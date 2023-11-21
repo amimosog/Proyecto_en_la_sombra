@@ -21,6 +21,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
 @Preview(showSystemUi = true)
 @Composable
 fun preview(){
