@@ -21,6 +21,9 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             val animal = service.getAnimals("69771579")
             println(animal)
+
+            //val listanimals = service.getRandom("random")
+            //println(listanimals)
         }
             setContent {
                 AppNavigation()
