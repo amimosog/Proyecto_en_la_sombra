@@ -57,7 +57,6 @@ fun listOfElements(navController: NavController, allTheTexts: List<Texts>){
             listElement(textsElement)
         }
     }
-    MyNavigationBar(navController)
 }
 /*Funcion que pinta los textos y las imagenes en conjunto*/
 @Composable

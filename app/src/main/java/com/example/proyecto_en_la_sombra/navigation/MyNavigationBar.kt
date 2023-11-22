@@ -38,7 +38,7 @@ fun MyNavigationBar(navController: NavController){
         )
         NavigationButton(
             navController = navController,
-            route = AppScreens.AnimalDetailScreen.route,
+            route = AppScreens.SearchScreen.route,
             imageVector = Icons.Default.Search
         )
         NavigationButton(

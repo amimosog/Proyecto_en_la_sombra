@@ -157,7 +157,6 @@ fun ProfileComponents(navController: NavController) {
             }
         }
     }
-    MyNavigationBar(navController)
 }
 
 @Composable
