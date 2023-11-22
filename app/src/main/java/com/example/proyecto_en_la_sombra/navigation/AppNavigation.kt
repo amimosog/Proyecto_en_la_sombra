@@ -1,12 +1,13 @@
 package com.example.proyecto_en_la_sombra.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.proyecto_en_la_sombra.screens.FirstScreen
 import com.example.proyecto_en_la_sombra.screens.Texts
 import com.example.proyecto_en_la_sombra.screens.listOfElements
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
 
 private val allTheTexts: List<Texts> = listOf(
     Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),

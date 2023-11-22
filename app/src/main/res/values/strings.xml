@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Proyecto_en_la_sombra</string>
+    <string name="title_activity_main2">MainActivity2</string>
+    <string name="title_activity_animal_views">AnimalViews</string>
 </resources>
