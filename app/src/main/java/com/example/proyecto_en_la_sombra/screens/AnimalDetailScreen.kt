@@ -29,9 +29,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.proyecto_en_la_sombra.R
 
-class AnimalView : ComponentActivity() {
+/*class AnimalView : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -46,12 +47,18 @@ class AnimalView : ComponentActivity() {
             }
         }
     }
-}
+}*/
 
 @Composable
-fun AnimalComponents(){
+fun AnimalComponents(navController: NavController){
     Column (modifier = Modifier.fillMaxSize()) {
-        val Lista = listOf<Int>(R.drawable.ic_launcher_foreground,R.drawable.ic_launcher_foreground,R.drawable.ic_launcher_foreground, R.drawable.ic_launcher_foreground,R.drawable.ic_launcher_foreground,R.drawable.ic_launcher_foreground)
+        val Lista = listOf<Int>(
+            R.drawable.ic_launcher_foreground,
+            R.drawable.ic_launcher_foreground,
+            R.drawable.ic_launcher_foreground,
+            R.drawable.ic_launcher_foreground,
+            R.drawable.ic_launcher_foreground,
+            R.drawable.ic_launcher_foreground)
         Animal_Photo(Lista)
             Row (modifier = Modifier
                 .fillMaxSize()
@@ -73,7 +80,9 @@ fun AnimalComponents(){
 @Composable
 fun Animal_Adopt_Button(modifier: Modifier = Modifier) {
     Button(onClick = { /*TODO*/ },
-        modifier = Modifier.width(100.dp).padding(top = 50.dp) ) {
+        modifier = Modifier
+            .width(110.dp)
+            .padding(top = 50.dp) ) {
         Text(text = "Adoptar")
 
     }
@@ -119,6 +128,6 @@ fun Animal_Photo(photos : List<Int>) {
 @Composable
 fun Animal_InfoPreview2() {
     Proyecto_en_la_sombraTheme {
-        AnimalComponents()
+        //AnimalComponents()
     }
 }

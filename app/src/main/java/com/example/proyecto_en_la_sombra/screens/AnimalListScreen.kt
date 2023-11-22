@@ -21,6 +21,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.proyecto_en_la_sombra.R
+import com.example.proyecto_en_la_sombra.navigation.MyNavigationBar
 import com.example.proyecto_en_la_sombra.ui.theme.PurpleGrey40
 
 //Constante creado para probar que se pinta correctamente la interfaz
@@ -56,6 +57,7 @@ fun listOfElements(navController: NavController, allTheTexts: List<Texts>){
             listElement(textsElement)
         }
     }
+    MyNavigationBar(navController)
 }
 /*Funcion que pinta los textos y las imagenes en conjunto*/
 @Composable

@@ -6,8 +6,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.proyecto_en_la_sombra.screens.FirstScreen
 import com.example.proyecto_en_la_sombra.screens.Texts
 import com.example.proyecto_en_la_sombra.screens.listOfElements
+import com.example.proyecto_en_la_sombra.screens.AnimalComponents
+import com.example.proyecto_en_la_sombra.screens.ProfileComponents
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.rememberNavController
 
 private val allTheTexts: List<Texts> = listOf(
     Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
@@ -37,8 +38,16 @@ fun AppNavigation(){
         composable(route = AppScreens.FirstScreen.route){
             FirstScreen(navController)
         }
-        composable(route = AppScreens.ListScreen.route){
+        composable(route = AppScreens.AnimalListScreen.route){
             listOfElements(navController, allTheTexts)
+        }
+
+        composable(route = AppScreens.AnimalDetailScreen.route){
+            AnimalComponents(navController)
+        }
+
+        composable(route = AppScreens.ProfileUserScreen.route){
+            ProfileComponents(navController)
         }
     }
 }
