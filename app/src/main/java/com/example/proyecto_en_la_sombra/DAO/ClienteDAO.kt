@@ -1,5 +1,5 @@
 package com.example.proyecto_en_la_sombra.DAO
-
+/*
 import androidx.room.Dao
 import androidx.room.Query
 import com.example.proyecto_en_la_sombra.Model.*
@@ -26,3 +26,5 @@ interface ClienteDAO {
     @Query("SELECT * FROM Cliente")
     fun getClienteSolicitoAdopciones() : List<ClienteSolicitaAdoptar>
 }
+
+ */

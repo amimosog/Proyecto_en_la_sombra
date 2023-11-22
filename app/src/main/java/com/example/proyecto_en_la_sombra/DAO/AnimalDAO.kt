@@ -1,3 +1,4 @@
+/*
 package com.example.proyecto_en_la_sombra.DAO
 
 import androidx.room.Dao
@@ -10,3 +11,5 @@ interface AnimalDAO {
     @Query("SELECT * FROM Animal")
     fun getAnimalesApadrinadosPorClientes() : List<animalEsApadrinadoPorClientes>
 }
+
+ */

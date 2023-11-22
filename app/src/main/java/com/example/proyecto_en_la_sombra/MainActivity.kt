@@ -22,8 +22,8 @@ class MainActivity : ComponentActivity() {
             val animal = service.getAnimals("69771579")
             println(animal)
 
-            //val listanimals = service.getRandom("random")
-            //println(listanimals)
+            val listanimals = service.getRandom("random")
+            println(listanimals)
         }
             setContent {
                 AppNavigation()

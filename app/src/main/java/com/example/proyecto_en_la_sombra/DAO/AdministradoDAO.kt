@@ -1,3 +1,4 @@
+/*
 package com.example.proyecto_en_la_sombra.DAO
 
 import androidx.room.Dao
@@ -19,3 +20,4 @@ interface AdministradoDAO {
     @Query("SELECT * FROM Administrador")
     fun getAdministradoresAgregaronOrganizaciones() : List<AdministradorAgregaOrganizaciones>
 }
+ */

@@ -1,3 +1,4 @@
+/*
 package com.example.proyecto_en_la_sombra.DAO
 
 import androidx.room.Dao
@@ -20,3 +21,4 @@ interface ProtectoraDAO {
     @Query("SELECT * FROM Protectora")
     fun getOrganizacionesAnunciaronAnimales() : List<ProtectoraAnunciaAnimales>
 }
+ */

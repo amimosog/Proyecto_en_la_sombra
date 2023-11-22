@@ -69,7 +69,7 @@ class ProfileUserActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Proyecto_en_la_sombraTheme() {
+            Proyecto_en_la_sombraTheme {
                 MyComponent()
             }
         }

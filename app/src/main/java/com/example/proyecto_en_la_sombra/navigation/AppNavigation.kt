@@ -24,7 +24,7 @@ private val allTheTexts: List<Texts> = listOf(
     Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
     Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
     Texts("Este es el nombre del bicho","Esta es la descripcion del bicho")
-);
+)
 
 /*Elemento composable que se va a encargar de orquestar la navegacion, va a conocer
 las pantallas de nuestra app y se va a encargar de gestionar el paso entre ellas*/
