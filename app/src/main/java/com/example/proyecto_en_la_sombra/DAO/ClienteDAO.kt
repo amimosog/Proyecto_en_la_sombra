@@ -29,6 +29,9 @@ interface ClienteDAO {
     @Query("SELECT * FROM Cliente")
     suspend fun getClienteSolicitoAdopciones() : List<ClienteSolicitaAdoptar>
 
+    @Query("SELECT * FROM Cliente")
+    suspend fun getClientes() : List<Cliente>
+
     //Inserta un Cliente
     @Insert
     suspend fun insertCliente(cliente: Cliente)

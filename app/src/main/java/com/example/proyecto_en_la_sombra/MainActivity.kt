@@ -2,6 +2,7 @@ package com.example.proyecto_en_la_sombra
 
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -17,6 +18,8 @@ import com.example.proyecto_en_la_sombra.navigation.AppNavigation
 import kotlinx.coroutines.launch
 import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
 
+import com.example.proyecto_en_la_sombra.Model.*
+
 private const val grant_type = "client_credentials"
 private const val client_id = "jt78yfZFePKyGM8tmLpHZduPe4wiobusxA4gvGrxv5p9xlMREy"
 private const val client_secret = "ADto7Ake8ThsPUe57IprbsLHORd29qhZynDdw1ej"
@@ -29,9 +32,12 @@ class MainActivity : ComponentActivity() {
        val room : AplicacionDB = Room
            .databaseBuilder(this, AplicacionDB::class.java, "database.db")
            .build()
-//        lifecycleScope.launch {
-//            room.clienteDAO().insertCliente(Cliente(1,"Manuel",1))
-//        }
+        lifecycleScope.launch {
+            room.clienteDAO().insertCliente(Cliente(1,"Manuel",null))
+             val clientes: List<Cliente> = room.clienteDAO().getClientes()
+
+            Log.i("Numero de clientes almacenados en la base de datos: ",clientes.size.toString())
+        }
 
 
         lifecycleScope.launch {
@@ -45,9 +51,6 @@ class MainActivity : ComponentActivity() {
             //val listanimals = service.getRandom("random")
             //println(listanimals)
 
-        setContent {
-            AppNavigation()
-        }
             val listanimals = service.getAnimalsRandom(auth,"random")
             println(listanimals)
 
