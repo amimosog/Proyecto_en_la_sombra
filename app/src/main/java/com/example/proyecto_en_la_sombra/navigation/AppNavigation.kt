@@ -9,8 +9,10 @@ import com.example.proyecto_en_la_sombra.screens.listOfElements
 import com.example.proyecto_en_la_sombra.screens.AnimalComponents
 import com.example.proyecto_en_la_sombra.screens.ProfileComponents
 import androidx.navigation.compose.NavHost
+import com.example.proyecto_en_la_sombra.screens.OrganizationList
 import com.example.proyecto_en_la_sombra.screens.SearchBarCustom
 import com.example.proyecto_en_la_sombra.screens.SelectCategory
+import com.example.proyecto_en_la_sombra.screens.profileOrganization
 
 private val allTheTexts: List<Texts> = listOf(
     Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
@@ -55,12 +57,20 @@ fun AppNavigation(){
             MyNavigationBar(navController)
         }
 
-
         composable(route = AppScreens.SearchScreen.route){
             val list = listOf<String>("test1", "test2", "test3")
             SearchBarCustom()
             SelectCategory(name = "test", list = list)
             MyNavigationBar(navController)
+        }
+
+        composable(route = AppScreens.OrgListScreen.route){
+            OrganizationList(navController)
+            MyNavigationBar(navController)
+        }
+
+        composable(route = AppScreens.ProfileOrganizationScreen.route){
+            profileOrganization(navController)
         }
     }
 }

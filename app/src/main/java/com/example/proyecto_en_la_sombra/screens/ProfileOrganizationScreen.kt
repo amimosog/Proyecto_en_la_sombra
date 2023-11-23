@@ -43,7 +43,37 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.proyecto_en_la_sombra.R
+
+
+@Composable
+fun profileOrganization(navController: NavController) {
+    Column(Modifier.padding(8.dp)) {
+        Column {
+            Row {
+                UserImage()
+                UserInfo()
+            }
+        }
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            SocialMedia()
+        }
+        Column {
+            DetailInfo()
+        }
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            UserGallery()
+            ReviewsField()
+        }
+        Column(modifier = Modifier.padding(5.dp)) {
+            Reviews(1)
+        }
+    }
+}
 
 @Composable
 fun UserImage() {
@@ -228,35 +258,6 @@ fun Reviews(id: Int) {
                     )
                 }
             }
-        }
-    }
-}
-
-@Preview
-@Composable
-fun PreviewOrganization() {
-    Column(Modifier.padding(8.dp)) {
-        Column {
-            Row {
-                UserImage()
-                UserInfo()
-            }
-        }
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            SocialMedia()
-        }
-        Column {
-            DetailInfo()
-        }
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            UserGallery()
-            ReviewsField()
-        }
-        Column(modifier = Modifier.padding(5.dp)) {
-            Reviews(1)
         }
     }
 }

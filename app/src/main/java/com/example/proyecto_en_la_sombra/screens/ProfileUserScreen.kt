@@ -35,6 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.proyecto_en_la_sombra.R
+import com.example.proyecto_en_la_sombra.navigation.AppScreens
 import com.example.proyecto_en_la_sombra.navigation.MyNavigationBar
 import com.example.proyecto_en_la_sombra.ui.theme.Proyecto_en_la_sombraTheme
 import kotlinx.coroutines.launch
@@ -143,7 +144,7 @@ fun ProfileComponents(navController: NavController) {
                         content = {
                             photos.forEachIndexed { index, photo ->
                                 item {
-                                    ImagenFav(photo)
+                                    ImagenFav(photo,navController)
                                 }
                             }
                         }
@@ -172,7 +173,7 @@ fun ImagenUser() {
 }
 
 @Composable
-fun ImagenFav(photo: Photo) {
+fun ImagenFav(photo: Photo, navController: NavController) {
     Image(
         painterResource(photo.image),
         "Imagen del animal",
@@ -180,6 +181,9 @@ fun ImagenFav(photo: Photo) {
             .size(80.dp)
             .aspectRatio(1f)
             .background(MaterialTheme.colorScheme.primary)
+            .clickable {
+                navController.navigate(route = AppScreens.AnimalDetailScreen.route)
+            }
     )
 }
 
