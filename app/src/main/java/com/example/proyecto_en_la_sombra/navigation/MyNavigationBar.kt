@@ -28,7 +28,7 @@ fun MyNavigationBar(navController: NavController){
     ) {
         NavigationButton(
             navController = navController,
-            route = AppScreens.AnimalDetailScreen.route,
+            route = AppScreens.OrgListScreen.route,
             imageVector = Icons.Default.Lock
         )
         NavigationButton(
