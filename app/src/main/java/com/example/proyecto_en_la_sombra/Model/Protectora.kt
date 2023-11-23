@@ -11,7 +11,7 @@ data class Protectora(
     @PrimaryKey(autoGenerate = true)
     val idProtectora: Long,
     val nombre: String,
-    val descripcion: String
+    val descripcion: String?
 )
 
 data class ProtectoraAnunciaAnimales(
@@ -23,7 +23,7 @@ data class ProtectoraAnunciaAnimales(
     )
     val animals : List<Animal>
 )
-
+/*
 data class ProtectoraEsDonadaPorClientes(
     @Embedded
     val protectora: Protectora,
@@ -44,4 +44,4 @@ data class ProtectoraEsValoradaPorClientes(
         associateBy = Junction(Valoracion::class)
     )
     val clientes : List<Cliente>
-)
+)*/

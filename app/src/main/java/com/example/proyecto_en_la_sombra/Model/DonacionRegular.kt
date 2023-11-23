@@ -5,7 +5,6 @@ import androidx.room.PrimaryKey
 
 @Entity(primaryKeys=["idCliente","idAnimal"])
 data class DonacionRegular(
-    @PrimaryKey(autoGenerate = true)
     val idCliente: Long,
     val idAnimal: Long,
     val fecha: String,

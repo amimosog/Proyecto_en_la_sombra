@@ -11,7 +11,7 @@ data class Cliente (
     @PrimaryKey(autoGenerate = true)
     val idCliente: Long,
     val nombre: String,
-    val bloqueador: Long //id del administrador que lo bloqueo si se ha dado el caso
+    val bloqueador: Long? //id del administrador que lo bloqueo si se ha dado el caso
 )
 
 data class ClienteSolicitaAdoptar(
@@ -23,7 +23,7 @@ data class ClienteSolicitaAdoptar(
     )
     val animales : List<Animal>
 )
-
+/*
 data class ClienteTieneFavoritosAnimales(
     @Embedded
     val cliente: Cliente,
@@ -66,4 +66,4 @@ data class ClienteApadrinaAnimales(
         associateBy = Junction(DonacionRegular::class)
     )
     val animales : List<Animal>
-)
+)*/

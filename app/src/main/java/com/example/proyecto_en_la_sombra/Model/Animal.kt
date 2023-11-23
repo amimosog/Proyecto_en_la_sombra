@@ -11,11 +11,11 @@ data class Animal (
     @PrimaryKey(autoGenerate = true)
     val idAnimal: Long,
     val nombre: String,
-    val descripcion: String,
+    val descripcion: String?,
     val insertado: Long, //id del administrador que lo inserto
     val protectora: Long //id de la protectora del animal
 )
-
+/*
 data class animalEsApadrinadoPorClientes(
     @Embedded
     val anima : Animal,
@@ -25,4 +25,4 @@ data class animalEsApadrinadoPorClientes(
         associateBy = Junction(DonacionRegular::class)
     )
     val clientes : List<Cliente>
-)
+)*/
