@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
            .databaseBuilder(this, AplicacionDB::class.java, "database.db")
            .build()
         lifecycleScope.launch {
-            room.clienteDAO().insertCliente(Cliente(1,"Manuel",null))
+            //room.clienteDAO().insertCliente(Cliente(1,"Manuel",null))
              val clientes: List<Cliente> = room.clienteDAO().getClientes()
 
             Log.i("Numero de clientes almacenados en la base de datos: ",clientes.size.toString())
