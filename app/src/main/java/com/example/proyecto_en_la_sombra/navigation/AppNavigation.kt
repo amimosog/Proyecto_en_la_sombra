@@ -60,7 +60,6 @@ fun AppNavigation(){
 
         composable(route = AppScreens.SearchScreen.route){
             val list = listOf<String>("test1", "test2", "test3")
-            /* TODO Mirar que en esta pantalla no vaya a la de animales*/
             SearchBarCustom(navController)
             SelectCategory(name = "test", list = list)
             MyNavigationBar(navController)
