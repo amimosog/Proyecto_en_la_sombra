@@ -44,8 +44,7 @@ class MainActivity : ComponentActivity() {
         }
 
         val sharedPreferences = getSharedPreferences("myPreferences", Context.MODE_PRIVATE)
-        val now = System.currentTimeMillis()
-        val timeSeconds = TimeUnit.MILLISECONDS.toSeconds(now);
+        val timeSeconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
         lifecycleScope.launch {
             var auth = sharedPreferences.getString("token", "")!!
             val time = sharedPreferences.getLong("time", 0)
