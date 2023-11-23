@@ -12,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import com.example.proyecto_en_la_sombra.screens.OrganizationList
 import com.example.proyecto_en_la_sombra.screens.SearchBarCustom
 import com.example.proyecto_en_la_sombra.screens.SelectCategory
+import com.example.proyecto_en_la_sombra.screens.listadoResultados
 import com.example.proyecto_en_la_sombra.screens.profileOrganization
 
 private val allTheTexts: List<Texts> = listOf(
@@ -59,7 +60,8 @@ fun AppNavigation(){
 
         composable(route = AppScreens.SearchScreen.route){
             val list = listOf<String>("test1", "test2", "test3")
-            SearchBarCustom()
+            /* TODO Mirar que en esta pantalla no vaya a la de animales*/
+            SearchBarCustom(navController)
             SelectCategory(name = "test", list = list)
             MyNavigationBar(navController)
         }
@@ -71,6 +73,10 @@ fun AppNavigation(){
 
         composable(route = AppScreens.ProfileOrganizationScreen.route){
             profileOrganization(navController)
+        }
+
+        composable(route = AppScreens.SearchResultsScreen.route) {
+            listadoResultados(navController)
         }
     }
 }

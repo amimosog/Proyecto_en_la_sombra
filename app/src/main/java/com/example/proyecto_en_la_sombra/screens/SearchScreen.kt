@@ -21,6 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.proyecto_en_la_sombra.navigation.AppScreens
 
 
 /*class SearchScreen : ComponentActivity() {
@@ -36,7 +38,7 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBarCustom() {
+fun SearchBarCustom(navController: NavController) {
     var search by remember {
         mutableStateOf("")
     }
@@ -49,7 +51,10 @@ fun SearchBarCustom() {
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = null,
-                modifier = Modifier.clickable {}
+                modifier = Modifier
+                    .clickable {
+                        navController.navigate(route = AppScreens.SearchResultsScreen.route)
+                    }
             )
         },
         modifier = Modifier
@@ -111,5 +116,5 @@ fun SelectCategory(name: String, list: List<String>) {
 @Composable
 @Preview
 fun Preview (){
-    SearchBarCustom()
+ //   SearchBarCustom()
 }
