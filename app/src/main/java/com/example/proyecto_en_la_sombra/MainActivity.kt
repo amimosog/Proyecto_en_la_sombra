@@ -39,15 +39,10 @@ class MainActivity : ComponentActivity() {
             val authResponse = service.login(grant_type,client_id,client_secret)
             val auth = "Bearer ${authResponse.access_token}"
             println(auth)
+
             val animal = service.getAnimals(auth,"69771579")
             println(animal)
 
-            //val listanimals = service.getRandom("random")
-            //println(listanimals)
-
-        setContent {
-            AppNavigation()
-        }
             val listanimals = service.getAnimalsRandom(auth,"random")
             println(listanimals)
 
