@@ -1,6 +1,8 @@
 package com.example.proyecto_en_la_sombra
 
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -19,6 +21,8 @@ import kotlinx.coroutines.launch
 import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
 
 import com.example.proyecto_en_la_sombra.Model.*
+import java.time.Duration
+import java.util.concurrent.TimeUnit
 
 private const val grant_type = "client_credentials"
 private const val client_id = "jt78yfZFePKyGM8tmLpHZduPe4wiobusxA4gvGrxv5p9xlMREy"
@@ -39,12 +43,20 @@ class MainActivity : ComponentActivity() {
             Log.i("Numero de clientes almacenados en la base de datos: ",clientes.size.toString())
         }
 
-
+        val sharedPreferences = getSharedPreferences("myPreferences", Context.MODE_PRIVATE)
+        val now = System.currentTimeMillis()
+        val timeSeconds = TimeUnit.MILLISECONDS.toSeconds(now);
         lifecycleScope.launch {
-
-            val authResponse = service.login(grant_type,client_id,client_secret)
-            val auth = "Bearer ${authResponse.access_token}"
-            println(auth)
+            var auth = sharedPreferences.getString("token", "")!!
+            val time = sharedPreferences.getLong("time", 0)
+            //Check if an hour has passed since the last token was generated, if so, generate a new one.
+            if(timeSeconds > time + 3600) {
+                val authResponse = service.login(grant_type, client_id, client_secret)
+                auth = "Bearer ${authResponse.access_token}"
+                Log.i("Generated token: ", auth)
+                sharedPreferences.edit().putString("token", auth).apply()
+                sharedPreferences.edit().putLong("time", timeSeconds).apply()
+            }
 
             val animal = service.getAnimals(auth,"69771579")
             println(animal)
