@@ -49,14 +49,14 @@ class MainActivity : ComponentActivity() {
             var auth = sharedPreferences.getString("token", "")!!
             val time = sharedPreferences.getLong("time", 0)
             //Check if an hour has passed since the last token was generated, if so, generate a new one.
-            if(timeSeconds > time + 3600) {
+            if(timeSeconds > (time + 3600)) {
                 val authResponse = service.login(grant_type, client_id, client_secret)
                 auth = "Bearer ${authResponse.access_token}"
                 Log.i("Generated token: ", auth)
                 sharedPreferences.edit().putString("token", auth).apply()
                 sharedPreferences.edit().putLong("time", timeSeconds).apply()
             }
-
+            //Get the data from the API of the animals and organizations
             val animal = service.getAnimals(auth,"69771579")
             println(animal)
 
