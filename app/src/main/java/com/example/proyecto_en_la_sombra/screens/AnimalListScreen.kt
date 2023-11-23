@@ -21,6 +21,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.proyecto_en_la_sombra.R
+import com.example.proyecto_en_la_sombra.navigation.MyNavigationBar
 import com.example.proyecto_en_la_sombra.ui.theme.PurpleGrey40
 
 //Constante creado para probar que se pinta correctamente la interfaz
@@ -37,7 +38,7 @@ private val allTheTexts: List<Texts> = listOf(Texts("Este es el nombre del bicho
     Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
     Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
     Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"));
+    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"))
 
 
 data class Texts(val title: String, val descripion: String) //Clase que representa a los textos de cada elemento
@@ -49,7 +50,7 @@ fun listOfElements(navController: NavController, allTheTexts: List<Texts>){
     /*LazyColumn nos permite ser mas eficientes ya que
     * traera a memoria unicamente los elementos que se pueden pintar (los que
     * caben dentro de los margenes de la pantalla)*/
-    LazyColumn(){
+    LazyColumn {
         /*Items es un iterador inteligente que se va a ejecutar
         * una vez por cada elemento de la lista*/
         items(allTheTexts){ textsElement ->
@@ -82,7 +83,7 @@ fun imageElements(){
 /*Funcion que pinta los elementos de tipo texto*/
 @Composable
 fun iconElements(){
-    Column() {
+    Column {
         Icon(Icons.Default.Add,
             contentDescription = "Follow button",
             modifier = Modifier

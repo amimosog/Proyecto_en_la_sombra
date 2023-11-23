@@ -23,7 +23,7 @@ fun BodyContent(navController: NavController){
         horizontalAlignment = Alignment.CenterHorizontally){
         Text(text = "Hola navegacion")
         Button(onClick = {
-            navController.navigate(route = AppScreens.ListScreen.route)
+            navController.navigate(route = AppScreens.AnimalListScreen.route)
         }){
             Text(text = "Navega")
         }

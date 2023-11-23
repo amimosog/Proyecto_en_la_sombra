@@ -6,5 +6,8 @@ sealed class AppScreens(val route: String){
     //Con esto se consigue tipar y limitar las pantallas de nuestra aplicacion, para que en el momento en el que
     // se quieran realizar navegaciones solo se podran realizar a las pantallas que tenemos aqui definidas
     object FirstScreen: AppScreens("first_screen")
-    object ListScreen: AppScreens("list_screen")
+    object AnimalListScreen: AppScreens("animal_list_screen")
+    object AnimalDetailScreen: AppScreens("animal_detail_screen")
+    object ProfileUserScreen: AppScreens("profile_user_screen")
+    object SearchScreen: AppScreens("search_screen")
 }

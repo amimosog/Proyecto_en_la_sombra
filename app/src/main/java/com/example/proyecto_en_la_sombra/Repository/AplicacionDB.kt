@@ -1,3 +1,4 @@
+/*
 package com.example.proyecto_en_la_sombra.Repository
 
 import androidx.room.Database
@@ -21,3 +22,5 @@ abstract class AplicacionDB : RoomDatabase() {
     abstract fun solicitudAdopcionDAO() : SolicitudAdopcionDAO
     abstract fun valoracionDAO() : ValoracionDAO
 }
+
+ */

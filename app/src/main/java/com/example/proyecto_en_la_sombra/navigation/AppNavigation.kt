@@ -6,8 +6,11 @@ import androidx.navigation.compose.rememberNavController
 import com.example.proyecto_en_la_sombra.screens.FirstScreen
 import com.example.proyecto_en_la_sombra.screens.Texts
 import com.example.proyecto_en_la_sombra.screens.listOfElements
+import com.example.proyecto_en_la_sombra.screens.AnimalComponents
+import com.example.proyecto_en_la_sombra.screens.ProfileComponents
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.rememberNavController
+import com.example.proyecto_en_la_sombra.screens.SearchBarCustom
+import com.example.proyecto_en_la_sombra.screens.SelectCategory
 
 private val allTheTexts: List<Texts> = listOf(
     Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
@@ -24,7 +27,7 @@ private val allTheTexts: List<Texts> = listOf(
     Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
     Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
     Texts("Este es el nombre del bicho","Esta es la descripcion del bicho")
-);
+)
 
 /*Elemento composable que se va a encargar de orquestar la navegacion, va a conocer
 las pantallas de nuestra app y se va a encargar de gestionar el paso entre ellas*/
@@ -37,8 +40,27 @@ fun AppNavigation(){
         composable(route = AppScreens.FirstScreen.route){
             FirstScreen(navController)
         }
-        composable(route = AppScreens.ListScreen.route){
+
+        composable(route = AppScreens.AnimalListScreen.route){
             listOfElements(navController, allTheTexts)
+            MyNavigationBar(navController)
+        }
+
+        composable(route = AppScreens.AnimalDetailScreen.route){
+            AnimalComponents(navController)
+        }
+
+        composable(route = AppScreens.ProfileUserScreen.route){
+            ProfileComponents(navController)
+            MyNavigationBar(navController)
+        }
+
+
+        composable(route = AppScreens.SearchScreen.route){
+            val list = listOf<String>("test1", "test2", "test3")
+            SearchBarCustom()
+            SelectCategory(name = "test", list = list)
+            MyNavigationBar(navController)
         }
     }
 }

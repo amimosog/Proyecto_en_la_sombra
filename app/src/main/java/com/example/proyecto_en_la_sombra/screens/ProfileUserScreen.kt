@@ -25,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -32,7 +33,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.proyecto_en_la_sombra.R
+import com.example.proyecto_en_la_sombra.navigation.MyNavigationBar
 import com.example.proyecto_en_la_sombra.ui.theme.Proyecto_en_la_sombraTheme
 import kotlinx.coroutines.launch
 
@@ -63,23 +66,26 @@ private val photos: List<Photo> = listOf(
     Photo(R.drawable.ic_launcher_foreground),
     Photo(R.drawable.ic_launcher_foreground),
 )
-
+/*
 @ExperimentalFoundationApi
 class ProfileUserActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Proyecto_en_la_sombraTheme() {
-                MyComponent()
+            Proyecto_en_la_sombraTheme {
+                ProfileComponents()
             }
         }
     }
-}
+}*/
 
 data class Photo(val image: Int)
+
+
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MyComponent() {
+fun ProfileComponents(navController: NavController) {
     Column(modifier = Modifier
         .background(MaterialTheme.colorScheme.background)
         .padding(8.dp)) {
@@ -143,11 +149,14 @@ fun MyComponent() {
                         }
                     )
             }else{
-                BloqueDatos()
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    BloqueDatos()
+                }
             }
         }
     }
-
 }
 
 @Composable
@@ -251,6 +260,6 @@ fun TextoNombre(text: String, color: Color, style: TextStyle, lines: Int = Int.M
 @Composable
 fun PreviewComponent() {
     Proyecto_en_la_sombraTheme {
-        MyComponent()
+        //ProfileComponents()
     }
 }
