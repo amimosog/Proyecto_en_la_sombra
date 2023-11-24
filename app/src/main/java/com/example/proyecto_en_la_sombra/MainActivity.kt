@@ -32,15 +32,8 @@ private const val client_secret = "ADto7Ake8ThsPUe57IprbsLHORd29qhZynDdw1ej"
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-       val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
-       val room : AplicacionDB = AplicacionDB.getInstance(context = this)
-
-        lifecycleScope.launch {
-            //room.clienteDAO().insertCliente(Cliente(1,"Manuel",null))
-             val clientes: List<Cliente> = room.clienteDAO().getClientes()
-
-            Log.i("Numero de clientes almacenados en la base de datos: ",clientes.size.toString())
-        }
+        val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
+        val room: AplicacionDB = AplicacionDB.getInstance(context = this)
 
         val sharedPreferences = getSharedPreferences("myPreferences", Context.MODE_PRIVATE)
         val timeSeconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
@@ -48,7 +41,7 @@ class MainActivity : ComponentActivity() {
             var auth = sharedPreferences.getString("token", "")!!
             val time = sharedPreferences.getLong("time", 0)
             //Check if an hour has passed since the last token was generated, if so, generate a new one.
-            if(timeSeconds > (time + 3600)) {
+            if (timeSeconds > (time + 3600)) {
                 val authResponse = service.login(grant_type, client_id, client_secret)
                 auth = "Bearer ${authResponse.access_token}"
                 Log.i("Generated token: ", auth)
@@ -56,28 +49,20 @@ class MainActivity : ComponentActivity() {
                 sharedPreferences.edit().putLong("time", timeSeconds).apply()
             }
             //Get the data from the API of the animals and organizations
-            val animal = service.getAnimals(auth,"69771579")
+            val animal = service.getAnimals(auth, "69771579")
             println(animal)
 
-            val listanimals = service.getAnimalsRandom(auth,"random")
+            val listanimals = service.getAnimalsRandom(auth, "random")
             println(listanimals)
 
             val listOrganizations = service.getOrganizations(auth)
             println(listOrganizations)
 
-            val Organization = service.getUniqueOrganization(auth,"WI535")
+            val Organization = service.getUniqueOrganization(auth, "WI535")
             println(Organization)
         }
-            setContent {
-                AppNavigation()
-            }
+        setContent {
+            AppNavigation(this)
+        }
     }
-}
-
-
-
-@Preview(showSystemUi = true)
-@Composable
-fun preview(){
-    AppNavigation()
 }

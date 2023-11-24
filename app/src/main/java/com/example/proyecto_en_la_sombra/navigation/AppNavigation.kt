@@ -1,5 +1,6 @@
 package com.example.proyecto_en_la_sombra.navigation
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -32,11 +33,13 @@ private val allTheTexts: List<Texts> = listOf(
     Texts("Este es el nombre del bicho","Esta es la descripcion del bicho")
 )
 
+
 /*Elemento composable que se va a encargar de orquestar la navegacion, va a conocer
 las pantallas de nuestra app y se va a encargar de gestionar el paso entre ellas*/
 @Composable
-fun AppNavigation(){
+fun AppNavigation(context : Context){
     val navController = rememberNavController()
+
     //El elemento NavHost va a conocer las pantallas y como navegar entre ellas
     NavHost(navController = navController, startDestination = AppScreens.FirstScreen.route){
         //El navHost estara formado por diferente composables que seran cada una de nuestras pantallas
@@ -54,7 +57,7 @@ fun AppNavigation(){
         }
 
         composable(route = AppScreens.ProfileUserScreen.route){
-            ProfileComponents(navController)
+            ProfileComponents(navController, context)
             MyNavigationBar(navController)
         }
 
