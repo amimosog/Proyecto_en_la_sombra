@@ -19,70 +19,76 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.proyecto_en_la_sombra.R
+import com.example.proyecto_en_la_sombra.api.RetrofitService
+import com.example.proyecto_en_la_sombra.api.model.Animal
+import com.example.proyecto_en_la_sombra.api.model.RemoteModelPage
+import com.example.proyecto_en_la_sombra.auth
 import com.example.proyecto_en_la_sombra.navigation.AppScreens
 import com.example.proyecto_en_la_sombra.ui.theme.PurpleGrey40
-
-//Constante creado para probar que se pinta correctamente la interfaz
-private val allTheTexts: List<Texts> = listOf(
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"))
-
-
-data class Texts(val title: String, val description: String) //Clase que representa a los textos de cada elemento
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 
 /*Funcion que pinta cada elemento de la lista de forma optima*/
 @Composable
-fun listOfElements(navController: NavController, allTheTexts: List<Texts>){
+fun listOfElements(navController: NavController){
+    var result by remember { mutableStateOf<RemoteModelPage?>(null) }
+    LaunchedEffect(true) {
+        val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
+        val query = GlobalScope.async(Dispatchers.IO) { service.getAnimalsRandom(auth, "Random") }
+        result = query.await()
+    }
 
-    /*LazyColumn nos permite ser mas eficientes ya que
-    * traera a memoria unicamente los elementos que se pueden pintar (los que
-    * caben dentro de los margenes de la pantalla)*/
-    LazyColumn {
-        /*Items es un iterador inteligente que se va a ejecutar
-        * una vez por cada elemento de la lista*/
-        items(allTheTexts){ textsElement ->
-            listElement(textsElement, navController)
+    if (result != null){
+        /*LazyColumn nos permite ser mas eficientes ya que
+     * traera a memoria unicamente los elementos que se pueden pintar (los que
+     * caben dentro de los margenes de la pantalla)*/
+        LazyColumn {
+            /*Items es un iterador inteligente que se va a ejecutar
+            * una vez por cada elemento de la lista*/
+            result?.animals?.let {
+                items(it){ animal ->
+                    listElement(animal, navController)
+                }
+            }
+
+
         }
     }
+
 }
+
 /*Funcion que pinta los textos y las imagenes en conjunto*/
 @Composable
-fun listElement(myTexts: Texts, navController: NavController){
+fun listElement(animal: Animal, navController: NavController){
     Box(modifier = Modifier
         .fillMaxSize()
         .clickable {
-            navController.navigate(route = AppScreens.AnimalDetailScreen.route)
+            navController.navigate(route = AppScreens.AnimalDetailScreen.route + animal.id)
         }
     ) {
         Spacer(modifier = Modifier.height(5.dp))
-        imageElements()
+        imageElements(R.drawable.ic_launcher_foreground/*TODO animal.photos[0].full*/)
         iconElements()
-        textElements(myTexts)
+        textElements(animal)
     }
 }
 
 /*Funcion que pinta los elementos de tipo imagen*/
 @Composable
-fun imageElements(){
+fun imageElements(image: Int){
     Image(
-        painterResource(id = R.drawable.ic_launcher_foreground),
+        painterResource(image),
         "Imagen del animal",
         modifier = Modifier
             .background(color = PurpleGrey40)
@@ -113,13 +119,15 @@ fun iconElements(){
 }
 
 @Composable
-fun textElements(myTexts: Texts){
+fun textElements(animal: Animal){
     Column {
-        Text("Ubicacion del animal", modifier = Modifier.padding(top = 10.dp, start = 20.dp))
-        Text("Organizacion que cuida del animal", modifier = Modifier.padding(start = 20.dp))
-        Text(text = myTexts.title,
+        Text(animal.distance.toString(),
+            modifier = Modifier.padding(top = 10.dp, start = 20.dp))
+        Text(animal.organization_id.toString(),
+            modifier = Modifier.padding(start = 20.dp))
+        Text(animal.name,
             modifier = Modifier.padding(top = 660.dp, start = 20.dp))
-        Text(myTexts.description,
+        Text(animal.description,
             modifier = Modifier.padding(start = 20.dp))
     }
 }

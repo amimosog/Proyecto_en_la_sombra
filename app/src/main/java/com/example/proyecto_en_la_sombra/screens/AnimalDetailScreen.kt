@@ -1,15 +1,7 @@
 package com.example.proyecto_en_la_sombra.screens
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.os.Bundle
-import android.provider.Settings.Global
-import android.telecom.Call
-import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.proyecto_en_la_sombra.R
 import com.example.proyecto_en_la_sombra.api.RetrofitService
+import com.example.proyecto_en_la_sombra.api.model.Photo
 import com.example.proyecto_en_la_sombra.api.model.RemoteResult
 import com.example.proyecto_en_la_sombra.auth
 import com.example.proyecto_en_la_sombra.ui.theme.Proyecto_en_la_sombraTheme
@@ -98,24 +91,19 @@ import kotlinx.coroutines.async
 @OptIn(DelicateCoroutinesApi::class)
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun AnimalComponents(navController: NavController) {
+fun AnimalComponents(navController: NavController, id: String) {
     var result by remember { mutableStateOf<RemoteResult?>(null) }
     LaunchedEffect(true) {
-    val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
-        val query = GlobalScope.async(Dispatchers.IO) { service.getAnimals(auth, "69771579") }
+        val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
+        val query = GlobalScope.async(Dispatchers.IO) { service.getAnimals(auth, id) }
         result = query.await()
     }
     if (result != null){
         Column(modifier = Modifier.fillMaxSize()) {
-            val lista = listOf(
-                R.drawable.ic_launcher_foreground,
-                R.drawable.ic_launcher_foreground,
-                R.drawable.ic_launcher_foreground,
-                R.drawable.ic_launcher_foreground,
-                R.drawable.ic_launcher_foreground,
-                R.drawable.ic_launcher_foreground
-            )
-            Animal_Photo(lista)
+            val lista = result?.animal?.let {it.photos}
+            if (lista != null) {
+                Animal_Photo(lista)
+            }
             Row(
                 modifier = Modifier
                     .fillMaxSize()
@@ -130,7 +118,7 @@ fun AnimalComponents(navController: NavController) {
                     "Ojos" to "Negros",
                 )
                 val descripcion = "Pipo es un perro bueno y cariñoso"
-                result?.animal?.let { Animal_Info(it.name, descripcion, caracteristicas) }
+                result?.animal?.let { Animal_Info(it.name, it.description, caracteristicas) }
                 Animal_Adopt_Button()
             }
         }
@@ -173,14 +161,14 @@ fun Animal_Info(name: String, descripcion: String, caracteristicas: HashMap<Stri
 }
 
 @Composable
-fun Animal_Photo(photos: List<Int>) {
+fun Animal_Photo(photos: List<Photo>) {
     LazyHorizontalGrid(
         rows = GridCells.Fixed(2),
         modifier = Modifier.height(400.dp)
     ) {
         items(photos) { photo ->
             Image(
-                painter = painterResource(photo),
+                painter = painterResource(R.drawable.ic_launcher_foreground/*TODO photo.full*/),
                 contentDescription = "Animal Photo",
                 contentScale = ContentScale.FillWidth,
                 modifier = Modifier.size(200.dp)

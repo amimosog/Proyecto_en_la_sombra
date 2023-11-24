@@ -35,10 +35,16 @@ class MainActivity : ComponentActivity() {
         val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
         val room: AplicacionDB = AplicacionDB.getInstance(context = this)
 
+        //Si es la primera vez que ejecutas ROOM descometa este bloque de codigo para crear un cliente
+        /*lifecycleScope.launch {
+            var cliente : Cliente = Cliente(1, "Richar","Widmark", "rwidmark", "rwidmark69@gmail.com", "+34644501112","Agente internacional y de vacas bravas fiuuuuu", null)
+            room.clienteDAO().insertCliente(cliente)
+        }*/
+
         val sharedPreferences = getSharedPreferences("myPreferences", Context.MODE_PRIVATE)
         val timeSeconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
         lifecycleScope.launch {
-            var auth = sharedPreferences.getString("token", "")!!
+            auth = sharedPreferences.getString("token", "")!!
             val time = sharedPreferences.getLong("time", 0)
             //Check if an hour has passed since the last token was generated, if so, generate a new one.
             if (timeSeconds > (time + 3600)) {
@@ -49,6 +55,7 @@ class MainActivity : ComponentActivity() {
                 sharedPreferences.edit().putLong("time", timeSeconds).apply()
             }
             //Get the data from the API of the animals and organizations
+            /*
             val animal = service.getAnimals(auth, "69771579")
             println(animal)
 
@@ -60,6 +67,7 @@ class MainActivity : ComponentActivity() {
 
             val Organization = service.getUniqueOrganization(auth, "WI535")
             println(Organization)
+             */
         }
         setContent {
             AppNavigation(this)

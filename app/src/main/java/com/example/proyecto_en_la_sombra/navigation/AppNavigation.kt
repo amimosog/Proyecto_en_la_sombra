@@ -2,37 +2,20 @@ package com.example.proyecto_en_la_sombra.navigation
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.proyecto_en_la_sombra.screens.FirstScreen
-import com.example.proyecto_en_la_sombra.screens.Texts
 import com.example.proyecto_en_la_sombra.screens.listOfElements
 import com.example.proyecto_en_la_sombra.screens.AnimalComponents
 import com.example.proyecto_en_la_sombra.screens.ProfileComponents
 import androidx.navigation.compose.NavHost
+import androidx.navigation.navArgument
 import com.example.proyecto_en_la_sombra.screens.OrganizationList
 import com.example.proyecto_en_la_sombra.screens.SearchBarCustom
 import com.example.proyecto_en_la_sombra.screens.SelectCategory
 import com.example.proyecto_en_la_sombra.screens.listadoResultados
 import com.example.proyecto_en_la_sombra.screens.profileOrganization
-
-private val allTheTexts: List<Texts> = listOf(
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho"),
-    Texts("Este es el nombre del bicho","Esta es la descripcion del bicho")
-)
-
 
 /*Elemento composable que se va a encargar de orquestar la navegacion, va a conocer
 las pantallas de nuestra app y se va a encargar de gestionar el paso entre ellas*/
@@ -48,12 +31,18 @@ fun AppNavigation(context : Context){
         }
 
         composable(route = AppScreens.AnimalListScreen.route){
-            listOfElements(navController, allTheTexts)
+            listOfElements(navController)
             MyNavigationBar(navController)
         }
 
-        composable(route = AppScreens.AnimalDetailScreen.route){
-            AnimalComponents(navController)
+        composable(route = AppScreens.AnimalDetailScreen.route + "/{id}",
+            arguments = listOf(
+                navArgument("id") {
+                    type = NavType.StringType
+                }
+            )
+        ){
+            it.arguments?.getString("id")?.let { it1 -> AnimalComponents(navController, it1) }
         }
 
         composable(route = AppScreens.ProfileUserScreen.route){
