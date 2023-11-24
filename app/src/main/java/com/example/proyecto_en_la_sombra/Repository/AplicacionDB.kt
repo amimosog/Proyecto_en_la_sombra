@@ -1,6 +1,8 @@
 package com.example.proyecto_en_la_sombra.Repository
 
+import android.content.Context
 import androidx.room.Database
+import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.proyecto_en_la_sombra.DAO.*
 import com.example.proyecto_en_la_sombra.Model.*
@@ -20,6 +22,31 @@ abstract class AplicacionDB : RoomDatabase() {
     abstract fun protectoraDAO() : ProtectoraDAO
     abstract fun solicitudAdopcionDAO() : SolicitudAdopcionDAO
     abstract fun valoracionDAO() : ValoracionDAO
+
+    companion object {
+
+        @Volatile
+        private var INSTANCE: AplicacionDB? = null
+
+        fun getInstance(context: Context): AplicacionDB {
+            if (INSTANCE == null) {
+                synchronized(this) {
+                    var instance = INSTANCE
+                    if (instance == null) {
+                        instance = Room.databaseBuilder(
+                            context.applicationContext,
+                            AplicacionDB::class.java,
+                            "database"
+                        )
+                            .build()
+                        INSTANCE = instance
+                    }
+                }
+            }
+            return INSTANCE!!
+        }
+    }
+
 }
 
 

@@ -33,11 +33,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
        val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
-       val room : AplicacionDB = Room
-           .databaseBuilder(this, AplicacionDB::class.java, "database.db")
-           .build()
+       val room : AplicacionDB = AplicacionDB.getInstance(context = this)
         lifecycleScope.launch {
-            //room.clienteDAO().insertCliente(Cliente(1,"Manuel",null))
+            room.clienteDAO().insertCliente(Cliente(1,"Manuel",null))
              val clientes: List<Cliente> = room.clienteDAO().getClientes()
 
             Log.i("Numero de clientes almacenados en la base de datos: ",clientes.size.toString())
