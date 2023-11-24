@@ -45,7 +45,7 @@ fun listOfElements(navController: NavController){
     var result by remember { mutableStateOf<RemoteModelPage?>(null) }
     LaunchedEffect(true) {
         val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
-        val query = GlobalScope.async(Dispatchers.IO) { service.getAnimalsRandom(auth, "Random") }
+        val query = GlobalScope.async(Dispatchers.IO) { service.getAnimalsRandom(auth, "random") }
         result = query.await()
     }
 
@@ -74,7 +74,7 @@ fun listElement(animal: Animal, navController: NavController){
     Box(modifier = Modifier
         .fillMaxSize()
         .clickable {
-            navController.navigate(route = AppScreens.AnimalDetailScreen.route + animal.id)
+            navController.navigate(route = AppScreens.AnimalDetailScreen.route + "/" + animal.id)
         }
     ) {
         Spacer(modifier = Modifier.height(5.dp))
@@ -121,7 +121,7 @@ fun iconElements(){
 @Composable
 fun textElements(animal: Animal){
     Column {
-        Text(animal.distance.toString(),
+        Text("Localización Organización",
             modifier = Modifier.padding(top = 10.dp, start = 20.dp))
         Text(animal.organization_id.toString(),
             modifier = Modifier.padding(start = 20.dp))
