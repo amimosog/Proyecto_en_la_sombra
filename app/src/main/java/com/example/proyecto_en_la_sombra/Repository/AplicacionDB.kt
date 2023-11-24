@@ -9,7 +9,7 @@ import com.example.proyecto_en_la_sombra.Model.*
 
 @Database(
     entities = [Administrador::class, Animal::class, Cliente::class, Donacion::class, DonacionRegular::class, Favoritos::class, Protectora::class, SolicitudAdopcion::class, Valoracion::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AplicacionDB : RoomDatabase() {
@@ -38,6 +38,7 @@ abstract class AplicacionDB : RoomDatabase() {
                             AplicacionDB::class.java,
                             "database"
                         )
+                            .fallbackToDestructiveMigration() //Permite destruir el schema de base de datos anterior si este ha sido cambiado
                             .build()
                         INSTANCE = instance
                     }
