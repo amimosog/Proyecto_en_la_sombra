@@ -2,12 +2,10 @@ package com.example.proyecto_en_la_sombra.screens
 
 
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -20,10 +18,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.proyecto_en_la_sombra.R
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
-import androidx.compose.ui.graphics.Color
+import com.example.proyecto_en_la_sombra.navigation.AppScreens
 
 
 private val photos: List<Photo> = listOf(
@@ -41,7 +38,7 @@ val data = listOf("☕️", "☕️", "☕️", "☕️", "☕️", "☕️", "�
 
 
 @Composable
-fun listadoResultados() {
+fun listadoResultados(navController: NavController) {
 
     Text(text = "Resultados animales", textAlign = TextAlign.Center, modifier = Modifier.padding(top = 10.dp))
         LazyVerticalGrid(
@@ -50,7 +47,11 @@ fun listadoResultados() {
         ) {
             items(data) { item ->
                 Card(
-                    modifier = Modifier.padding(4.dp)
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .clickable {
+                            navController.navigate(route = AppScreens.AnimalDetailScreen.route)
+                        }
                 ) {
                     Text(
                         text = item,
@@ -68,5 +69,5 @@ fun listadoResultados() {
 @Preview(showSystemUi = true)
 @Composable
 fun verPantalla(){
-    listadoResultados()
+    //listadoResultados()
 }
