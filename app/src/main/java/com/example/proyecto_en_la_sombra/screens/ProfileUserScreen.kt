@@ -1,6 +1,9 @@
 package com.example.proyecto_en_la_sombra.screens
 
+import android.app.Activity
+import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -33,12 +36,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
+import com.example.proyecto_en_la_sombra.Model.Cliente
 import com.example.proyecto_en_la_sombra.R
+import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
 import com.example.proyecto_en_la_sombra.navigation.AppScreens
 import com.example.proyecto_en_la_sombra.navigation.MyNavigationBar
 import com.example.proyecto_en_la_sombra.ui.theme.Proyecto_en_la_sombraTheme
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 private val photos: List<Photo> = listOf(
     Photo(R.drawable.ic_launcher_foreground),
@@ -83,19 +92,26 @@ class ProfileUserActivity : ComponentActivity() {
 data class Photo(val image: Int)
 
 
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ProfileComponents(navController: NavController) {
+fun ProfileComponents(navController: NavController, context: Context) {
+    val room : AplicacionDB = AplicacionDB.getInstance(context)
+    var cliente: Cliente
+    //Llamar a la base de datos para que cargue el nombre
+
+    runBlocking{
+        cliente = room.clienteDAO().getClientById(1)
+    }
+
     Column(modifier = Modifier
         .background(MaterialTheme.colorScheme.background)
         .padding(8.dp)) {
         Row{
             ImagenUser()
-            BloqueNombre()
+            BloqueNombre(cliente)
         }
 
-        BloqueDatos()
+        BloqueDatos(cliente)
 
         //-------------------------TABS-------------------------------------------------
         val pagerState = rememberPagerState(
@@ -153,7 +169,7 @@ fun ProfileComponents(navController: NavController) {
                 Column(
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    BloqueDatos()
+                    BloqueDatos(cliente)
                 }
             }
         }
@@ -188,8 +204,9 @@ fun ImagenFav(photo: Photo, navController: NavController) {
 }
 
 @Composable
-fun BloqueNombre() {
+fun BloqueNombre(cliente: Cliente) {
     var expanded by remember { mutableStateOf(false)}
+
 
     Column(modifier = Modifier
         .padding(start = 8.dp)
@@ -197,36 +214,36 @@ fun BloqueNombre() {
             expanded = !expanded
         }) {
         TextoNombre(
-            "Alejandro",
+            cliente.nombre,
             MaterialTheme.colorScheme.primary,
             MaterialTheme.typography.titleLarge
         )
         Spacer(modifier = Modifier.height(5.dp))
         TextoNombre(
-            "Mimoso García",
+            cliente.appellidos,
             MaterialTheme.colorScheme.primary,
             MaterialTheme.typography.titleLarge
         )
         Spacer(modifier = Modifier.height(5.dp))
-        TextoNombre(
-            "Dueño de 3 mascotas, adoro los gatos y mis " +
-                    "perros son como de mi familia. Siempre dispuesto " +
-                    "a encontrar un nuevo amigo al que ayudar.",
-            MaterialTheme.colorScheme.onBackground,
-            MaterialTheme.typography.bodyMedium,
-            if (expanded) Int.MAX_VALUE else 1
-        )
+        cliente.descripcion?.let { //Este bloque se pone ya que si es nulo no crea el texto
+            TextoNombre(
+                it,
+                MaterialTheme.colorScheme.onBackground,
+                MaterialTheme.typography.bodyMedium,
+                if (expanded) Int.MAX_VALUE else 1
+            )
+        }
     }
 }
 
 @Composable
-fun BloqueDatos() {
+fun BloqueDatos(cliente: Cliente) {
     Column(modifier = Modifier.padding(start = 8.dp)) {
         Row {
             Text("Nickname:",
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.titleLarge)
-            Text("AlexMiGar",
+            Text(cliente.nickname,
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(4.dp))
@@ -236,7 +253,7 @@ fun BloqueDatos() {
             Text("Email:",
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.titleLarge)
-            Text("amg@gmail.com",
+            Text(cliente.email,
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(4.dp))
@@ -246,10 +263,13 @@ fun BloqueDatos() {
             Text("Num. tlf.:",
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.titleLarge)
-            Text("987654321",
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(4.dp))
+            cliente.numTelefono?.let { //Bloque necesario ya que si es nulo el campo, no crea el Text
+                Text(
+                    it,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(4.dp))
+            }
         }
     }
 }
