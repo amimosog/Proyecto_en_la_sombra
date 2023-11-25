@@ -200,5 +200,7 @@ fun textElements(animal: Animal){
             modifier = Modifier.padding(top = 660.dp, start = 20.dp))
         if(animal.description != null) Text(animal.description,
             modifier = Modifier.padding(start = 20.dp))
+        else Text("No hay descripcion",
+            modifier = Modifier.padding(start = 20.dp))
     }
 }

@@ -141,15 +141,16 @@ fun Animal_Adopt_Button(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun Animal_Info(name: String, descripcion: String, caracteristicas: HashMap<String, String>) {
+fun Animal_Info(name: String, descripcion: String?, caracteristicas: HashMap<String, String>) {
     Column {
         Text(
             text = name, fontSize = 25.sp, fontWeight = FontWeight.Bold
         )
 
-        descripcion?.let { Text(
+        if(descripcion != null) Text(
             text = descripcion, fontSize = 15.sp
-        ) }
+        ) else Text("No hay descripción",
+                    fontSize = 15.sp)
         LazyColumn(modifier = Modifier.padding(15.dp)) {
             items(caracteristicas.toList()) { (key, value) ->
                 Text(
