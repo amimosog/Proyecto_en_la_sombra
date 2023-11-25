@@ -9,5 +9,5 @@ data class SolicitudAdopcion(
     val id: Long,
     val idCliente: Long,
     val idAnimal: Long,
-    val fecha: String
+    val fecha: String?
 )

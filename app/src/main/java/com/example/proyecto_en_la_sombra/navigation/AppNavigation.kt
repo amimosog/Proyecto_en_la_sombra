@@ -42,7 +42,7 @@ fun AppNavigation(context : Context){
                 }
             )
         ){
-            it.arguments?.getString("id")?.let { it1 -> AnimalComponents(navController, it1) }
+            it.arguments?.getString("id")?.let { it1 -> AnimalComponents(navController, it1, context) }
         }
 
         composable(route = AppScreens.ProfileUserScreen.route){
