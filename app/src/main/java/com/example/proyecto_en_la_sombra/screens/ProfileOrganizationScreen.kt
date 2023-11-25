@@ -57,6 +57,7 @@ import com.example.proyecto_en_la_sombra.api.model.RemoteModelPage
 import com.example.proyecto_en_la_sombra.api.organizationsModel.Organization
 import com.example.proyecto_en_la_sombra.api.organizationsModel.Photo
 import com.example.proyecto_en_la_sombra.auth
+import com.example.proyecto_en_la_sombra.navigation.AppScreens
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -76,7 +77,11 @@ fun profileOrganization(navController: NavController, id : String) {
     Column(Modifier.padding(8.dp)) {
         Column {
             Row {
-                result?.organization?.let { UserImage(it.photos) }
+                result?.organization?.let {
+                    if(it.photos.isNotEmpty())
+                        UserImage(it.photos[0].small)
+                    else UserImage("https://play-lh.googleusercontent.com/QuYkQAkLt5OpBAIabNdIGmd8HKwK58tfqmKNvw2UF69pb4jkojQG9za9l3nLfhv2N5U")
+                }
                 result?.let { UserInfo(it) }
             }
         }
@@ -90,7 +95,7 @@ fun profileOrganization(navController: NavController, id : String) {
             result?.let { DetailInfo(it) }
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            UserGallery(id)
+            UserGallery(id,navController)
             result?.let { ReviewsField(it) }
         }
         Column(modifier = Modifier.padding(0.dp)) {
@@ -100,7 +105,7 @@ fun profileOrganization(navController: NavController, id : String) {
 }
 
 @Composable
-fun UserImage(url: List<Photo>) {
+fun UserImage(url: String) {
     AsyncImage(
         model = url,
         contentDescription = "OrgProfileImage",
@@ -177,7 +182,7 @@ fun DetailInfo(org: OrgRemoteModel) {
 }
 
 @Composable
-fun UserGallery(id:String) {
+fun UserGallery(id:String, navController: NavController) {
     var result by remember { mutableStateOf<RemoteModelPage?>(null) }
     LaunchedEffect(true) {
         val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
@@ -191,19 +196,21 @@ fun UserGallery(id:String) {
     ) {
         result?.animals?.forEachIndexed { index, animal ->
             item {
-                showImage(animal)
+                showImage(animal, navController)
             }
         }
     }
 }
 @Composable
-fun showImage(animal : Animal){
+fun showImage(animal : Animal, navController : NavController){
 
         AsyncImage(
-            model = animal.photos[0].small,
+            model = animal.photos[0].medium,
             placeholder = painterResource(R.drawable.ic_launcher_foreground),
-            modifier = Modifier.size(200.dp),
             contentDescription = "Animal photo",
+            modifier = Modifier.size(200.dp).clickable {
+                navController.navigate(route = AppScreens.AnimalDetailScreen.route + "/" + animal.id)
+            }
         )
 }
 
