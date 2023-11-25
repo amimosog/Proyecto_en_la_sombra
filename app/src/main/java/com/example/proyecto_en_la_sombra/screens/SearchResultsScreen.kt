@@ -63,22 +63,21 @@ fun listadoResultados(navController: NavController, search: String) {
         val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
         val query1 = GlobalScope.async(Dispatchers.IO) { service.getAnimalsName(auth, "random", search) }
         val query2 = GlobalScope.async(Dispatchers.IO) { service.getAnimalsLocation(auth, "random", search) }
-        result1 = query1.await()
-        result2 = query2.await()
+        result1 = query1.await()!!
+        result2 = query2.await()!!
 
 
     }
-
-    val lista1 = listOf(1, 2, 3)
-    val lista2 = listOf(4, 5, 6)
-
-    val listaUnida = lista1.plus(lista2)
-
-    val animals1: List<Animal>? = result1?.animals
-    val animals2: List<Animal>? = result2?.animals
-    if(animals1 != null) {
-        val result = animals1
-
+    var result : List<Animal>? = null
+    if(result1 != null && result2 != null){
+    val animals1 = result1!!.animals
+    val animals2 = result2!!.animals
+        result = animals1 + animals2
+    } else if (result1 != null){
+        result = result1!!.animals
+    } else if (result2 != null){
+        result = result2!!.animals
+    }
 
         if (result != null) {
             Text(
@@ -116,7 +115,6 @@ fun listadoResultados(navController: NavController, search: String) {
 
             }
         }
-    }
 }
 
 
