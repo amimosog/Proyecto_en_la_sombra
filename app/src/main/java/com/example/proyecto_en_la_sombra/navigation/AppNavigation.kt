@@ -66,8 +66,15 @@ fun AppNavigation(context : Context){
             profileOrganization(navController)
         }
 
-        composable(route = AppScreens.SearchResultsScreen.route) {
-            listadoResultados(navController)
+        composable(route = AppScreens.SearchResultsScreen.route + "/{search}",
+            arguments = listOf(
+                navArgument("search"){
+                    type = NavType.StringType
+                }
+            )
+        ) {
+            it.arguments?.getString("id")?.let { it1 -> listadoResultados(navController, it1) }
+
         }
     }
 }
