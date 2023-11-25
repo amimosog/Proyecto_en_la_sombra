@@ -90,7 +90,12 @@ fun listElement(animal: Animal, navController: NavController, context:Context){
         }
     ) {
         Spacer(modifier = Modifier.height(5.dp))
-        imageElements(animal.photos[0].full)
+        imageElements(
+            if(animal.photos.isNotEmpty())
+                animal.photos[0].full
+            else
+                "https://play-lh.googleusercontent.com/QuYkQAkLt5OpBAIabNdIGmd8HKwK58tfqmKNvw2UF69pb4jkojQG9za9l3nLfhv2N5U"
+        )
         iconElements(animal, context)
         textElements(animal)
     }
