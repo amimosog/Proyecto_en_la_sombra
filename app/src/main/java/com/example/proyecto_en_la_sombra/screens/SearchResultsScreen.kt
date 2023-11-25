@@ -2,6 +2,8 @@ package com.example.proyecto_en_la_sombra.screens
 
 
 
+import android.content.Context.INPUT_METHOD_SERVICE
+import android.view.inputmethod.InputMethodManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
@@ -27,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.proyecto_en_la_sombra.R
@@ -40,34 +43,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 
-
-private val photos: List<Photo> = listOf(
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-)
-
-val data = listOf("☕️", "☕️", "☕️", "☕️", "☕️", "☕️", "☕️", "☕️", "☕️", "☕️", "☕️", "☕️")
-
-
 @Composable
 fun listadoResultados(navController: NavController, search: String) {
-    var result1 by remember { mutableStateOf<RemoteModelPage?>(null) }
-    var result2 by remember { mutableStateOf<RemoteModelPage?>(null) }
+    var result by remember { mutableStateOf<RemoteModelPage?>(null) }
+    //var result2 by remember { mutableStateOf<RemoteModelPage?>(null) }
     LaunchedEffect(true) {
         val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
         val query1 = GlobalScope.async(Dispatchers.IO) { service.getAnimalsName(auth, "random", search) }
-        val query2 = GlobalScope.async(Dispatchers.IO) { service.getAnimalsLocation(auth, "random", search) }
-        result1 = query1.await()!!
-        result2 = query2.await()!!
-
-
+        //val query2 = GlobalScope.async(Dispatchers.IO) { service.getAnimalsLocation(auth, "random", search) }
+        result = query1.await()!!
+        //result2 = query2.await()!!
     }
+    /*
     var result : List<Animal>? = null
     if(result1 != null && result2 != null){
     val animals1 = result1!!.animals
@@ -78,6 +65,8 @@ fun listadoResultados(navController: NavController, search: String) {
     } else if (result2 != null){
         result = result2!!.animals
     }
+     */
+
 
         if (result != null) {
             Text(
@@ -89,31 +78,31 @@ fun listadoResultados(navController: NavController, search: String) {
                 columns = GridCells.Fixed(2),
                 contentPadding = PaddingValues(8.dp, top = 30.dp)
             ) {
-                    items(result) { item ->
+                result?.animals?.let {
+                    items(it) { item ->
                         Card(
                             modifier = Modifier
                                 .padding(4.dp)
                                 .clickable {
-                                    navController.navigate(route = AppScreens.AnimalDetailScreen.route)
+                                    navController.navigate(route = AppScreens.AnimalDetailScreen.route + "/" + item.id)
                                 }
                         ) {
                             AsyncImage(
                                 model =
                                     if (item.photos.isNotEmpty())
-                                        item.photos[0]
+                                        item.photos[0].full
                                     else
                                         "https://play-lh.googleusercontent.com/QuYkQAkLt5OpBAIabNdIGmd8HKwK58tfqmKNvw2UF69pb4jkojQG9za9l3nLfhv2N5U",
                                 placeholder = painterResource(R.drawable.ic_launcher_foreground),
                                 contentDescription = "Animal photo",
                                 modifier = Modifier
                                     .background(color = PurpleGrey40)
-                                    .size(width = 600.dp, height = 800.dp) //Tendria que ocupar toda la pantalla
+                                    .size(width = 200.dp, height = 200.dp) //Tendria que ocupar toda la pantalla
                             )
                         }
-
                     }
 
-            }
+            }   }
         }
 }
 
