@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -42,13 +44,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.proyecto_en_la_sombra.R
 import com.example.proyecto_en_la_sombra.api.RetrofitService
+import com.example.proyecto_en_la_sombra.api.model.Animal
 import com.example.proyecto_en_la_sombra.api.organizationsModel.OrgRemoteModel
+import com.example.proyecto_en_la_sombra.api.model.RemoteModelPage
 import com.example.proyecto_en_la_sombra.api.organizationsModel.Organization
 import com.example.proyecto_en_la_sombra.api.organizationsModel.Photo
 import com.example.proyecto_en_la_sombra.auth
@@ -60,12 +65,12 @@ import kotlinx.coroutines.async
 
 @OptIn(DelicateCoroutinesApi::class)
 @Composable
-fun profileOrganization(navController: NavController) {
+fun profileOrganization(navController: NavController, id : String) {
     var result by remember { mutableStateOf<OrgRemoteModel?>(null) }
     LaunchedEffect(true) {
         val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
         val query =
-            GlobalScope.async(Dispatchers.IO) { service.getUniqueOrganization(auth, "WI535") }
+            GlobalScope.async(Dispatchers.IO) { service.getUniqueOrganization(auth, id) }
         result = query.await()
     }
     Column(Modifier.padding(8.dp)) {
@@ -85,10 +90,10 @@ fun profileOrganization(navController: NavController) {
             result?.let { DetailInfo(it) }
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            result?.let { UserGallery(it) }
+            UserGallery(id)
             result?.let { ReviewsField(it) }
         }
-        Column(modifier = Modifier.padding(5.dp)) {
+        Column(modifier = Modifier.padding(0.dp)) {
             Reviews(1)
         }
     }
@@ -172,18 +177,34 @@ fun DetailInfo(org: OrgRemoteModel) {
 }
 
 @Composable
-fun UserGallery(org: OrgRemoteModel) {
-    LazyVerticalGrid(GridCells.Fixed(3), modifier = Modifier.padding(top = 5.dp, bottom = 15.dp)) {
-        items(10) {
-            Image(
-                imageVector = Icons.Default.AccountBox,
-                contentDescription = null,
-                modifier = Modifier
-                    .clickable {}
-                    .fillMaxSize()
-                    .fillMaxWidth())
+fun UserGallery(id:String) {
+    var result by remember { mutableStateOf<RemoteModelPage?>(null) }
+    LaunchedEffect(true) {
+        val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
+        val query = //Poner el id de la organizacion
+            GlobalScope.async(Dispatchers.IO) { service.getAnimalsByOrganization(auth,id) }
+        result = query.await()
+    }
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(100.dp),
+        modifier = Modifier.height(400.dp)
+    ) {
+        result?.animals?.forEachIndexed { index, animal ->
+            item {
+                showImage(animal)
+            }
         }
     }
+}
+@Composable
+fun showImage(animal : Animal){
+
+        AsyncImage(
+            model = animal.photos[0].small,
+            placeholder = painterResource(R.drawable.ic_launcher_foreground),
+            modifier = Modifier.size(200.dp),
+            contentDescription = "Animal photo",
+        )
 }
 
 @Composable
