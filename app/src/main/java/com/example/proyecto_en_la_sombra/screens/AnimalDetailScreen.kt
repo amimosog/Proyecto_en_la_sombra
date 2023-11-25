@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.proyecto_en_la_sombra.R
 import com.example.proyecto_en_la_sombra.api.RetrofitService
 import com.example.proyecto_en_la_sombra.api.model.Photo
@@ -167,11 +168,11 @@ fun Animal_Photo(photos: List<Photo>) {
         modifier = Modifier.height(400.dp)
     ) {
         items(photos) { photo ->
-            Image(
-                painter = painterResource(R.drawable.ic_launcher_foreground/*TODO photo.full*/),
-                contentDescription = "Animal Photo",
-                contentScale = ContentScale.FillWidth,
-                modifier = Modifier.size(200.dp)
+            AsyncImage(
+                model = photo.full,
+                placeholder = painterResource(R.drawable.ic_launcher_foreground),
+                modifier = Modifier.size(200.dp),
+                contentDescription = "Animal photo",
             )
         }
     }

@@ -91,4 +91,7 @@ dependencies {
     implementation("androidx.room:room-ktx:$room_version")
     // optional - Test helpers
     testImplementation("androidx.room:room-testing:$room_version")
+    //Coil implementation
+    implementation("io.coil-kt:coil:2.5.0")
+    implementation("io.coil-kt:coil-compose:2.5.0")
 }

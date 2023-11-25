@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.proyecto_en_la_sombra.R
 import com.example.proyecto_en_la_sombra.api.RetrofitService
 import com.example.proyecto_en_la_sombra.api.model.Animal
@@ -78,7 +79,7 @@ fun listElement(animal: Animal, navController: NavController){
         }
     ) {
         Spacer(modifier = Modifier.height(5.dp))
-        imageElements(R.drawable.ic_launcher_foreground/*TODO animal.photos[0].full*/)
+        imageElements(animal.photos[0].full)
         iconElements()
         textElements(animal)
     }
@@ -86,10 +87,11 @@ fun listElement(animal: Animal, navController: NavController){
 
 /*Funcion que pinta los elementos de tipo imagen*/
 @Composable
-fun imageElements(image: Int){
-    Image(
-        painterResource(image),
-        "Imagen del animal",
+fun imageElements(image: String){
+    AsyncImage(
+        model = image,
+        placeholder = painterResource(R.drawable.ic_launcher_foreground),
+        contentDescription = "Animal photo",
         modifier = Modifier
             .background(color = PurpleGrey40)
             .size(width = 600.dp, height = 800.dp) //Tendria que ocupar toda la pantalla
@@ -127,7 +129,7 @@ fun textElements(animal: Animal){
             modifier = Modifier.padding(start = 20.dp))
         Text(animal.name,
             modifier = Modifier.padding(top = 660.dp, start = 20.dp))
-        Text(animal.description,
+        if(animal.description != null) Text(animal.description,
             modifier = Modifier.padding(start = 20.dp))
     }
 }
