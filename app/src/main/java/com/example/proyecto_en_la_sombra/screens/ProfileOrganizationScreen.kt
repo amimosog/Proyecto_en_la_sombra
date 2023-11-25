@@ -27,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,36 +39,54 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.proyecto_en_la_sombra.R
+import com.example.proyecto_en_la_sombra.api.RetrofitService
+import com.example.proyecto_en_la_sombra.api.organizationsModel.OrgRemoteModel
+import com.example.proyecto_en_la_sombra.api.organizationsModel.Organization
+import com.example.proyecto_en_la_sombra.api.organizationsModel.Photo
+import com.example.proyecto_en_la_sombra.auth
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 
 
+@OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun profileOrganization(navController: NavController) {
+    var result by remember { mutableStateOf<OrgRemoteModel?>(null) }
+    LaunchedEffect(true) {
+        val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
+        val query =
+            GlobalScope.async(Dispatchers.IO) { service.getUniqueOrganization(auth, "WI535") }
+        result = query.await()
+    }
     Column(Modifier.padding(8.dp)) {
         Column {
             Row {
-                UserImage()
-                UserInfo()
+                result?.organization?.let { UserImage(it.photos) }
+                result?.let { UserInfo(it) }
             }
         }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxWidth()
         ) {
-            SocialMedia()
+            result?.let { SocialMedia(it) }
         }
         Column {
-            DetailInfo()
+            result?.let { DetailInfo(it) }
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            UserGallery()
-            ReviewsField()
+            result?.let { UserGallery(it) }
+            result?.let { ReviewsField(it) }
         }
         Column(modifier = Modifier.padding(5.dp)) {
             Reviews(1)
@@ -76,10 +95,10 @@ fun profileOrganization(navController: NavController) {
 }
 
 @Composable
-fun UserImage() {
-    Image(
-        painterResource(id = R.drawable.ic_launcher_foreground),
-        "UserImage",
+fun UserImage(url: List<Photo>) {
+    AsyncImage(
+        model = url,
+        contentDescription = "OrgProfileImage",
         modifier = Modifier
             .clip(CircleShape)
             .size(100.dp)
@@ -88,20 +107,20 @@ fun UserImage() {
 }
 
 @Composable
-fun UserInfo() {
+fun UserInfo(org: OrgRemoteModel) {
     Column() {
         Text(
-            "Nombre de la organización",
+            org.organization.name,
             modifier = Modifier.padding(top = 7.dp, start = 5.dp),
             fontSize = 20.sp
         )
         Text(
-            "Ciudad",
+            org.organization.address.city,
             modifier = Modifier.padding(start = 5.dp),
             fontSize = 14.sp
         )
         Text(
-            "Pais",
+            org.organization.address.country,
             modifier = Modifier.padding(top = 1.dp, start = 5.dp),
             fontSize = 12.sp
         )
@@ -109,31 +128,51 @@ fun UserInfo() {
 }
 
 @Composable
-fun DetailInfo() {
-    Text(
-        "Email: ",
-        modifier = Modifier.padding(top = 7.dp, start = 7.dp),
-        fontSize = 14.sp
-    )
-    Text(
-        "Dirección: ",
-        modifier = Modifier.padding(top = 7.dp, start = 7.dp),
-        fontSize = 14.sp
-    )
-    Text(
-        "Número de teléfono: ",
-        modifier = Modifier.padding(top = 7.dp, start = 7.dp),
-        fontSize = 14.sp
-    )
-    Text(
-        "Página web: ",
-        modifier = Modifier.padding(top = 7.dp, start = 7.dp),
-        fontSize = 14.sp
-    )
+fun DetailInfo(org: OrgRemoteModel) {
+    if (org.organization.email != null) {
+        Text(
+            "Email: " + org.organization.email,
+            modifier = Modifier.padding(top = 7.dp, start = 7.dp),
+            fontSize = 14.sp
+        )
+    }
+    if (org.organization.address.address1 != null && org.organization.address.address2 != null) {
+        Text(
+            "Dirección: " + org.organization.address.address1 + " " + org.organization.address.address2,
+            modifier = Modifier.padding(top = 7.dp, start = 7.dp),
+            fontSize = 14.sp
+        )
+    } else if (org.organization.address.address1 != null) {
+        Text(
+            "Dirección: " + org.organization.address.address1,
+            modifier = Modifier.padding(top = 7.dp, start = 7.dp),
+            fontSize = 14.sp
+        )
+    } else if (org.organization.address.address2 != null) {
+        Text(
+            "Dirección: " + org.organization.address.address2,
+            modifier = Modifier.padding(top = 7.dp, start = 7.dp),
+            fontSize = 14.sp
+        )
+    }
+    if (org.organization.phone != null) {
+        Text(
+            "Número de teléfono: " + org.organization.phone,
+            modifier = Modifier.padding(top = 7.dp, start = 7.dp),
+            fontSize = 14.sp
+        )
+    }
+    if (org.organization.website != null) {
+        Text(
+            "Página web: " + org.organization.website,
+            modifier = Modifier.padding(top = 7.dp, start = 7.dp),
+            fontSize = 14.sp
+        )
+    }
 }
 
 @Composable
-fun UserGallery() {
+fun UserGallery(org: OrgRemoteModel) {
     LazyVerticalGrid(GridCells.Fixed(3), modifier = Modifier.padding(top = 5.dp, bottom = 15.dp)) {
         items(10) {
             Image(
@@ -148,29 +187,52 @@ fun UserGallery() {
 }
 
 @Composable
-fun SocialMedia() {
+fun SocialMedia(org: OrgRemoteModel) {
+    val localUriHandler = LocalUriHandler.current
     val logoModifier = Modifier
         .padding(top = 5.dp, start = 10.dp)
         .size(60.dp)
         .clip(CircleShape)
 
     Row {
-        Image(painterResource(id = R.drawable.twitter_logo), "twitter_logo", logoModifier)
-        Image(painterResource(id = R.drawable.youtube_logo), "youtube_logo", logoModifier)
-        Image(painterResource(id = R.drawable.facebook_logo), "facebook_logo", logoModifier)
-        Image(
-            painterResource(id = R.drawable.pinterest_logo),
-            "pinterest_logo", logoModifier
-        )
-        Image(
-            painterResource(id = R.drawable.instagram_logo), "instagram_logo", logoModifier
-        )
+        if (org.organization.social_media.twitter != null) {
+            Image(
+                painterResource(id = R.drawable.twitter_logo),
+                "twitter_logo",
+                logoModifier.clickable { localUriHandler.openUri(org.organization.social_media.twitter.toString()) })
+        }
+        if (org.organization.social_media.youtube != null) {
+            Image(
+                painterResource(id = R.drawable.youtube_logo),
+                "youtube_logo",
+                logoModifier.clickable { localUriHandler.openUri(org.organization.social_media.youtube.toString()) })
+        }
+        if (org.organization.social_media.facebook != null) {
+            Image(
+                painterResource(id = R.drawable.facebook_logo),
+                "facebook_logo",
+                logoModifier.clickable { localUriHandler.openUri(org.organization.social_media.facebook.toString()) })
+        }
+        if (org.organization.social_media.pinterest != null) {
+            Image(
+                painterResource(id = R.drawable.pinterest_logo),
+                "pinterest_logo",
+                logoModifier.clickable { localUriHandler.openUri(org.organization.social_media.pinterest.toString()) }
+            )
+        }
+        if (org.organization.social_media.instagram != null) {
+            Image(
+                painterResource(id = R.drawable.instagram_logo),
+                "instagram_logo",
+                logoModifier.clickable { localUriHandler.openUri(org.organization.social_media.instagram.toString()) }
+            )
+        }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReviewsField() {
+fun ReviewsField(org: OrgRemoteModel) {
     var review by remember { mutableStateOf("") }
     Column(
         modifier = Modifier
