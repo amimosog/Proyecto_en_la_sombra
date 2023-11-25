@@ -39,17 +39,21 @@ import com.example.proyecto_en_la_sombra.api.model.RemoteModelPage
 import com.example.proyecto_en_la_sombra.auth
 import com.example.proyecto_en_la_sombra.navigation.AppScreens
 import com.example.proyecto_en_la_sombra.ui.theme.PurpleGrey40
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 
+
 @Composable
-fun listadoResultados(navController: NavController, search: String) {
+fun listadoResultados(navController: NavController, search: String, type : String, size : String, gender : String, age : String) {
     var result by remember { mutableStateOf<RemoteModelPage?>(null) }
     //var result2 by remember { mutableStateOf<RemoteModelPage?>(null) }
     LaunchedEffect(true) {
         val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
-        val query1 = GlobalScope.async(Dispatchers.IO) { service.getAnimalsName(auth, "random", search) }
+        var query1 : Deferred<RemoteModelPage>
+        query1 = if(search != "") GlobalScope.async(Dispatchers.IO) { service.getAnimalsName(auth, "random", search) }
+        else GlobalScope.async(Dispatchers.IO) { service.getAnimalsFilters(auth, "random", type, size, gender, age) }
         //val query2 = GlobalScope.async(Dispatchers.IO) { service.getAnimalsLocation(auth, "random", search) }
         result = query1.await()!!
         //result2 = query2.await()!!

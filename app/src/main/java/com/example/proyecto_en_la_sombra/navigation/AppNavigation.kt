@@ -13,7 +13,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.navArgument
 import com.example.proyecto_en_la_sombra.screens.OrganizationList
 import com.example.proyecto_en_la_sombra.screens.SearchBarCustom
-import com.example.proyecto_en_la_sombra.screens.SelectCategory
 import com.example.proyecto_en_la_sombra.screens.listadoResultados
 import com.example.proyecto_en_la_sombra.screens.profileOrganization
 
@@ -51,9 +50,7 @@ fun AppNavigation(context : Context){
         }
 
         composable(route = AppScreens.SearchScreen.route){
-            val list = listOf<String>("test1", "test2", "test3")
             SearchBarCustom(navController)
-            SelectCategory(name = "test", list = list)
             MyNavigationBar(navController)
         }
 
@@ -72,15 +69,33 @@ fun AppNavigation(context : Context){
             it.arguments?.getString("id")?.let { it1 -> profileOrganization(navController, it1) }
 
         }
-        composable(route = AppScreens.SearchResultsScreen.route + "/{search}",
+        composable(route = AppScreens.SearchResultsScreen.route + "?name={search}&type={type}&size={size}&gender={gender}&age={age}",
             arguments = listOf(
                 navArgument("search"){
                     type = NavType.StringType
+                }, navArgument("gender"){
+                    type = androidx.navigation.NavType.StringType
+                },
+                navArgument("type"){
+                    type = androidx.navigation.NavType.StringType
+                },
+                navArgument("size"){
+                    type = androidx.navigation.NavType.StringType
+                },
+                navArgument("age"){
+                    type = androidx.navigation.NavType.StringType
                 }
             )
         ) {
-            it.arguments?.getString("search")?.let { it1 -> listadoResultados(navController, it1) }
-
+            //it.arguments?.getString("search",)?.let { it1 -> listadoResultados(navController, it1, it2, it3, it4, it4) }
+            listadoResultados(
+                navController = navController,
+                search = it.arguments?.getString("search")!!,
+                type = it.arguments?.getString("type")!!,
+                size = it.arguments?.getString("size")!!,
+                gender = it.arguments?.getString("gender")!!,
+                age = it.arguments?.getString("age")!!
+            )
         }
     }
 }
