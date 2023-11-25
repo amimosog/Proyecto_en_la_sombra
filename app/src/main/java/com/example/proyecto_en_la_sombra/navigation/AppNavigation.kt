@@ -62,10 +62,16 @@ fun AppNavigation(context : Context){
             MyNavigationBar(navController)
         }
 
-        composable(route = AppScreens.ProfileOrganizationScreen.route){
-            profileOrganization(navController)
-        }
+        composable(route = AppScreens.ProfileOrganizationScreen.route + "/{id}",
+            arguments = listOf(
+                navArgument("id") {
+                    type = NavType.StringType
+                }
+            )
+        ) {
+            it.arguments?.getString("id")?.let { it1 -> profileOrganization(navController, it1) }
 
+        }
         composable(route = AppScreens.SearchResultsScreen.route + "/{search}",
             arguments = listOf(
                 navArgument("search"){
