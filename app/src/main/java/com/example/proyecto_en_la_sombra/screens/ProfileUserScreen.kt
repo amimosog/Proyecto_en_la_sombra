@@ -23,6 +23,7 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,14 +41,24 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
+import androidx.room.Room
+import coil.compose.AsyncImage
 import com.example.proyecto_en_la_sombra.Model.Cliente
+import com.example.proyecto_en_la_sombra.Model.Favoritos
 import com.example.proyecto_en_la_sombra.R
 import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
+import com.example.proyecto_en_la_sombra.api.RetrofitService
+import com.example.proyecto_en_la_sombra.api.model.RemoteResult
+import com.example.proyecto_en_la_sombra.auth
 import com.example.proyecto_en_la_sombra.navigation.AppScreens
 import com.example.proyecto_en_la_sombra.navigation.MyNavigationBar
 import com.example.proyecto_en_la_sombra.ui.theme.Proyecto_en_la_sombraTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+
 
 private val photos: List<Photo> = listOf(
     Photo(R.drawable.ic_launcher_foreground),
@@ -76,21 +87,8 @@ private val photos: List<Photo> = listOf(
     Photo(R.drawable.ic_launcher_foreground),
     Photo(R.drawable.ic_launcher_foreground),
 )
-/*
-@ExperimentalFoundationApi
-class ProfileUserActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            Proyecto_en_la_sombraTheme {
-                ProfileComponents()
-            }
-        }
-    }
-}*/
 
 data class Photo(val image: Int)
-
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -100,6 +98,13 @@ fun ProfileComponents(navController: NavController, context: Context) {
     //Llamar a la base de datos para que cargue el nombre
     runBlocking{
         cliente = room.clienteDAO().getClientById(1)
+    }
+
+    //Obtenemos la lista de favoritos del usuario
+    var result by remember { mutableStateOf<List<Favoritos>?>(null) }
+    LaunchedEffect(true) {
+        val query = GlobalScope.async(Dispatchers.IO) { room.favoritosDAO().getFavsByIdClient(1.toLong()) }
+        result = query.await()
     }
 
     Column(modifier = Modifier
@@ -157,9 +162,9 @@ fun ProfileComponents(navController: NavController, context: Context) {
                 LazyVerticalGrid(
                         columns = GridCells.Adaptive(100.dp),
                         content = {
-                            photos.forEachIndexed { index, photo ->
+                            result?.forEachIndexed { index, fav ->
                                 item {
-                                    ImagenFav(photo,navController)
+                                    ImagenFav(fav,navController)
                                 }
                             }
                         }
@@ -188,18 +193,22 @@ fun ImagenUser() {
 }
 
 @Composable
-fun ImagenFav(photo: Photo, navController: NavController) {
-    Image(
-        painterResource(photo.image),
-        "Imagen del animal",
-        modifier = Modifier
-            .size(80.dp)
-            .aspectRatio(1f)
-            .background(MaterialTheme.colorScheme.primary)
-            .clickable {
-                navController.navigate(route = AppScreens.AnimalDetailScreen.route)
-            }
-    )
+fun ImagenFav(favorito: Favoritos, navController: NavController) {
+
+    var result by remember { mutableStateOf<RemoteResult?>(null) }
+    LaunchedEffect(true) {
+        val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
+        val query = GlobalScope.async(Dispatchers.IO) { service.getAnimals(auth,favorito.idAnimal.toString()) }
+        result = query.await()
+    }
+    if (result?.animal?.photos?.isNotEmpty() == true){
+        AsyncImage(model = result!!.animal.photos[0].small,
+            contentDescription = "",
+            placeholder = painterResource(R.drawable.ic_launcher_foreground),
+            modifier = Modifier.size(60.dp).clickable {
+                navController.navigate(route = AppScreens.AnimalDetailScreen.route + "/" + result?.animal!!.id)
+            })
+    }
 }
 
 @Composable
