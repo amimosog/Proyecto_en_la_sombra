@@ -98,7 +98,6 @@ fun ProfileComponents(navController: NavController, context: Context) {
     val room : AplicacionDB = AplicacionDB.getInstance(context)
     var cliente: Cliente
     //Llamar a la base de datos para que cargue el nombre
-
     runBlocking{
         cliente = room.clienteDAO().getClientById(1)
     }
@@ -277,13 +276,4 @@ fun BloqueDatos(cliente: Cliente) {
 @Composable
 fun TextoNombre(text: String, color: Color, style: TextStyle, lines: Int = Int.MAX_VALUE){
     Text(text, color = color, style = style, maxLines = lines)
-}
-
-@Preview(showSystemUi = true)
-//@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showSystemUi = true)
-@Composable
-fun PreviewComponent() {
-    Proyecto_en_la_sombraTheme {
-        //ProfileComponents()
-    }
 }
