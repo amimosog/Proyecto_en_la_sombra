@@ -39,9 +39,7 @@ import com.example.proyecto_en_la_sombra.navigation.AppScreens
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchBarCustom(navController: NavController) {
-    var search by remember {
-        mutableStateOf("")
-    }
+    var search by remember {mutableStateOf("")}
 
     TextField(
         value = search,
@@ -53,7 +51,7 @@ fun SearchBarCustom(navController: NavController) {
                 contentDescription = null,
                 modifier = Modifier
                     .clickable {
-                        navController.navigate(route = AppScreens.SearchResultsScreen.route)
+                        navController.navigate(route = AppScreens.SearchResultsScreen.route + "/" + search)
                     }
             )
         },
