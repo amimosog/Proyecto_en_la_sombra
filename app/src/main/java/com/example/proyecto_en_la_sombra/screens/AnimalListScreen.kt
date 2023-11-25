@@ -14,9 +14,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,20 +31,29 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.proyecto_en_la_sombra.Model.Favoritos
 import com.example.proyecto_en_la_sombra.R
+import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
 import com.example.proyecto_en_la_sombra.api.RetrofitService
 import com.example.proyecto_en_la_sombra.api.model.Animal
 import com.example.proyecto_en_la_sombra.api.model.RemoteModelPage
+import com.example.proyecto_en_la_sombra.api.model.RemoteResult
 import com.example.proyecto_en_la_sombra.auth
 import com.example.proyecto_en_la_sombra.navigation.AppScreens
 import com.example.proyecto_en_la_sombra.ui.theme.PurpleGrey40
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import android.content.Context
+import android.util.Log
+import androidx.compose.runtime.saveable.rememberSaveable
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 
 /*Funcion que pinta cada elemento de la lista de forma optima*/
 @Composable
-fun listOfElements(navController: NavController){
+fun listOfElements(navController: NavController, context:Context){
     var result by remember { mutableStateOf<RemoteModelPage?>(null) }
     LaunchedEffect(true) {
         val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
@@ -59,7 +70,7 @@ fun listOfElements(navController: NavController){
             * una vez por cada elemento de la lista*/
             result?.animals?.let {
                 items(it){ animal ->
-                    listElement(animal, navController)
+                    listElement(animal, navController, context)
                 }
             }
 
@@ -71,7 +82,7 @@ fun listOfElements(navController: NavController){
 
 /*Funcion que pinta los textos y las imagenes en conjunto*/
 @Composable
-fun listElement(animal: Animal, navController: NavController){
+fun listElement(animal: Animal, navController: NavController, context:Context){
     Box(modifier = Modifier
         .fillMaxSize()
         .clickable {
@@ -80,7 +91,7 @@ fun listElement(animal: Animal, navController: NavController){
     ) {
         Spacer(modifier = Modifier.height(5.dp))
         imageElements(animal.photos[0].full)
-        iconElements()
+        iconElements(animal, context)
         textElements(animal)
     }
 }
@@ -100,20 +111,73 @@ fun imageElements(image: String){
 
 /*Funcion que pinta los elementos de tipo texto*/
 @Composable
-fun iconElements(){
+fun iconElements(animal: Animal, context: Context){
     Column {
+        val room : AplicacionDB = AplicacionDB.getInstance(context)
+        var islikeClicked by rememberSaveable  { mutableStateOf(false) }
+        /* Inicializacion de los likes, si al animal ya se le ha dado like previamente, inicializa
+        la variable islikeClicked para que pinte el corazon en consecuencia*/
+        var result by remember { mutableStateOf<Favoritos?>(null) }
+        LaunchedEffect(true) {
+            GlobalScope.async(Dispatchers.IO) {
+                //La peticion a la base de datos de forma asincrona
+                //Inserta en la base de datos si sabe que no existe el id de dicho animal en la bd
+                val query = GlobalScope.async(Dispatchers.IO) {
+                    room.favoritosDAO().getFavByIdAnimal(animal.id.toLong(),1.toLong())
+                }
+                result = query.await()
+            }
+        }
+        if(result!=null){
+            islikeClicked = true
+        } else islikeClicked = false
+
         Icon(Icons.Default.Add,
             contentDescription = "Follow button",
             modifier = Modifier
                 .padding(start = 350.dp, top = 630.dp)
                 .size(30.dp))
-        Icon(Icons.Default.FavoriteBorder,
-            contentDescription = "like button",
+
+        IconButton(onClick = {
+            islikeClicked= !islikeClicked
+            if (!islikeClicked) {
+                //ha pulsado sobre no me gusta, luego lo elimina de la
+                GlobalScope.launch {
+                    //La peticion a la base de datos de forma asincrona
+                    //Elimina de la base de la tabla favoritos, dicho animal
+                    room.favoritosDAO().deleteFav(Favoritos(1.toLong(),animal.id.toLong()))
+                    var favoritos: List<Favoritos> = room.favoritosDAO().getFavsByIdClient(1.toLong())
+
+                    Log.i("Numero de favs ", favoritos.size.toString())
+                }
+            }else{
+                GlobalScope.launch {
+                    //La peticion a la base de datos de forma asincrona
+                    //Elimina de la base de la tabla favoritos, dicho animal
+                    room.favoritosDAO().setFav(Favoritos(1.toLong(),animal.id.toLong()))
+                    var favoritos: List<Favoritos> = room.favoritosDAO().getFavsByIdClient(1.toLong())
+
+                    Log.i("Numero de favs ", favoritos.size.toString())
+                }
+            }
+        },
             modifier = Modifier
                 .padding(start = 350.dp, top = 10.dp)
-                .size(30.dp))
+                .size(30.dp)) {
+
+            if (!islikeClicked) {
+                Icon(Icons.Default.FavoriteBorder,
+                    contentDescription = "like button"
+                )
+
+            } else {
+                Icon(Icons.Default.Favorite,
+                    contentDescription = "like button")
+            }
+        }
+
         Icon(Icons.Default.Share,
-            contentDescription = "like button",
+            contentDescription = "share button",
             modifier = Modifier
                 .padding(start = 350.dp, top = 10.dp)
                 .size(30.dp))
@@ -133,18 +197,3 @@ fun textElements(animal: Animal){
             modifier = Modifier.padding(start = 20.dp))
     }
 }
-
-//@Preview(showSystemUi = true)
-//@Composable
-//fun viewFuction(){
-//    Proyecto_en_la_sombraTheme{ //Necesario para poder usar las propiedades de MaterialTheme
-//        listOfElements(allTheTexts)
-//    }
-//}
-//
-//@Preview
-//@Composable
-//fun viewComponent(){
-//    val element: List<Texts> = listOf(Texts("Nombre del chucho","Descripcion del chucho"))
-//    listOfElements(element)
-//}

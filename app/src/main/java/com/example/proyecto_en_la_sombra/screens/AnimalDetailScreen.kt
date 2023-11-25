@@ -147,9 +147,9 @@ fun Animal_Info(name: String, descripcion: String, caracteristicas: HashMap<Stri
             text = name, fontSize = 25.sp, fontWeight = FontWeight.Bold
         )
 
-        Text(
+        descripcion?.let { Text(
             text = descripcion, fontSize = 15.sp
-        )
+        ) }
         LazyColumn(modifier = Modifier.padding(15.dp)) {
             items(caracteristicas.toList()) { (key, value) ->
                 Text(
