@@ -26,7 +26,7 @@ fun AppNavigation(context : Context){
     NavHost(navController = navController, startDestination = AppScreens.FirstScreen.route){
         //El navHost estara formado por diferente composables que seran cada una de nuestras pantallas
         composable(route = AppScreens.FirstScreen.route){
-            FirstScreen(navController)
+            FirstScreen(navController, context)
         }
 
         composable(route = AppScreens.AnimalListScreen.route){

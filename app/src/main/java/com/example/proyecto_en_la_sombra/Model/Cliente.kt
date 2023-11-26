@@ -14,6 +14,7 @@ data class Cliente (
     val appellidos: String,
     val nickname: String,
     val email: String,
+    val pass: String,
     val numTelefono: String?,
     val descripcion: String?,
     val bloqueador: Long? //id del administrador que lo bloqueo si se ha dado el caso
