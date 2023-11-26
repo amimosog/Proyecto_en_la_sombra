@@ -98,6 +98,7 @@ fun listElement(animal: Animal, navController: NavController, context:Context){
         )
         iconElements(animal, context)
         textElements(animal)
+
     }
 }
 
