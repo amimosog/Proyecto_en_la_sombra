@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -25,16 +26,14 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.room.Update
 import com.example.proyecto_en_la_sombra.navigation.AppScreens
-import androidx.compose.runtime.getValue
-import androidx.room.util.dropFtsSyncTriggers
 import com.example.proyecto_en_la_sombra.api.RetrofitService
-import com.example.proyecto_en_la_sombra.api.model.RemoteModelPage
 import com.example.proyecto_en_la_sombra.auth
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import java.util.Collections
 
 
 /*class SearchScreen : ComponentActivity() {
@@ -48,15 +47,16 @@ import kotlinx.coroutines.async
     }
 }*/
 
-
-val size = listOf<String>("","small", "medium", "large", "extra-large")
+val size = listOf<String>("","small", "medium", "large", "xlarge")
 val gender = listOf<String>("","male", "female")
 val age = listOf<String>("","baby", "young", "adult")
+val type = listOf<String>("","baby", "young", "adult")
 
 var caracteristicas = hashMapOf(
     "size" to size,
     "gender" to gender,
-    "age" to age
+    "age" to age,
+    "type" to type
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,6 +67,7 @@ fun SearchBarCustom(navController: NavController) {
     var genderDropdown by remember { mutableStateOf("") }
     var ageDropdown by remember { mutableStateOf("") }
     var sizeDropdown by remember { mutableStateOf("") }
+
 
 
     TextField(
@@ -87,18 +88,13 @@ fun SearchBarCustom(navController: NavController) {
         modifier = Modifier
             .fillMaxWidth()
     )
-
+    typeDropdown = "Dog"
     getType(onUpdate = { caracteristicas = it })
-    for (i in caracteristicas) {
-        println(i.key)
-        println(i.value)
-    }
     Column {
-        dropdown(name = "age", list = caracteristicas.getValue("age"), onUpdate = { ageDropdown = it })
-        //dropdown(name = "Type", list = caracteristicas.getValue("type"), onUpdate = { typeDropdown = it })
-        //dropdown(name = "gender", list = list2, onTextChange = { ageDropdown = it })
-        //dropdown(name = name, list = list, onTextChange = { sizeDropdown = it })
-        //dropdown(name = "gender", list = list2, onTextChange = { genderDropdown = it })
+        dropdown(name = "age", list = caracteristicas.getValue("age")) { ageDropdown = it }
+        dropdown(name = "type", list = caracteristicas.getValue("type")) { typeDropdown = it }
+        dropdown(name = "gender", list = caracteristicas.getValue("gender")) { genderDropdown = it }
+        dropdown(name = "size", list = caracteristicas.getValue("size")) { sizeDropdown = it }
         //dropdown(name = name, list = list, onTextChange = { sizeDropdown = it })
     }
 }
@@ -107,6 +103,7 @@ fun SearchBarCustom(navController: NavController) {
 fun dropdown(name: String, list: List<String>, onUpdate: (String) -> Unit){
     var expanded : Boolean by remember { mutableStateOf(false)}
     var selectedType : String by remember { mutableStateOf("")}
+    var lista = list
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { newValue ->
@@ -119,7 +116,7 @@ fun dropdown(name: String, list: List<String>, onUpdate: (String) -> Unit){
         TextField(
             readOnly = true,
             value = selectedType,
-            onValueChange = { },
+            onValueChange = { selectedType = it },
             label = { Text(name) },
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(
@@ -135,7 +132,7 @@ fun dropdown(name: String, list: List<String>, onUpdate: (String) -> Unit){
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            list.forEach {
+            lista.forEach {
                 DropdownMenuItem(
                     text = { Text(text = it) },
                     onClick = {
@@ -154,22 +151,46 @@ fun dropdown(name: String, list: List<String>, onUpdate: (String) -> Unit){
 
 @Composable
 fun getType(onUpdate: (HashMap<String,List<String>>) -> Unit){
+    val composed = remember { false }
     LaunchedEffect(true) {
-        val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
-        var query = GlobalScope.async(Dispatchers.IO) { service.getSearchTypes(auth) }
-        var result = query.await()!!
-        val tiposanimal : List<String> = listOf()
-        for (i in result.types) {
-            tiposanimal.plus(i.name)
-            println(i.name)
+        if (!composed) {
+            val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
+            var query = GlobalScope.async(Dispatchers.IO) { service.getSearchTypes(auth) }
+            var result = query.await()!!
+            var tiposanimal: List<String> = listOf()
+            for (i in result.types) {
+                tiposanimal = tiposanimal.plus(i.name)
+                println(i.name)
+            }
+            caracteristicas.put("type", tiposanimal)
+
+            for (i in caracteristicas) {
+                println(i.key)
+                println(i.value)
+            }
         }
-        caracteristicas["type"] = tiposanimal
-        onUpdate(caracteristicas)
     }
 }
 
+//Solo actualiza la primer vez que se llama a la funcion
+/*
+@Composable
+fun updateColors(type : String){
+    println("He pasado por aquí")
+    dropdownOptions.clear()
+    LaunchedEffect(true) {
+            val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
+            var query = GlobalScope.async(Dispatchers.IO) { service.getSearchTypebyAnimal(auth, "Dog") }
+            var result = query.await()!!
+            println(result.type.colors)
+            for (i in result.type.colors) {
+                dropdownOptions.add(i)
+            }
+    }
+}
+*/
 @Composable
 @Preview
 fun Preview (){
- //   SearchBarCustom()
+ //SearchBarCustom(null)
 }

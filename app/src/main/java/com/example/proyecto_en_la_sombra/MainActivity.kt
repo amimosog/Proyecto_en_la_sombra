@@ -51,10 +51,11 @@ class MainActivity : ComponentActivity() {
         val room: AplicacionDB = AplicacionDB.getInstance(context = this)
 
         //Si es la primera vez que ejecutas ROOM descometa este bloque de codigo para crear un cliente
+        /*
         lifecycleScope.launch {
             var cliente : Cliente = Cliente(1, "Richar","Widmark", "rwidmark", "rwidmark69@gmail.com", "+34644501112","Agente internacional y de vacas bravas fiuuuuu", null)
             room.clienteDAO().insertCliente(cliente)
-        }
+        }*/
 
         val sharedPreferences = getSharedPreferences("myPreferences", Context.MODE_PRIVATE)
         val timeSeconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
