@@ -11,7 +11,6 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.foundation.Image
-
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -118,27 +117,22 @@ fun AnimalComponents(navController: NavController, id: String, context : Context
         val query = GlobalScope.async(Dispatchers.IO) { service.getAnimals(auth, id) }
         result = query.await()
     }
+
     if (result != null){
         Column(modifier = Modifier.fillMaxSize()) {
             val lista = result?.animal?.let {it.photos}
             if (lista != null) {
                 Animal_Photo(lista)
             }
+
             Row(
                 modifier = Modifier
                     .padding(top = 50.dp, start = 10.dp)
             ) {
-                val caracteristicas = hashMapOf(
-                    "Sexo" to "Masculino",
-                    "Pelaje" to "Blanco",
-                    "Raza" to "Chihuahua",
-                    "Edad" to "3 años",
-                    "Peso" to "2 kg",
-                    "Ojos" to "Negros",
-                )
-                val descripcion = "Pipo es un perro bueno y cariñoso"
-                result?.animal?.let { Animal_Info(it.name, it.description, caracteristicas) }
-                result?.animal?.let{Animal_Adopt_ButtonAndLikeIcon(it, context)}
+                result?.animal?.let {
+                    Animal_Info(it)
+                    Animal_Adopt_ButtonAndLikeIcon(it, context)
+                }
             }
         }
     }
@@ -256,22 +250,43 @@ fun Animal_Adopt_ButtonAndLikeIcon(animal : Animal, context: Context) {
 }
 
 @Composable
-fun Animal_Info(name: String, descripcion: String?, caracteristicas: HashMap<String, String>) {
+fun Animal_Info(animal: Animal) {
     Column {
         Text(
-            text = name, fontSize = 25.sp, fontWeight = FontWeight.Bold, modifier = Modifier.fillMaxWidth(0.65f)
+            text = animal.name,
+            fontSize = 25.sp,
+            fontWeight = FontWeight.Bold
         )
 
-        if(descripcion != null) Text(
-            text = descripcion, fontSize = 15.sp, modifier = Modifier.fillMaxWidth(0.65f)
-        ) else Text("No hay descripción",
-                    fontSize = 15.sp)
-        LazyColumn(modifier = Modifier.padding(15.dp)) {
+        Text(
+            text = if(animal.description != null)
+                        animal.description
+                    else
+                        "No hay descripción",
+            fontSize = 15.sp,
+            modifier = Modifier
+                .fillMaxWidth(0.65f)
+        )
+
+        val caracteristicas = hashMapOf(
+            "Edad" to animal.age,
+            "Pelaje" to animal.coat,
+            "Género" to animal.gender,
+            "Tamaño" to animal.size,
+            "Especie" to animal.species,
+            "Tipo" to animal.type,
+        )
+
+        LazyColumn(
+            modifier = Modifier
+                .padding(15.dp)
+        ) {
             items(caracteristicas.toList()) { (key, value) ->
-                Text(
-                    "$key: $value",
-                    fontSize = 20.sp
-                )
+                if (value != null)
+                    Text(
+                            "$key: $value",
+                        fontSize = 20.sp
+                    )
             }
         }
     }

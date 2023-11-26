@@ -27,14 +27,17 @@ interface ClienteDAO {
     //Devuelve una lista de los clientes que solicitaron adopciones junto a los animales que solicitaron adoptar
     @Transaction
     @Query("SELECT * FROM Cliente")
-    suspend fun getClienteSolicitoAdopciones() : List<ClienteSolicitaAdoptar>
+    suspend fun getClienteSolicitoAdopciones(): List<ClienteSolicitaAdoptar>
 
     @Query("SELECT * FROM Cliente")
-    suspend fun getClientes() : List<Cliente>
+    suspend fun getClientes(): List<Cliente>
 
     //Get a client by a given id
     @Query("SELECT * FROM Cliente WHERE idCliente = :id")
-    suspend fun getClientById(id:Int) : Cliente
+    suspend fun getClientById(id: Int): Cliente
+
+    @Query("SELECT * FROM Cliente WHERE email = :email")
+    suspend fun getClientesByEmail(email: String): Cliente
 
     //Inserta un Cliente
     @Insert
