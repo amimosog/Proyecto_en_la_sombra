@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.foundation.Image
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -240,8 +241,7 @@ fun Animal_Adopt_ButtonAndLikeIcon(animal : Animal, context: Context) {
         }
     },
         modifier = Modifier
-            .padding( end = 20.dp)
-            .size(80.dp)) {
+            .padding(top = 10.dp)){
 
         if (!islikeClicked) {
             Icon(Icons.Default.FavoriteBorder,
@@ -259,7 +259,7 @@ fun Animal_Adopt_ButtonAndLikeIcon(animal : Animal, context: Context) {
 fun Animal_Info(name: String, descripcion: String?, caracteristicas: HashMap<String, String>) {
     Column {
         Text(
-            text = name, fontSize = 25.sp, fontWeight = FontWeight.Bold
+            text = name, fontSize = 25.sp, fontWeight = FontWeight.Bold, modifier = Modifier.fillMaxWidth(0.65f)
         )
 
         if(descripcion != null) Text(
