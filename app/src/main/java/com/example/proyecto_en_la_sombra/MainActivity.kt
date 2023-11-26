@@ -35,11 +35,6 @@ import kotlinx.coroutines.launch
 import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
 
 import com.example.proyecto_en_la_sombra.Model.*
-import com.example.proyecto_en_la_sombra.api.model.RemoteModelPage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
@@ -49,28 +44,17 @@ private const val client_secret = "ADto7Ake8ThsPUe57IprbsLHORd29qhZynDdw1ej"
 var auth = ""
 
 class MainActivity : ComponentActivity() {
-    @OptIn(ExperimentalMaterial3Api::class)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
         val room: AplicacionDB = AplicacionDB.getInstance(context = this)
 
         //Si es la primera vez que ejecutas ROOM descometa este bloque de codigo para crear un cliente
-        /*lifecycleScope.launch {
-            var cliente: Cliente = Cliente(
-                4,
-                "Angel",
-                "test",
-                "angelito",
-                "test@gmail.com",
-                "1234",
-                "+34644501112",
-                "Agente internacional y de vacas bravas fiuuuuu",
-                null
-            )
-
+        lifecycleScope.launch {
+            var cliente : Cliente = Cliente(1, "Richar","Widmark", "rwidmark", "rwidmark69@gmail.com", "+34644501112","Agente internacional y de vacas bravas fiuuuuu", null)
             room.clienteDAO().insertCliente(cliente)
-        }*/
+        }
 
         val sharedPreferences = getSharedPreferences("myPreferences", Context.MODE_PRIVATE)
         val timeSeconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
@@ -85,24 +69,9 @@ class MainActivity : ComponentActivity() {
                 sharedPreferences.edit().putString("token", auth).apply()
                 sharedPreferences.edit().putLong("time", timeSeconds).apply()
             }
-            //Get the data from the API of the animals and organizations
-            /*
-            val animal = service.getAnimals(auth, "69771579")
-            println(animal)
-
-            val listanimals = service.getAnimalsRandom(auth, "random")
-            println(listanimals)
-
-            val listOrganizations = service.getOrganizations(auth)
-            println(listOrganizations)
-
-            val Organization = service.getUniqueOrganization(auth, "WI535")
-            println(Organization)
-             */
         }
         setContent {
             AppNavigation(this)
         }
     }
 }
-
