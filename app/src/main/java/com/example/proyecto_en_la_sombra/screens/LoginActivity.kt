@@ -53,6 +53,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.proyecto_en_la_sombra.R
+
 /*import com.example.proyecto_en_la_sombra.screens.ui.theme.Proyecto_en_la_sombraTheme
 
 class LoginActivity : ComponentActivity() {
@@ -98,10 +99,10 @@ fun LoginComponents() {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxHeight(0.5F)
-                .fillMaxSize(0.75F)
+                .fillMaxWidth(0.85F)
                 .padding(top = 30.dp)
                 .offset(y = 50.dp)
-                .background(Color.White)
+                .background(Color.White, RoundedCornerShape(8.dp))
 
         ) {
             Spacer(Modifier.height(30.dp))
@@ -121,11 +122,14 @@ fun LoginComponents() {
                 trailingIcon = {
                     Icon(Icons.Outlined.Email, contentDescription = "email_icon")
                 },
-                colors = TextFieldDefaults.textFieldColors(
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.LightGray,
+                    unfocusedContainerColor = Color.LightGray,
+                    disabledContainerColor = Color.LightGray,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    containerColor = Color.LightGray
-                )
+                ),
+                modifier = Modifier.fillMaxWidth(0.95F)
             )
             Spacer(Modifier.height(15.dp))
             TextField(
@@ -136,17 +140,21 @@ fun LoginComponents() {
                 trailingIcon = {
                     Icon(Icons.Outlined.Lock, contentDescription = "pass_icon")
                 },
-                colors = TextFieldDefaults.textFieldColors(
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.LightGray,
+                    unfocusedContainerColor = Color.LightGray,
+                    disabledContainerColor = Color.LightGray,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    containerColor = Color.LightGray
-                )
+                ),
+                modifier = Modifier.fillMaxWidth(0.95F)
             )
 
             Spacer(Modifier.height(35.dp))
             Button(onClick = { /*TODO*/ }) {
-                Text(text = "Registrar")
+                Text(text = "Iniciar Sesión")
             }
+            Spacer(Modifier.height(40.dp))
         }
     }
 }
