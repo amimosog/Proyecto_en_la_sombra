@@ -44,7 +44,9 @@ import androidx.navigation.NavController
 import androidx.room.Room
 import coil.compose.AsyncImage
 import com.example.proyecto_en_la_sombra.Model.Cliente
+import com.example.proyecto_en_la_sombra.Model.Donacion
 import com.example.proyecto_en_la_sombra.Model.Favoritos
+import com.example.proyecto_en_la_sombra.Model.SolicitudAdopcion
 import com.example.proyecto_en_la_sombra.R
 import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
 import com.example.proyecto_en_la_sombra.api.RetrofitService
@@ -60,33 +62,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 
-private val photos: List<Photo> = listOf(
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-    Photo(R.drawable.ic_launcher_foreground),
-)
 
 data class Photo(val image: Int)
 
@@ -101,10 +76,16 @@ fun ProfileComponents(navController: NavController, context: Context) {
     }
 
     //Obtenemos la lista de favoritos del usuario
-    var result by remember { mutableStateOf<List<Favoritos>?>(null) }
+    var resultFavs by remember { mutableStateOf<List<Favoritos>?>(null) }
     LaunchedEffect(true) {
-        val query = GlobalScope.async(Dispatchers.IO) { room.favoritosDAO().getFavsByIdClient(1.toLong()) }
-        result = query.await()
+        val query1 = GlobalScope.async(Dispatchers.IO) { room.favoritosDAO().getFavsByIdClient(1.toLong()) }
+        resultFavs = query1.await()
+    }
+
+    var resultAdop by remember { mutableStateOf<List<SolicitudAdopcion>?>(null) }
+    LaunchedEffect(true) {
+        val query2 = GlobalScope.async(Dispatchers.IO) { room.solicitudAdopcionDAO().getAdopByIdClient(1.toLong()) }
+        resultAdop = query2.await()
     }
 
     Column(modifier = Modifier
@@ -119,7 +100,7 @@ fun ProfileComponents(navController: NavController, context: Context) {
 
         //-------------------------TABS-------------------------------------------------
         val pagerState = rememberPagerState(
-            pageCount = {2}
+            pageCount = {3}
         )
         val coroutineScope = rememberCoroutineScope()
         TabRow(selectedTabIndex = pagerState.currentPage,
@@ -146,13 +127,23 @@ fun ProfileComponents(navController: NavController, context: Context) {
             )
             Tab(
                 selected = pagerState.currentPage == 1,
-                text = { Text("Preferencias") },
+                text = { Text("Adoptados") },
                 onClick = {
                     coroutineScope.launch {
                         pagerState.animateScrollToPage(1)
                     }
                 }
             )
+            Tab(
+                selected = pagerState.currentPage == 2,
+                text = { Text("Preferencias") },
+                onClick = {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(2)
+                    }
+                }
+            )
+
         }
         HorizontalPager(
             state = pagerState,
@@ -162,13 +153,24 @@ fun ProfileComponents(navController: NavController, context: Context) {
                 LazyVerticalGrid(
                         columns = GridCells.Adaptive(100.dp),
                         content = {
-                            result?.forEachIndexed { index, fav ->
+                            resultFavs?.forEachIndexed { index, fav ->
                                 item {
                                     ImagenFav(fav,navController)
                                 }
                             }
                         }
                     )
+            }else if(page == 1){
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(100.dp),
+                    content = {
+                        resultAdop?.forEachIndexed { index, adop ->
+                            item {
+                                ImagenAdop(adop,navController)
+                            }
+                        }
+                    }
+                )
             }else{
                 Column(
                     verticalArrangement = Arrangement.Center,
@@ -199,6 +201,24 @@ fun ImagenFav(favorito: Favoritos, navController: NavController) {
     LaunchedEffect(true) {
         val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
         val query = GlobalScope.async(Dispatchers.IO) { service.getAnimals(auth,favorito.idAnimal.toString()) }
+        result = query.await()
+    }
+    if (result?.animal?.photos?.isNotEmpty() == true){
+        AsyncImage(model = result!!.animal.photos[0].small,
+            contentDescription = "",
+            placeholder = painterResource(R.drawable.ic_launcher_foreground),
+            modifier = Modifier.size(60.dp).clickable {
+                navController.navigate(route = AppScreens.AnimalDetailScreen.route + "/" + result?.animal!!.id)
+            })
+    }
+}
+
+@Composable
+fun ImagenAdop(solicitudAdopcion: SolicitudAdopcion, navController: NavController) {
+    var result by remember { mutableStateOf<RemoteResult?>(null) }
+    LaunchedEffect(true) {
+        val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
+        val query = GlobalScope.async(Dispatchers.IO) { service.getAnimals(auth,solicitudAdopcion.idAnimal.toString()) }
         result = query.await()
     }
     if (result?.animal?.photos?.isNotEmpty() == true){

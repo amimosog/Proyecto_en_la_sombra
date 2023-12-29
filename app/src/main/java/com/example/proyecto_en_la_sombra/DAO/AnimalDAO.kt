@@ -4,6 +4,9 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import com.example.proyecto_en_la_sombra.Model.Animal
+import com.example.proyecto_en_la_sombra.Model.Cliente
+import com.example.proyecto_en_la_sombra.Model.SolicitudAdopcion
+
 //import com.example.proyecto_en_la_sombra.Model.animalEsApadrinadoPorClientes
 
 @Dao
@@ -15,6 +18,10 @@ interface AnimalDAO {
     //Inserta un animal
     @Insert
     suspend fun insertAnimal(animal: Animal)
+
+    //Get a client by a given id
+    @Query("SELECT * FROM Animal WHERE idAnimal = :idAnimal")
+    suspend fun getAnimalById(idAnimal: Long): Animal
 
     //Inserta una lista de clientes que han apadrinado un determinado animal
     //@Insert
