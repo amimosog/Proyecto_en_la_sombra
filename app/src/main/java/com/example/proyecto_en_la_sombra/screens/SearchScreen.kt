@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,6 +26,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
@@ -66,7 +68,7 @@ var caracteristicas = hashMapOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBarCustom(navController: NavController) {
+fun SearchBarCustom() {
     var search by remember { mutableStateOf("") }
     var typeDropdown by remember { mutableStateOf("") }
     var genderDropdown by remember { mutableStateOf("") }
@@ -75,8 +77,12 @@ fun SearchBarCustom(navController: NavController) {
 
 
 
-    Column (Modifier.fillMaxSize()) {
-        Column {
+    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            Modifier
+                .fillMaxWidth(0.85F)
+                .offset(y = 25.dp)
+        ) {
             TextField(
                 value = search,
                 shape = RoundedCornerShape(8.dp),
@@ -88,10 +94,10 @@ fun SearchBarCustom(navController: NavController) {
                         contentDescription = null,
                         modifier = Modifier
                             .clickable {
-                                navController.navigate(
+                                /*navController.navigate(
                                     route = AppScreens.SearchResultsScreen.route + "?name=" + search + "&type=" + typeDropdown +
                                             "&size=" + sizeDropdown + "&gender=" + genderDropdown + "&age=" + ageDropdown
-                                )
+                                )*/
                             }
                     )
                 },
@@ -146,7 +152,10 @@ fun dropdown(name: String, list: List<String>, onUpdate: (String) -> Unit) {
                     expanded = expanded
                 )
             },
-            colors = ExposedDropdownMenuDefaults.textFieldColors(),
+            colors = ExposedDropdownMenuDefaults.textFieldColors(
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            ),
             modifier = Modifier
                 .menuAnchor()
                 .fillMaxWidth(),
@@ -213,7 +222,7 @@ fun updateColors(type : String){
 }
 */
 @Composable
-@Preview
+@Preview(showBackground = true)
 fun Preview() {
-    //SearchBarCustom(null)
+    SearchBarCustom()
 }
