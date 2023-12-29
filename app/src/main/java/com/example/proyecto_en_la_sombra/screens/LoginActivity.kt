@@ -53,7 +53,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.proyecto_en_la_sombra.R
-import com.example.proyecto_en_la_sombra.screens.ui.theme.Proyecto_en_la_sombraTheme
+/*import com.example.proyecto_en_la_sombra.screens.ui.theme.Proyecto_en_la_sombraTheme
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,7 +70,7 @@ class LoginActivity : ComponentActivity() {
             }
         }
     }
-}
+}*/
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

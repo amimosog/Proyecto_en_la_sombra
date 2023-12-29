@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Icon
@@ -53,7 +55,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.proyecto_en_la_sombra.R
-import com.example.proyecto_en_la_sombra.screens.ui.theme.Proyecto_en_la_sombraTheme
+/*import com.example.proyecto_en_la_sombra.screens.ui.theme.Proyecto_en_la_sombraTheme
 
 class RegisterActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,7 +72,7 @@ class RegisterActivity : ComponentActivity() {
             }
         }
     }
-}
+}*/
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -103,7 +105,8 @@ fun RegisterComponents() {
                 .fillMaxSize(0.75F)
                 .padding(top = 30.dp)
                 .offset(y = 30.dp)
-                .background(Color.White)
+                .background(Color.White, RoundedCornerShape(8.dp))
+
         ) {
             Spacer(Modifier.height(30.dp))
             Text(
@@ -122,11 +125,14 @@ fun RegisterComponents() {
                 trailingIcon = {
                     Icon(Icons.Outlined.Person, contentDescription = "name_icon")
                 },
-                colors = TextFieldDefaults.textFieldColors(
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.LightGray,
+                    unfocusedContainerColor = Color.LightGray,
+                    disabledContainerColor = Color.LightGray,
                     focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    containerColor = Color.LightGray
-                )
+                    unfocusedIndicatorColor = Color.Transparent
+                ),
+                modifier = Modifier.fillMaxWidth(0.95F)
             )
             Spacer(Modifier.height(15.dp))
             TextField(
@@ -134,11 +140,14 @@ fun RegisterComponents() {
                 shape = RoundedCornerShape(8.dp),
                 onValueChange = { apellidos = it },
                 placeholder = { Text(text = "Apellidos", modifier = Modifier.alpha(0.5F)) },
-                colors = TextFieldDefaults.textFieldColors(
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.LightGray,
+                    unfocusedContainerColor = Color.LightGray,
+                    disabledContainerColor = Color.LightGray,
                     focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    containerColor = Color.LightGray
-                )
+                    unfocusedIndicatorColor = Color.Transparent
+                ),
+                modifier = Modifier.fillMaxWidth(0.95F)
             )
             Spacer(Modifier.height(15.dp))
             TextField(
@@ -149,11 +158,14 @@ fun RegisterComponents() {
                 trailingIcon = {
                     Icon(Icons.Outlined.Email, contentDescription = "email_icon")
                 },
-                colors = TextFieldDefaults.textFieldColors(
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.LightGray,
+                    unfocusedContainerColor = Color.LightGray,
+                    disabledContainerColor = Color.LightGray,
                     focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    containerColor = Color.LightGray
-                )
+                    unfocusedIndicatorColor = Color.Transparent
+                ),
+                modifier = Modifier.fillMaxWidth(0.95F)
             )
             Spacer(Modifier.height(15.dp))
             TextField(
@@ -164,11 +176,14 @@ fun RegisterComponents() {
                 trailingIcon = {
                     Icon(Icons.Outlined.LockOpen, contentDescription = "pass_icon")
                 },
-                colors = TextFieldDefaults.textFieldColors(
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.LightGray,
+                    unfocusedContainerColor = Color.LightGray,
+                    disabledContainerColor = Color.LightGray,
                     focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    containerColor = Color.LightGray
-                )
+                    unfocusedIndicatorColor = Color.Transparent
+                ),
+                modifier = Modifier.fillMaxWidth(0.95F)
             )
             Spacer(Modifier.height(15.dp))
             TextField(
@@ -184,16 +199,19 @@ fun RegisterComponents() {
                 trailingIcon = {
                     Icon(Icons.Outlined.Lock, contentDescription = "pass_check_icon")
                 },
-                colors = TextFieldDefaults.textFieldColors(
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.LightGray,
+                    unfocusedContainerColor = Color.LightGray,
+                    disabledContainerColor = Color.LightGray,
                     focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    containerColor = Color.LightGray
-                )
+                    unfocusedIndicatorColor = Color.Transparent
+                ),
+                modifier = Modifier.fillMaxWidth(0.95F)
             )
-            Spacer(Modifier.height(35.dp))
             Button(onClick = { /*TODO*/ }) {
                 Text(text = "Registrar")
             }
+            Spacer(Modifier.height(35.dp))
         }
     }
 }
