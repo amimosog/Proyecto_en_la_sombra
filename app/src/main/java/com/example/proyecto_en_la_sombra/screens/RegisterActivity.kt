@@ -102,7 +102,8 @@ fun RegisterComponents() {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .fillMaxSize(0.75F)
+                .fillMaxHeight(0.78F)
+                .fillMaxWidth(0.85F)
                 .padding(top = 30.dp)
                 .offset(y = 30.dp)
                 .background(Color.White, RoundedCornerShape(8.dp))
@@ -208,10 +209,11 @@ fun RegisterComponents() {
                 ),
                 modifier = Modifier.fillMaxWidth(0.95F)
             )
+            Spacer(Modifier.height(35.dp))
             Button(onClick = { /*TODO*/ }) {
                 Text(text = "Registrar")
             }
-            Spacer(Modifier.height(35.dp))
+            Spacer(Modifier.height(40.dp))
         }
     }
 }
