@@ -68,7 +68,7 @@ var caracteristicas = hashMapOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchBarCustom() {
+fun SearchBarCustom(navController: NavController) {
     var search by remember { mutableStateOf("") }
     var typeDropdown by remember { mutableStateOf("") }
     var genderDropdown by remember { mutableStateOf("") }
@@ -94,10 +94,10 @@ fun SearchBarCustom() {
                         contentDescription = null,
                         modifier = Modifier
                             .clickable {
-                                /*navController.navigate(
+                                navController.navigate(
                                     route = AppScreens.SearchResultsScreen.route + "?name=" + search + "&type=" + typeDropdown +
                                             "&size=" + sizeDropdown + "&gender=" + genderDropdown + "&age=" + ageDropdown
-                                )*/
+                                )
                             }
                     )
                 },
@@ -224,5 +224,5 @@ fun updateColors(type : String){
 @Composable
 @Preview(showBackground = true)
 fun Preview() {
-    SearchBarCustom()
+    //SearchBarCustom(null)
 }
