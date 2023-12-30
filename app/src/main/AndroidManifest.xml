@@ -15,6 +15,11 @@
         android:theme="@style/Theme.Proyecto_en_la_sombra"
         tools:targetApi="31">
         <activity
+            android:name=".screens.RegisterActivity"
+            android:exported="false"
+            android:label="@string/title_activity_register"
+            android:theme="@style/Theme.Proyecto_en_la_sombra" />
+        <activity
             android:name=".screens.ProfileOrganizationScreen"
             android:exported="false"
             android:label="@string/title_activity_profile_organization_screen"
@@ -23,7 +28,7 @@
             android:name=".screens.AnimalView"
             android:exported="true"
             android:label="@string/title_activity_main2"
-            android:theme="@style/Theme.Proyecto_en_la_sombra"></activity>
+            android:theme="@style/Theme.Proyecto_en_la_sombra" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -2,8 +2,12 @@ package com.example.proyecto_en_la_sombra.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DropdownMenuItem
@@ -13,6 +17,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -21,8 +26,10 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -47,10 +54,10 @@ import java.util.Collections
     }
 }*/
 
-val size = listOf<String>("","small", "medium", "large", "xlarge")
-val gender = listOf<String>("","male", "female")
-val age = listOf<String>("","baby", "young", "adult")
-val type = listOf<String>("","baby", "young", "adult")
+val size = listOf<String>("", "small", "medium", "large", "xlarge")
+val gender = listOf<String>("", "male", "female")
+val age = listOf<String>("", "baby", "young", "adult")
+val type = listOf<String>("", "baby", "young", "adult")
 
 var caracteristicas = hashMapOf(
     "size" to size,
@@ -70,39 +77,61 @@ fun SearchBarCustom(navController: NavController) {
 
 
 
-    TextField(
-        value = search,
-        onValueChange = { search = it },
-        placeholder = { Text(text = "Buscar", modifier = Modifier.alpha(0.5F)) },
-        trailingIcon = {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = null,
+    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            Modifier
+                .fillMaxWidth(0.85F)
+                .offset(y = 25.dp)
+        ) {
+            TextField(
+                value = search,
+                shape = RoundedCornerShape(8.dp),
+                onValueChange = { search = it },
+                placeholder = { Text(text = "Buscar", modifier = Modifier.alpha(0.5F)) },
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .clickable {
+                                navController.navigate(
+                                    route = AppScreens.SearchResultsScreen.route + "?name=" + search + "&type=" + typeDropdown +
+                                            "&size=" + sizeDropdown + "&gender=" + genderDropdown + "&age=" + ageDropdown
+                                )
+                            }
+                    )
+                },
                 modifier = Modifier
-                    .clickable {
-                        navController.navigate(route = AppScreens.SearchResultsScreen.route + "?name=" + search + "&type="+ typeDropdown +
-                                "&size=" + sizeDropdown + "&gender="+ genderDropdown +"&age=" + ageDropdown)
-                    }
+                    .fillMaxWidth(),
+                colors = TextFieldDefaults.textFieldColors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                )
             )
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-    )
-    typeDropdown = "Dog"
-    getType(onUpdate = { caracteristicas = it })
-    Column {
-        dropdown(name = "age", list = caracteristicas.getValue("age")) { ageDropdown = it }
-        dropdown(name = "type", list = caracteristicas.getValue("type")) { typeDropdown = it }
-        dropdown(name = "gender", list = caracteristicas.getValue("gender")) { genderDropdown = it }
-        dropdown(name = "size", list = caracteristicas.getValue("size")) { sizeDropdown = it }
-        //dropdown(name = name, list = list, onTextChange = { sizeDropdown = it })
+            typeDropdown = "Dog"
+            getType(onUpdate = { caracteristicas = it })
+            Column {
+                dropdown(name = "age", list = caracteristicas.getValue("age")) { ageDropdown = it }
+                dropdown(name = "type", list = caracteristicas.getValue("type")) {
+                    typeDropdown = it
+                }
+                dropdown(name = "gender", list = caracteristicas.getValue("gender")) {
+                    genderDropdown = it
+                }
+                dropdown(name = "size", list = caracteristicas.getValue("size")) {
+                    sizeDropdown = it
+                }
+                //dropdown(name = name, list = list, onTextChange = { sizeDropdown = it })
+            }
+        }
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun dropdown(name: String, list: List<String>, onUpdate: (String) -> Unit){
-    var expanded : Boolean by remember { mutableStateOf(false)}
-    var selectedType : String by remember { mutableStateOf("")}
+fun dropdown(name: String, list: List<String>, onUpdate: (String) -> Unit) {
+    var expanded: Boolean by remember { mutableStateOf(false) }
+    var selectedType: String by remember { mutableStateOf("") }
     var lista = list
     ExposedDropdownMenuBox(
         expanded = expanded,
@@ -123,7 +152,10 @@ fun dropdown(name: String, list: List<String>, onUpdate: (String) -> Unit){
                     expanded = expanded
                 )
             },
-            colors = ExposedDropdownMenuDefaults.textFieldColors(),
+            colors = ExposedDropdownMenuDefaults.textFieldColors(
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            ),
             modifier = Modifier
                 .menuAnchor()
                 .fillMaxWidth(),
@@ -150,7 +182,7 @@ fun dropdown(name: String, list: List<String>, onUpdate: (String) -> Unit){
 }
 
 @Composable
-fun getType(onUpdate: (HashMap<String,List<String>>) -> Unit){
+fun getType(onUpdate: (HashMap<String, List<String>>) -> Unit) {
     val composed = remember { false }
     LaunchedEffect(true) {
         if (!composed) {
@@ -190,7 +222,7 @@ fun updateColors(type : String){
 }
 */
 @Composable
-@Preview
-fun Preview (){
- //SearchBarCustom(null)
+@Preview(showBackground = true)
+fun Preview() {
+    //SearchBarCustom(null)
 }
