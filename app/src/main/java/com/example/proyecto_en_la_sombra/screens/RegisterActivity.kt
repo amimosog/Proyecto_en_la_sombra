@@ -1,7 +1,9 @@
 package com.example.proyecto_en_la_sombra.screens
 
+import android.content.Context
 import android.graphics.drawable.Icon
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -54,7 +56,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.proyecto_en_la_sombra.Model.Cliente
 import com.example.proyecto_en_la_sombra.R
+import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
+import com.example.proyecto_en_la_sombra.navigation.AppScreens
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+
 /*import com.example.proyecto_en_la_sombra.screens.ui.theme.Proyecto_en_la_sombraTheme
 
 class RegisterActivity : ComponentActivity() {
@@ -74,9 +83,16 @@ class RegisterActivity : ComponentActivity() {
     }
 }*/
 
+@Composable
+fun RegisterActivity(navController: NavController, context: Context){
+    RegisterComponents(navController, context)
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterComponents() {
+fun RegisterComponents(navController: NavController, context:Context) {
+
+    val room : AplicacionDB = AplicacionDB.getInstance(context)
 
     var name: String by remember { mutableStateOf("") }
     var apellidos: String by remember { mutableStateOf("") }
@@ -102,7 +118,7 @@ fun RegisterComponents() {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .fillMaxHeight(0.78F)
+                .fillMaxHeight(1F)
                 .fillMaxWidth(0.85F)
                 .padding(top = 30.dp)
                 .offset(y = 30.dp)
@@ -210,17 +226,37 @@ fun RegisterComponents() {
                 modifier = Modifier.fillMaxWidth(0.95F)
             )
             Spacer(Modifier.height(35.dp))
-            Button(onClick = { /*TODO*/ }) {
+            Button(onClick = {
+                //Comprobar que todos los campos estan rellenos
+                if(name.isNotEmpty() && apellidos.isNotEmpty() && email.isNotEmpty() && pass.isNotEmpty() && passCheck.isNotEmpty()){
+                    if(pass.equals(passCheck)){
+                        //Introducir los datos en la base de datos y navegar al login
+                        GlobalScope.launch {
+                            var cliente = Cliente(name,apellidos,email.substringBefore('@'),email,pass,null, null, null)
+                            //La peticion a la base de datos de forma asincrona
+                            room.clienteDAO().insertCliente(cliente)
+
+                            Log.i("Insercion usuario","usuario insertado")
+                        }
+
+                        navController.navigate(route = AppScreens.LoginActivity.route)
+                    }
+                }
+            }) {
                 Text(text = "Registrar")
+            }
+            Button(onClick = {
+                navController.navigate(route = AppScreens.LoginActivity.route)
+            }) {
+                Text(text = "Ya tengo cuenta")
             }
             Spacer(Modifier.height(40.dp))
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-
-fun RegisterPreview() {
-    RegisterComponents()
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun RegisterPreview() {
+//    RegisterComponents()
+//}

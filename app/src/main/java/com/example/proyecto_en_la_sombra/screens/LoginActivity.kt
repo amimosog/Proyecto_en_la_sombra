@@ -1,7 +1,9 @@
 package com.example.proyecto_en_la_sombra.screens
 
+import android.content.Context
 import android.graphics.drawable.Icon
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -52,36 +54,32 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.proyecto_en_la_sombra.Model.Cliente
 import com.example.proyecto_en_la_sombra.R
+import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
+import com.example.proyecto_en_la_sombra.emailActual
+import com.example.proyecto_en_la_sombra.navigation.AppScreens
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
-/*import com.example.proyecto_en_la_sombra.screens.ui.theme.Proyecto_en_la_sombraTheme
 
-class LoginActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            Proyecto_en_la_sombraTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-
-                }
-            }
-        }
-    }
-}*/
+@Composable
+fun LoginActivity(navController : NavController, context: Context){
+    LoginComponents(navController, context)
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginComponents() {
+fun LoginComponents(navController : NavController, context: Context) {
+
+    val room : AplicacionDB = AplicacionDB.getInstance(context)
 
     var name: String by remember { mutableStateOf("") }
     var apellidos: String by remember { mutableStateOf("") }
     var email: String by remember { mutableStateOf("") }
     var pass: String by remember { mutableStateOf("") }
-    var passCheck: String by remember { mutableStateOf("") }
+    var passCheck: String by remember { mutableStateOf("") } //En este contexto almacenara la contrasena almacenada en la base de datos
 
     Box(
         Modifier
@@ -98,7 +96,7 @@ fun LoginComponents() {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .fillMaxHeight(0.5F)
+                .fillMaxHeight(0.7F)
                 .fillMaxWidth(0.85F)
                 .padding(top = 30.dp)
                 .offset(y = 50.dp)
@@ -151,16 +149,27 @@ fun LoginComponents() {
             )
 
             Spacer(Modifier.height(35.dp))
-            Button(onClick = { /*TODO*/ }) {
+            Button(onClick = {
+                //Comprobar que la contrasena es la correcta para ese usuario
+                if(email.isNotEmpty() && pass.isNotEmpty()){
+                    GlobalScope.launch {
+                        var cliente = room.clienteDAO().getClienteByEmail(email)
+
+                        passCheck = cliente.password
+                        Log.i("obtencion usuario por email",cliente.nombre)
+                    }
+                    if(passCheck.equals(pass)){
+                        emailActual = email
+                        //Navegamos a la pantalla de lista de animales
+                        navController.navigate(route = AppScreens.AnimalListScreen.route)
+                    } else{
+                        //mostrar mensaje de error
+                    }
+                }
+            }) {
                 Text(text = "Iniciar Sesión")
             }
             Spacer(Modifier.height(40.dp))
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun LoginPreview() {
-    LoginComponents()
 }

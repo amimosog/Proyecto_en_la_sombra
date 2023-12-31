@@ -36,6 +36,9 @@ interface ClienteDAO {
     @Query("SELECT * FROM Cliente WHERE idCliente = :id")
     suspend fun getClientById(id: Int): Cliente
 
+    @Query("SELECT * FROM Cliente WHERE email = :email")
+    suspend fun getClienteByEmail(email : String) : Cliente
+
     //Inserta un Cliente
     @Insert
     suspend fun insertCliente(cliente: Cliente)

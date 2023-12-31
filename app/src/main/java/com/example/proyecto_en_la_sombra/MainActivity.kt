@@ -42,6 +42,7 @@ private const val grant_type = "client_credentials"
 private const val client_id = "jt78yfZFePKyGM8tmLpHZduPe4wiobusxA4gvGrxv5p9xlMREy"
 private const val client_secret = "ADto7Ake8ThsPUe57IprbsLHORd29qhZynDdw1ej"
 var auth = ""
+var emailActual = ""
 
 class MainActivity : ComponentActivity() {
 
@@ -49,13 +50,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
         val room: AplicacionDB = AplicacionDB.getInstance(context = this)
-
-        //Si es la primera vez que ejecutas ROOM descometa este bloque de codigo para crear un cliente
-        /*
-        lifecycleScope.launch {
-            var cliente : Cliente = Cliente(1, "Richar","Widmark", "rwidmark", "rwidmark69@gmail.com", "+34644501112","Agente internacional y de vacas bravas fiuuuuu", null)
-            room.clienteDAO().insertCliente(cliente)
-        }*/
 
         val sharedPreferences = getSharedPreferences("myPreferences", Context.MODE_PRIVATE)
         val timeSeconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());

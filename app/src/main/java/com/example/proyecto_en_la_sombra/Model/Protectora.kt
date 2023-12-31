@@ -23,25 +23,3 @@ data class ProtectoraAnunciaAnimales(
     )
     val animals : List<Animal>
 )
-/*
-data class ProtectoraEsDonadaPorClientes(
-    @Embedded
-    val protectora: Protectora,
-    @Relation(
-        parentColumn="idProtectora",
-        entityColumn="idCliente",
-        associateBy = Junction(Donacion::class)
-    )
-    val clientes : List<Cliente>
-)
-
-data class ProtectoraEsValoradaPorClientes(
-    @Embedded
-    val protectora: Protectora,
-    @Relation(
-        parentColumn="idProtectora",
-        entityColumn="idCliente",
-        associateBy = Junction(Valoracion::class)
-    )
-    val clientes : List<Cliente>
-)*/

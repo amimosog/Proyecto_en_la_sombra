@@ -8,16 +8,18 @@ import androidx.room.Relation
 
 @Entity
 data class Cliente (
-    @PrimaryKey(autoGenerate = true)
-    val idCliente: Long,
     val nombre: String,
     val appellidos: String,
     val nickname: String,
     val email: String,
+    val password : String,
     val numTelefono: String?,
     val descripcion: String?,
     val bloqueador: Long? //id del administrador que lo bloqueo si se ha dado el caso
-)
+){
+    @PrimaryKey(autoGenerate = true)
+    var idCliente: Long = 0
+}
 
 data class ClienteSolicitaAdoptar(
     @Embedded
@@ -28,47 +30,3 @@ data class ClienteSolicitaAdoptar(
     )
     val animales : List<Animal>
 )
-/*
-data class ClienteTieneFavoritosAnimales(
-    @Embedded
-    val cliente: Cliente,
-    @Relation(
-        parentColumn="idCliente",
-        entityColumn="idAnimal",
-        associateBy = Junction(Favoritos::class)
-    )
-    val animales : List<Animal>
-)
-
-data class ClienteDonaProtectoras(
-    @Embedded
-    val cliente: Cliente,
-    @Relation(
-        parentColumn="idCliente",
-        entityColumn="idProtectora",
-        associateBy = Junction(Donacion::class)
-    )
-    val protectora : List<Protectora>
-)
-
-data class ClienteValoraProtectoras(
-    @Embedded
-    val cliente: Cliente,
-    @Relation(
-        parentColumn="idCliente",
-        entityColumn="idProtectora",
-        associateBy = Junction(Valoracion::class)
-    )
-    val protectora : List<Protectora>
-)
-
-data class ClienteApadrinaAnimales(
-    @Embedded
-    val cliente: Cliente,
-    @Relation(
-        parentColumn="idCliente",
-        entityColumn="idAnimal",
-        associateBy = Junction(DonacionRegular::class)
-    )
-    val animales : List<Animal>
-)*/
