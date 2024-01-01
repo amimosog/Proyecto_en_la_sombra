@@ -17,6 +17,7 @@ import com.example.proyecto_en_la_sombra.screens.SearchBarCustom
 import com.example.proyecto_en_la_sombra.screens.listadoResultados
 import com.example.proyecto_en_la_sombra.screens.profileOrganization
 import com.example.proyecto_en_la_sombra.screens.RegisterActivity
+import com.example.proyecto_en_la_sombra.screens.newOrgComponents
 
 /*Elemento composable que se va a encargar de orquestar la navegacion, va a conocer
 las pantallas de nuestra app y se va a encargar de gestionar el paso entre ellas*/
@@ -66,7 +67,7 @@ fun AppNavigation(context : Context){
         }
 
         composable(route = AppScreens.OrgListScreen.route){
-            OrganizationList(navController)
+            OrganizationList(navController, context)
             MyNavigationBar(navController)
         }
 
@@ -107,6 +108,10 @@ fun AppNavigation(context : Context){
                 gender = it.arguments?.getString("gender")!!,
                 age = it.arguments?.getString("age")!!
             )
+        }
+
+        composable(route= AppScreens.NewOrgScreen.route){
+            newOrgComponents(navController, context)
         }
     }
 }

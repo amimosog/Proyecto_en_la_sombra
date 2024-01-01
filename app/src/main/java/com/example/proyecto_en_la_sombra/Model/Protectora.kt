@@ -11,7 +11,9 @@ data class Protectora(
     @PrimaryKey(autoGenerate = true)
     val idProtectora: Long,
     val nombre: String,
-    val descripcion: String?
+    val descripcion: String?,
+    val numTlf: String,
+    val email: String
 )
 
 data class ProtectoraAnunciaAnimales(

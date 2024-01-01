@@ -36,4 +36,7 @@ sealed class AppScreens(val route: String){
 
     //Pantalla para el registro
     object RegisterActivity: AppScreens("registerActivity")
+
+    //Pantalla para añadir una nueva organizacion
+    object NewOrgScreen: AppScreens("new_org_screen")
 }

@@ -4,6 +4,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
+import com.example.proyecto_en_la_sombra.Model.Cliente
+import com.example.proyecto_en_la_sombra.Model.Protectora
 import com.example.proyecto_en_la_sombra.Model.ProtectoraAnunciaAnimales
 //import com.example.proyecto_en_la_sombra.Model.ProtectoraEsDonadaPorClientes
 //import com.example.proyecto_en_la_sombra.Model.ProtectoraEsValoradaPorClientes
@@ -18,9 +20,12 @@ interface ProtectoraDAO {
     //@Query("SELECT * FROM Protectora")
     //suspend fun getProtectorasValoradasPorClientes() : List<ProtectoraEsValoradaPorClientes>
 
-    //Devuelve una lista de las protectoras que anunciaron animales junto con dichos animales
+    //Devuelve una lista de las organizaciones que hay en la base de datos local
     @Transaction
     @Query("SELECT * FROM Protectora")
-    suspend fun getOrganizacionesAnunciaronAnimales() : List<ProtectoraAnunciaAnimales>
+    suspend fun getOrganizaciones() : List<Protectora>
 
+    //Inserta una Organizacion
+    @Insert
+    suspend fun insertCOrganizacion(organizacion: Protectora)
 }
