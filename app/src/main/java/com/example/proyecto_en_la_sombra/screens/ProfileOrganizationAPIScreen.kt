@@ -1,7 +1,9 @@
 package com.example.proyecto_en_la_sombra.screens
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,9 +20,12 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -43,11 +48,15 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.proyecto_en_la_sombra.Model.Cliente
+import com.example.proyecto_en_la_sombra.Model.Donacion
 import com.example.proyecto_en_la_sombra.R
 import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
 import com.example.proyecto_en_la_sombra.api.RetrofitService
@@ -62,6 +71,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 
 @OptIn(DelicateCoroutinesApi::class)
@@ -92,7 +102,7 @@ fun profileOrganizationAPI(navController: NavController, id : String, context: C
             result?.let { SocialMediaAPI(it) }
         }
         Column {
-            result?.let { DetailInfoAPI(it) }
+            result?.let { DetailInfoAPI(it, context) }
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             OrgGalleryAPI(id,navController)
@@ -102,6 +112,27 @@ fun profileOrganizationAPI(navController: NavController, id : String, context: C
             ReviewsAPI(1)
         }
     }
+}
+
+@SuppressLint("SuspiciousIndentation")
+fun getDonacionOrg(org : OrgRemoteModel, Donaciones : List<Donacion>): Float {
+    var donacion : Float = 0F
+    for (i in Donaciones){
+        if(i.idProtectora.toString() == org.organization.id)
+        donacion += i.cantidad
+    }
+    return donacion
+}
+
+fun ExisteUserDonacion(cliente : Cliente, Donaciones : List<Donacion>, donacion: Donacion) : Boolean {
+    var donacionTotal : Float = 0F
+    var existeUsuario : Boolean = false
+    for (i in Donaciones) {
+        if(i.idCliente == cliente.idCliente)
+            existeUsuario = true
+            i.cantidad += donacion.cantidad
+    }
+    return existeUsuario
 }
 
 @Composable
@@ -134,11 +165,11 @@ fun OrgInfoAPI(org: OrgRemoteModel) {
             modifier = Modifier.padding(top = 1.dp, start = 5.dp),
             fontSize = 12.sp
         )
-    }
 }
-
+}
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun DetailInfoAPI(org: OrgRemoteModel) {
+fun DetailInfoAPI(org: OrgRemoteModel, context: Context) {
     if (org.organization.email != null) {
         Text(
             "Email: " + org.organization.email,
@@ -179,7 +210,71 @@ fun DetailInfoAPI(org: OrgRemoteModel) {
             fontSize = 14.sp
         )
     }
+    val room = AplicacionDB.getInstance(context)
+    val cliente : Cliente
+    runBlocking{
+        cliente = room.clienteDAO().getClienteByEmail(emailActual)
+    }
+    var openPopUp by remember { mutableStateOf<Boolean>(false) }
+    var result by remember { mutableStateOf<List<Donacion>?>(null) }
+    LaunchedEffect(true) {
+        val query =
+            GlobalScope.async(Dispatchers.IO) { room.donacionDAO().getDonaciones() }
+        result = query.await()
+    }
+    if (result != null) {
+        Text(
+            "Donaciones: " + getDonacionOrg(org, result!!).toString() + " €",
+            modifier = Modifier.padding(top = 7.dp, start = 7.dp),
+            fontSize = 14.sp)
+        Button(onClick = { openPopUp = true }) {
+            Text("Donar")
+        }
+    }
+    if(openPopUp){
+        var texto by remember { mutableStateOf("") }
+        Dialog(onDismissRequest = { openPopUp = false }) {
+            AlertDialog(
+                onDismissRequest = { openPopUp = false },
+                title = { Text("Donar") },
+                text = {
+                    Column {
+                        TextField(
+                            value = texto,
+                            onValueChange = { texto = it },
+                            label = { Text("Cantidad") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                             val newDonation = Donacion(cliente.idCliente, org.organization.id, texto.toFloat())
+                             if(!ExisteUserDonacion(cliente, result!!, newDonation)) {
+                                 result = result?.plus(newDonation)
+                                 GlobalScope.launch {
+                                     room.donacionDAO().setDonaciones(result!!)
+                                 }
+                             }
+                            openPopUp = false
+                        }
+                    ) {
+                        Text("Confirmar")
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = { openPopUp = false }
+                    ) {
+                        Text("Cancelar")
+                    }
+                }
+            )
+        }
+    }
 }
+
 
 @Composable
 fun OrgGalleryAPI(id:String, navController: NavController) {
