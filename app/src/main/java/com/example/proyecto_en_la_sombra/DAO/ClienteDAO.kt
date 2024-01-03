@@ -34,7 +34,7 @@ interface ClienteDAO {
 
     //Get a client by a given id
     @Query("SELECT * FROM Cliente WHERE idCliente = :id")
-    suspend fun getClientById(id: Int): Cliente
+    suspend fun getClientById(id: Long): Cliente
 
     @Query("SELECT * FROM Cliente WHERE email = :email")
     suspend fun getClienteByEmail(email : String) : Cliente

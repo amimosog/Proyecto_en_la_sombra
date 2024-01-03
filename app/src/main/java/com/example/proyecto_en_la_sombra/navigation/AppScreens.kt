@@ -25,8 +25,11 @@ sealed class AppScreens(val route: String){
     //Pantalla que muestra la lista de organizaciones
     object OrgListScreen: AppScreens("org_list_screen")
 
-    //Pantalla del perfil del usuario
-    object ProfileOrganizationScreen: AppScreens("profile_organization_screen")
+    //Pantalla del perfil de la organizacion de la API
+    object ProfileOrganizationScreenAPI: AppScreens("profile_organization_screen_api")
+
+    //Pantalla del perfil de la organizacion de la BD
+    object ProfileOrganizationScreenBD: AppScreens("profile_organization_screen_bd")
 
     //Pantalla que muestra los resultados de la busqueda o filtrado
     object SearchResultsScreen: AppScreens("search_results_screen")
