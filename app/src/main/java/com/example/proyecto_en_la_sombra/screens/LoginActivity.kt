@@ -29,8 +29,11 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.LockOpen
 import androidx.compose.material.icons.outlined.LockReset
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -50,6 +53,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -75,11 +80,11 @@ fun LoginComponents(navController : NavController, context: Context) {
 
     val room : AplicacionDB = AplicacionDB.getInstance(context)
 
-    var name: String by remember { mutableStateOf("") }
-    var apellidos: String by remember { mutableStateOf("") }
-    var email: String by remember { mutableStateOf("") }
-    var pass: String by remember { mutableStateOf("") }
+
+    var email: String by remember { mutableStateOf("angel@perico.com") }
+    var pass: String by remember { mutableStateOf("1234567") }
     var passCheck: String by remember { mutableStateOf("") } //En este contexto almacenara la contrasena almacenada en la base de datos
+    var passwordVisible: Boolean by remember { mutableStateOf(false) }
 
     Box(
         Modifier
@@ -136,8 +141,13 @@ fun LoginComponents(navController : NavController, context: Context) {
                 onValueChange = { pass = it },
                 placeholder = { Text(text = "Contraseña", modifier = Modifier.alpha(0.5F)) },
                 trailingIcon = {
-                    Icon(Icons.Outlined.Lock, contentDescription = "pass_icon")
+                    IconButton(onClick = {passwordVisible = !passwordVisible}){
+                        if (passwordVisible) {
+                            Icon(Outlined.Visibility, contentDescription = "pass_visibility_on")
+                        }else Icon(Outlined.VisibilityOff, contentDescription = "pass_visibility_off")
+                    }
                 },
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.LightGray,
                     unfocusedContainerColor = Color.LightGray,
