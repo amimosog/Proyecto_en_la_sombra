@@ -1,5 +1,8 @@
 package com.example.proyecto_en_la_sombra.screens
 
+import android.content.Context
+import android.util.Log
+import android.view.KeyEvent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -41,6 +44,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -50,6 +56,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.proyecto_en_la_sombra.R
+import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
 import com.example.proyecto_en_la_sombra.api.RetrofitService
 import com.example.proyecto_en_la_sombra.api.model.Animal
 import com.example.proyecto_en_la_sombra.api.organizationsModel.OrgRemoteModel
@@ -57,16 +64,18 @@ import com.example.proyecto_en_la_sombra.api.model.RemoteModelPage
 import com.example.proyecto_en_la_sombra.api.organizationsModel.Organization
 import com.example.proyecto_en_la_sombra.api.organizationsModel.Photo
 import com.example.proyecto_en_la_sombra.auth
+import com.example.proyecto_en_la_sombra.emailActual
 import com.example.proyecto_en_la_sombra.navigation.AppScreens
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 
 
 @OptIn(DelicateCoroutinesApi::class)
 @Composable
-fun profileOrganization(navController: NavController, id : String) {
+fun profileOrganization(navController: NavController, id : String, context: Context) {
     var result by remember { mutableStateOf<OrgRemoteModel?>(null) }
     LaunchedEffect(true) {
         val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
@@ -96,7 +105,7 @@ fun profileOrganization(navController: NavController, id : String) {
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             UserGallery(id,navController)
-            result?.let { ReviewsField(it) }
+            result?.let { ReviewsField(it, context, id) }
         }
         Column(modifier = Modifier.padding(0.dp)) {
             Reviews(1)
@@ -260,8 +269,11 @@ fun SocialMedia(org: OrgRemoteModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReviewsField(org: OrgRemoteModel) {
+fun ReviewsField(org: OrgRemoteModel, context: Context, id : String) {
     var review by remember { mutableStateOf("") }
+
+    val room : AplicacionDB = AplicacionDB.getInstance(context)
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -286,11 +298,8 @@ fun ReviewsField(org: OrgRemoteModel) {
         )
 
         TextField(
-            modifier = Modifier
-                .padding(bottom = 5.dp)
-                .height(47.dp),
             value = review,
-            onValueChange = { review = it },
+            onValueChange = {review = it },
             placeholder = {
                 Text(
                     text = "¿Algo que decir?",
@@ -305,6 +314,24 @@ fun ReviewsField(org: OrgRemoteModel) {
                     modifier = Modifier.clickable { review = "" }
                 )
             },
+            modifier = Modifier
+                .padding(bottom = 5.dp)
+                .height(47.dp)
+                // Add this Modifier
+                .onKeyEvent { event ->
+                    when (event.key) {
+                        Key.Enter -> {
+                            // Handle the enter key here
+                            GlobalScope.launch {
+                                var cliente = room.clienteDAO().getClienteByEmail(emailActual)
+                                room.valoracionDAO().setValoracion(cliente.idCliente,id,review)
+                                review = ""
+                            }
+                            true
+                        }
+                        else -> false
+                    }
+                },
             shape = RoundedCornerShape(10.dp)
         )
     }

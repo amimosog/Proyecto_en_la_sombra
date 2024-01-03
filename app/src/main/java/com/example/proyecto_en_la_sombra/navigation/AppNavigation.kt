@@ -78,7 +78,7 @@ fun AppNavigation(context : Context){
                 }
             )
         ) {
-            it.arguments?.getString("id")?.let { it1 -> profileOrganization(navController, it1) }
+            it.arguments?.getString("id")?.let { it1 -> profileOrganization(navController, it1, context) }
 
         }
         composable(route = AppScreens.SearchResultsScreen.route + "?name={search}&type={type}&size={size}&gender={gender}&age={age}",
