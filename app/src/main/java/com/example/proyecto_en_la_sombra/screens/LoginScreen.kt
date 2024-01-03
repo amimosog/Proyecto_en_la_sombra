@@ -16,12 +16,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Email
-import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.outlined.LockOpen
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons.Outlined
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -33,43 +35,49 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.proyecto_en_la_sombra.Model.Protectora
 import com.example.proyecto_en_la_sombra.R
 import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
+import com.example.proyecto_en_la_sombra.emailActual
 import com.example.proyecto_en_la_sombra.navigation.AppScreens
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
+
 @Composable
-fun newOrgComponents(navController: NavController, context: Context) {
+fun LoginActivity(navController : NavController, context: Context){
+    LoginComponents(navController, context)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LoginComponents(navController : NavController, context: Context) {
 
     val room : AplicacionDB = AplicacionDB.getInstance(context)
 
-    var nombre: String by remember { mutableStateOf("") }
-    var desc: String by remember { mutableStateOf("") }
-    var numTlf: String by remember { mutableStateOf("") }
-    var email: String by remember { mutableStateOf("") }
+
+    var email: String by remember { mutableStateOf("angel@perico.com") }
+    var pass: String by remember { mutableStateOf("1234567") }
+    var passCheck: String by remember { mutableStateOf("") } //En este contexto almacenara la contrasena almacenada en la base de datos
+    var passwordVisible: Boolean by remember { mutableStateOf(false) }
 
     Box(
         Modifier
-            .fillMaxSize()
-            .paint(
-                painterResource(id = R.drawable.background_register),
-                contentScale = ContentScale.FillBounds
-            ), contentAlignment = Alignment.TopCenter
+            .fillMaxSize(),
+        contentAlignment = Alignment.TopCenter
     ) {
         Image(
             painter = painterResource(R.drawable.background_register),
-            contentDescription = "add_org_background",
+            contentDescription = "register_background",
             modifier = Modifier
                 .fillMaxSize(),
             contentScale = ContentScale.Crop
@@ -77,56 +85,23 @@ fun newOrgComponents(navController: NavController, context: Context) {
         LazyColumn(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .fillMaxHeight(0.80F)
+                .fillMaxHeight(0.7F)
                 .fillMaxWidth(0.85F)
                 .padding(top = 30.dp)
-                .offset(y = 30.dp)
+                .offset(y = 50.dp)
                 .background(Color.White, RoundedCornerShape(8.dp))
 
         ) {
             item {
                 Spacer(Modifier.height(30.dp))
                 Text(
-                    text = "Añadir Organizacion",
+                    text = "Iniciar Sesión",
                     fontWeight = FontWeight.Bold,
                     fontSize = 25.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(0.71F)
                 )
                 Spacer(Modifier.height(60.dp))
-                TextField(
-                    shape = RoundedCornerShape(8.dp),
-                    value = nombre,
-                    onValueChange = { nombre = it },
-                    placeholder = { Text(text = "Nombre", modifier = Modifier.alpha(0.5F)) },
-                    trailingIcon = {
-                        Icon(Icons.Outlined.Person, contentDescription = "name_icon")
-                    },
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.LightGray,
-                        unfocusedContainerColor = Color.LightGray,
-                        disabledContainerColor = Color.LightGray,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    ),
-                    modifier = Modifier.fillMaxWidth(0.95F)
-                )
-                Spacer(Modifier.height(15.dp))
-                TextField(
-                    value = desc,
-                    shape = RoundedCornerShape(8.dp),
-                    onValueChange = { desc = it },
-                    placeholder = { Text(text = "Descripcion", modifier = Modifier.alpha(0.5F)) },
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.LightGray,
-                        unfocusedContainerColor = Color.LightGray,
-                        disabledContainerColor = Color.LightGray,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    ),
-                    modifier = Modifier.fillMaxWidth(0.95F)
-                )
-                Spacer(Modifier.height(15.dp))
                 TextField(
                     value = email,
                     shape = RoundedCornerShape(8.dp),
@@ -140,50 +115,57 @@ fun newOrgComponents(navController: NavController, context: Context) {
                         unfocusedContainerColor = Color.LightGray,
                         disabledContainerColor = Color.LightGray,
                         focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
+                        unfocusedIndicatorColor = Color.Transparent,
                     ),
                     modifier = Modifier.fillMaxWidth(0.95F)
                 )
                 Spacer(Modifier.height(15.dp))
                 TextField(
-                    value = numTlf,
+                    value = pass,
                     shape = RoundedCornerShape(8.dp),
-                    onValueChange = { numTlf = it },
-                    placeholder = {
-                        Text(
-                            text = "Número Teléfono",
-                            modifier = Modifier.alpha(0.5F)
-                        )
-                    },
+                    onValueChange = { pass = it },
+                    placeholder = { Text(text = "Contraseña", modifier = Modifier.alpha(0.5F)) },
                     trailingIcon = {
-                        Icon(Icons.Outlined.LockOpen, contentDescription = "pass_icon")
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            if (passwordVisible) {
+                                Icon(Outlined.Visibility, contentDescription = "pass_visibility_on")
+                            } else Icon(
+                                Outlined.VisibilityOff,
+                                contentDescription = "pass_visibility_off"
+                            )
+                        }
                     },
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.LightGray,
                         unfocusedContainerColor = Color.LightGray,
                         disabledContainerColor = Color.LightGray,
                         focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
+                        unfocusedIndicatorColor = Color.Transparent,
                     ),
                     modifier = Modifier.fillMaxWidth(0.95F)
                 )
+
                 Spacer(Modifier.height(35.dp))
                 Button(onClick = {
-                    //Comprobar que todos los campos estan rellenos
-                    if (nombre.isNotEmpty() && desc.isNotEmpty() && numTlf.isNotEmpty() && email.isNotEmpty()) {
-                        //Introducir los datos en la base de datos y navegar al login
+                    //Comprobar que la contrasena es la correcta para ese usuario
+                    if (email.isNotEmpty() && pass.isNotEmpty()) {
                         GlobalScope.launch {
-                            var newOrg = Protectora(nombre, desc, numTlf, email)
-                            //La peticion a la base de datos de forma asincrona
-                            room.protectoraDAO().insertOrganizacion(newOrg)
+                            var cliente = room.clienteDAO().getClienteByEmail(email)
 
-                            Log.i("Crear organizacion", "organizacion creada")
+                            passCheck = cliente.password
+                            Log.i("obtencion usuario por email", cliente.nombre)
                         }
-
-                        navController.navigate(route = AppScreens.OrgListScreen.route)
+                        if (passCheck.equals(pass)) {
+                            emailActual = email
+                            //Navegamos a la pantalla de lista de animales
+                            navController.navigate(route = AppScreens.AnimalListScreen.route)
+                        } else {
+                            //mostrar mensaje de error
+                        }
                     }
                 }) {
-                    Text(text = "Añadir Organizacion")
+                    Text(text = "Iniciar Sesión")
                 }
                 Spacer(Modifier.height(40.dp))
             }

@@ -27,5 +27,5 @@ interface ProtectoraDAO {
 
     //Inserta una Organizacion
     @Insert
-    suspend fun insertCOrganizacion(organizacion: Protectora)
+    suspend fun insertOrganizacion(organizacion: Protectora)
 }

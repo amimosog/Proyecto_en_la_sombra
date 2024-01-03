@@ -8,13 +8,14 @@ import androidx.room.Relation
 
 @Entity
 data class Protectora(
-    @PrimaryKey(autoGenerate = true)
-    val idProtectora: Long,
     val nombre: String,
     val descripcion: String?,
     val numTlf: String,
     val email: String
-)
+){
+    @PrimaryKey(autoGenerate = true)
+    var idProtectora: Long = 0
+}
 
 data class ProtectoraAnunciaAnimales(
     @Embedded
