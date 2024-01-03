@@ -15,7 +15,8 @@ import com.example.proyecto_en_la_sombra.screens.LoginActivity
 import com.example.proyecto_en_la_sombra.screens.OrganizationList
 import com.example.proyecto_en_la_sombra.screens.SearchBarCustom
 import com.example.proyecto_en_la_sombra.screens.listadoResultados
-import com.example.proyecto_en_la_sombra.screens.profileOrganization
+import com.example.proyecto_en_la_sombra.screens.profileOrganizationAPI
+import com.example.proyecto_en_la_sombra.screens.profileOrganizationBD
 import com.example.proyecto_en_la_sombra.screens.RegisterActivity
 import com.example.proyecto_en_la_sombra.screens.newOrgComponents
 
@@ -71,16 +72,28 @@ fun AppNavigation(context : Context){
             MyNavigationBar(navController)
         }
 
-        composable(route = AppScreens.ProfileOrganizationScreen.route + "/{id}",
+        composable(route = AppScreens.ProfileOrganizationScreenAPI.route + "/{id}",
             arguments = listOf(
                 navArgument("id") {
                     type = NavType.StringType
                 }
             )
         ) {
-            it.arguments?.getString("id")?.let { it1 -> profileOrganization(navController, it1, context) }
+            it.arguments?.getString("id")?.let { it1 -> profileOrganizationAPI(navController, it1, context) }
 
         }
+
+        composable(route = AppScreens.ProfileOrganizationScreenBD.route + "/{id}",
+            arguments = listOf(
+                navArgument("id") {
+                    type = NavType.LongType
+                }
+            )
+        ) {
+            it.arguments?.getLong("id")?.let { it1 -> profileOrganizationBD(navController, it1, context) }
+
+        }
+
         composable(route = AppScreens.SearchResultsScreen.route + "?name={search}&type={type}&size={size}&gender={gender}&age={age}",
             arguments = listOf(
                 navArgument("search"){

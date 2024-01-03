@@ -25,6 +25,10 @@ interface ProtectoraDAO {
     @Query("SELECT * FROM Protectora")
     suspend fun getOrganizaciones() : List<Protectora>
 
+    //Devuelve una lista de las organizaciones que hay en la base de datos local
+    @Query("SELECT * FROM Protectora WHERE idProtectora = :idProtectora")
+    suspend fun getOrganizacionId(idProtectora: Long) : Protectora
+
     //Inserta una Organizacion
     @Insert
     suspend fun insertOrganizacion(organizacion: Protectora)

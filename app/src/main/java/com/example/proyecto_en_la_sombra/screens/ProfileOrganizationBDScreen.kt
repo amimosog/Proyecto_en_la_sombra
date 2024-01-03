@@ -2,7 +2,6 @@ package com.example.proyecto_en_la_sombra.screens
 
 import android.content.Context
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -41,71 +39,66 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.proyecto_en_la_sombra.R
+import com.example.proyecto_en_la_sombra.Model.Protectora
 import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
 import com.example.proyecto_en_la_sombra.api.RetrofitService
-import com.example.proyecto_en_la_sombra.api.model.Animal
-import com.example.proyecto_en_la_sombra.api.organizationsModel.OrgRemoteModel
 import com.example.proyecto_en_la_sombra.api.model.RemoteModelPage
 import com.example.proyecto_en_la_sombra.auth
 import com.example.proyecto_en_la_sombra.emailActual
-import com.example.proyecto_en_la_sombra.navigation.AppScreens
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-
+import kotlinx.coroutines.runBlocking
 
 @OptIn(DelicateCoroutinesApi::class)
 @Composable
-fun profileOrganizationAPI(navController: NavController, id : String, context: Context) {
-    var result by remember { mutableStateOf<OrgRemoteModel?>(null) }
-    LaunchedEffect(true) {
-        val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
-        val query =
-            GlobalScope.async(Dispatchers.IO) { service.getUniqueOrganization(auth, id) }
-        result = query.await()
+fun profileOrganizationBD(navController: NavController, idOrg : Long, context: Context) {
+    val room : AplicacionDB = AplicacionDB.getInstance(context)
+
+    var org: Protectora
+    runBlocking{
+        org = room.protectoraDAO().getOrganizacionId(idOrg)
     }
+
     Column(Modifier.padding(8.dp)) {
         Column {
             Row {
-                result?.organization?.let {
-                    if(it.photos.isNotEmpty())
-                        OrgImageAPI(it.photos[0].small)
-                    else OrgImageAPI("https://play-lh.googleusercontent.com/QuYkQAkLt5OpBAIabNdIGmd8HKwK58tfqmKNvw2UF69pb4jkojQG9za9l3nLfhv2N5U")
-                }
-                result?.let { OrgInfoAPI(it) }
+                /*if(org.photos.isNotEmpty())TODO
+                    OrgImageBD(org.photos[0])
+                else*/ OrgImageBD("https://play-lh.googleusercontent.com/QuYkQAkLt5OpBAIabNdIGmd8HKwK58tfqmKNvw2UF69pb4jkojQG9za9l3nLfhv2N5U")
+
+                OrgInfoBD(org)
             }
         }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxWidth()
         ) {
-            result?.let { SocialMediaAPI(it) }
+            Text(text = "SocialMediaBD(org)")
         }
         Column {
-            result?.let { DetailInfoAPI(it) }
+            DetailInfoBD(org)
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            OrgGalleryAPI(id,navController)
-            result?.let { ReviewsFieldAPI(it, context, id) }
-        }
-        Column(modifier = Modifier.padding(0.dp)) {
-            ReviewsAPI(1)
-        }
+            //
+            //No hay imagenes TODO
+            //OrgGalleryBD(idOrg,navController)
+            ReviewsFieldBD(org, context, idOrg) }
+    }
+    Column(modifier = Modifier.padding(0.dp)) {
+        ReviewsBD(1)
     }
 }
 
 @Composable
-fun OrgImageAPI(url: String) {
+fun OrgImageBD(url: String) {
     AsyncImage(
         model = url,
         contentDescription = "OrgProfileImage",
@@ -117,77 +110,68 @@ fun OrgImageAPI(url: String) {
 }
 
 @Composable
-fun OrgInfoAPI(org: OrgRemoteModel) {
+fun OrgInfoBD(org: Protectora) {
     Column() {
         Text(
-            org.organization.name,
+            org.nombre,
             modifier = Modifier.padding(top = 7.dp, start = 5.dp),
             fontSize = 20.sp
         )
+        //
+        //Ciudad de la organizacion
+        //
         Text(
-            org.organization.address.city,
+            "Ciudad",
             modifier = Modifier.padding(start = 5.dp),
-            fontSize = 14.sp
+            fontSize = 14.sp,
+            color = Color.Red
         )
+        //
+        //Pais de la organizacion
+        //
         Text(
-            org.organization.address.country,
+            "Pais",
             modifier = Modifier.padding(top = 1.dp, start = 5.dp),
-            fontSize = 12.sp
+            fontSize = 12.sp,
+            color = Color.Red
         )
     }
 }
 
 @Composable
-fun DetailInfoAPI(org: OrgRemoteModel) {
-    if (org.organization.email != null) {
+fun DetailInfoBD(org: Protectora) {
+    if (org.email != null) {
         Text(
-            "Email: " + org.organization.email,
+            "Email: " + org.email,
             modifier = Modifier.padding(top = 7.dp, start = 7.dp),
             fontSize = 14.sp
         )
     }
-    if (org.organization.address.address1 != null && org.organization.address.address2 != null) {
+    //
+    //Direcciones de la organizacion
+    //
+    if (org.numTlf != null) {
         Text(
-            "Dirección: " + org.organization.address.address1 + " " + org.organization.address.address2,
-            modifier = Modifier.padding(top = 7.dp, start = 7.dp),
-            fontSize = 14.sp
-        )
-    } else if (org.organization.address.address1 != null) {
-        Text(
-            "Dirección: " + org.organization.address.address1,
-            modifier = Modifier.padding(top = 7.dp, start = 7.dp),
-            fontSize = 14.sp
-        )
-    } else if (org.organization.address.address2 != null) {
-        Text(
-            "Dirección: " + org.organization.address.address2,
+            "Número de teléfono: " + org.numTlf,
             modifier = Modifier.padding(top = 7.dp, start = 7.dp),
             fontSize = 14.sp
         )
     }
-    if (org.organization.phone != null) {
-        Text(
-            "Número de teléfono: " + org.organization.phone,
-            modifier = Modifier.padding(top = 7.dp, start = 7.dp),
-            fontSize = 14.sp
-        )
-    }
-    if (org.organization.website != null) {
-        Text(
-            "Página web: " + org.organization.website,
-            modifier = Modifier.padding(top = 7.dp, start = 7.dp),
-            fontSize = 14.sp
-        )
-    }
+    //
+    //Pagina web de la organizacion
+    //
 }
 
+//
+//No hay imagenes en la org, no se usa de momento TODO
+//
 @Composable
-fun OrgGalleryAPI(id:String, navController: NavController) {
+fun OrgGalleryBD(id: Long, navController: NavController) {
     var result by remember { mutableStateOf<RemoteModelPage?>(null) }
     LaunchedEffect(true) {
         val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
         val query = //Poner el id de la organizacion
-            GlobalScope.async(Dispatchers.IO) { service.getAnimalsByOrganization(auth,id) }
+            GlobalScope.async(Dispatchers.IO) { service.getAnimalsByOrganization(auth,id.toString()) }
         result = query.await()
     }
     LazyVerticalGrid(
@@ -203,67 +187,7 @@ fun OrgGalleryAPI(id:String, navController: NavController) {
 }
 
 @Composable
-fun showImageAPI(animal : Animal, navController : NavController){
-
-        AsyncImage(
-            model = animal.photos[0].medium,
-            placeholder = painterResource(R.drawable.ic_launcher_foreground),
-            contentDescription = "Animal photo",
-            modifier = Modifier
-                .size(200.dp)
-                .clickable {
-                    navController.navigate(route = AppScreens.AnimalDetailScreen.route + "/" + animal.id)
-                }
-        )
-}
-
-@Composable
-fun SocialMediaAPI(org: OrgRemoteModel) {
-    val localUriHandler = LocalUriHandler.current
-    val logoModifier = Modifier
-        .padding(top = 5.dp, start = 10.dp)
-        .size(60.dp)
-        .clip(CircleShape)
-
-    Row {
-        if (org.organization.social_media.twitter != null) {
-            Image(
-                painterResource(id = R.drawable.twitter_logo),
-                "twitter_logo",
-                logoModifier.clickable { localUriHandler.openUri(org.organization.social_media.twitter.toString()) })
-        }
-        if (org.organization.social_media.youtube != null) {
-            Image(
-                painterResource(id = R.drawable.youtube_logo),
-                "youtube_logo",
-                logoModifier.clickable { localUriHandler.openUri(org.organization.social_media.youtube.toString()) })
-        }
-        if (org.organization.social_media.facebook != null) {
-            Image(
-                painterResource(id = R.drawable.facebook_logo),
-                "facebook_logo",
-                logoModifier.clickable { localUriHandler.openUri(org.organization.social_media.facebook.toString()) })
-        }
-        if (org.organization.social_media.pinterest != null) {
-            Image(
-                painterResource(id = R.drawable.pinterest_logo),
-                "pinterest_logo",
-                logoModifier.clickable { localUriHandler.openUri(org.organization.social_media.pinterest.toString()) }
-            )
-        }
-        if (org.organization.social_media.instagram != null) {
-            Image(
-                painterResource(id = R.drawable.instagram_logo),
-                "instagram_logo",
-                logoModifier.clickable { localUriHandler.openUri(org.organization.social_media.instagram.toString()) }
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ReviewsFieldAPI(org: OrgRemoteModel, context: Context, id : String) {
+fun ReviewsFieldBD(org: Protectora, context: Context, id : Long) {
     var review by remember { mutableStateOf("") }
 
     val room : AplicacionDB = AplicacionDB.getInstance(context)
@@ -322,7 +246,7 @@ fun ReviewsFieldAPI(org: OrgRemoteModel, context: Context, id : String) {
                                     .getClienteByEmail(emailActual)
                                 room
                                     .valoracionDAO()
-                                    .setValoracion(cliente.idCliente, id, review)
+                                    .setValoracion(cliente.idCliente, id.toString(), review)
                                 review = ""
                             }
                             true
@@ -337,7 +261,7 @@ fun ReviewsFieldAPI(org: OrgRemoteModel, context: Context, id : String) {
 }
 
 @Composable
-fun ReviewsAPI(id: Int) {
+fun ReviewsBD(id: Int) {
     Column(
         modifier = Modifier
             .border(BorderStroke(1.dp, Color.DarkGray), shape = RoundedCornerShape(10.dp)),

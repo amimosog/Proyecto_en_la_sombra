@@ -37,7 +37,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.proyecto_en_la_sombra.Model.Favoritos
 import com.example.proyecto_en_la_sombra.Model.Protectora
 import com.example.proyecto_en_la_sombra.R
 import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
@@ -89,7 +88,7 @@ fun OrganizationList(navController: NavController, context: Context) {
         if (orgsAPI != null) {
             orgsAPI?.organizations?.let {
                 items(it) { org ->
-                    mostrarOrg(org, navController)
+                    mostrarOrgAPI(org, navController)
                     Spacer(modifier = Modifier.height(10.dp))
                 }
             }
@@ -127,7 +126,7 @@ fun OrganizationList(navController: NavController, context: Context) {
 }
 
 @Composable
-fun mostrarOrg(org: Organization, navController: NavController) {
+fun mostrarOrgAPI(org: Organization, navController: NavController) {
     var expanded by remember { mutableStateOf(false) }
     Row(
         modifier = Modifier
@@ -137,7 +136,7 @@ fun mostrarOrg(org: Organization, navController: NavController) {
             .padding(5.dp)
             .clickable {
                 expanded = !expanded
-                navController.navigate(route = AppScreens.ProfileOrganizationScreen.route + "/" + org.id)
+                navController.navigate(route = AppScreens.ProfileOrganizationScreenAPI.route + "/" + org.id)
             },
     ) {
         orgLogo(org)
@@ -204,7 +203,7 @@ fun mostrarOrgBD(org: Protectora, navController: NavController) {
             .padding(5.dp)
             .clickable {
                 expanded = !expanded
-                navController.navigate(route = AppScreens.ProfileOrganizationScreen.route + "/" + org.idProtectora)
+                navController.navigate(route = AppScreens.ProfileOrganizationScreenBD.route + "/" + org.idProtectora)
             },
     ) {
         orgLogo(org)
