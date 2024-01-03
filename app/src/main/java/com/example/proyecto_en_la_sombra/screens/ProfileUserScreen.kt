@@ -52,6 +52,7 @@ import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
 import com.example.proyecto_en_la_sombra.api.RetrofitService
 import com.example.proyecto_en_la_sombra.api.model.RemoteResult
 import com.example.proyecto_en_la_sombra.auth
+import com.example.proyecto_en_la_sombra.emailActual
 import com.example.proyecto_en_la_sombra.navigation.AppScreens
 import com.example.proyecto_en_la_sombra.navigation.MyNavigationBar
 import com.example.proyecto_en_la_sombra.ui.theme.Proyecto_en_la_sombraTheme
@@ -72,7 +73,7 @@ fun ProfileComponents(navController: NavController, context: Context) {
     var cliente: Cliente
     //Llamar a la base de datos para que cargue el nombre
     runBlocking{
-        cliente = room.clienteDAO().getClientById(1)
+        cliente = room.clienteDAO().getClienteByEmail(emailActual)
     }
 
     //Obtenemos la lista de favoritos del usuario

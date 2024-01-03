@@ -4,12 +4,17 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.icu.text.SimpleDateFormat
 import android.util.Log
+import androidx.compose.foundation.Image
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,12 +32,16 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,12 +49,19 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import androidx.navigation.NavController
@@ -115,7 +131,7 @@ import java.util.Locale
 @OptIn(DelicateCoroutinesApi::class)
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun AnimalComponents(navController: NavController, id: String, context : Context) {
+fun AnimalComponents(navController: NavController, id: String, context: Context) {
     var result by remember { mutableStateOf<RemoteResult?>(null) }
     LaunchedEffect(true) {
         val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
@@ -123,16 +139,26 @@ fun AnimalComponents(navController: NavController, id: String, context : Context
         result = query.await()
     }
 
-    if (result != null){
-        Column(modifier = Modifier.fillMaxSize()) {
-            val lista = result?.animal?.let {it.photos}
+    if (result != null) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .paint(
+                    painterResource(id = R.drawable.background_register),
+                    contentScale = ContentScale.FillBounds
+                ),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            val lista = result?.animal?.let { it.photos }
             if (lista != null) {
                 Animal_Photo(lista)
             }
 
             Row(
                 modifier = Modifier
-                    .padding(top = 50.dp, start = 10.dp)
+                    .padding(top = 50.dp, start = 10.dp, end = 10.dp)
+                    .background(Color.White, RoundedCornerShape(8.dp))
+                    .fillMaxWidth(0.98F)
             ) {
                 result?.animal?.let {
                     Animal_Info(it)
@@ -144,11 +170,12 @@ fun AnimalComponents(navController: NavController, id: String, context : Context
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Animal_Adopt_ButtonAndLikeIcon(animal : Animal, context: Context) {
+fun Animal_Adopt_ButtonAndLikeIcon(animal: Animal, context: Context) {
     //Logica del boton de ADOPCION----------------------------------------------------------------------------------------------
-    val room : AplicacionDB = AplicacionDB.getInstance(context)
-    var isButtonAdoptar by rememberSaveable  { mutableStateOf(false) }
+    val room: AplicacionDB = AplicacionDB.getInstance(context)
+    var isButtonAdoptar by rememberSaveable { mutableStateOf(false) }
     //Variable para gestionar cuando mostrar o no el popup
     var openPopUp by remember { mutableStateOf(false) }
     /* Inicializacion de los likes, si al animal ya se le ha dado like previamente, inicializa
@@ -164,7 +191,7 @@ fun Animal_Adopt_ButtonAndLikeIcon(animal : Animal, context: Context) {
             resultSolicitud = query.await()
         }
     }
-    if(resultSolicitud == null){
+    if (resultSolicitud == null) {
         isButtonAdoptar = true
     } else
         isButtonAdoptar = false
@@ -178,20 +205,20 @@ fun Animal_Adopt_ButtonAndLikeIcon(animal : Animal, context: Context) {
             }
         },
         modifier = Modifier
-            .width(120.dp)
+            /*.width(120.dp)*/
             .padding(top = 50.dp)
     )
     {
-        if(openPopUp){
+        if (openPopUp) {
             val sdf = SimpleDateFormat("dd/MM/yyyy", Locale("es", "ES"))
             val currentdate = sdf.format(Date())
 
-            Popup(
-                onDismissRequest = {openPopUp = false},
-                alignment = Alignment.Center,
-                offset = IntOffset(-370, -675),
-                properties = PopupProperties(
-                    focusable = true,
+            AlertDialog(
+                onDismissRequest = { openPopUp = false; isButtonAdoptar = true },
+                /*alignment = Alignment.Center,
+                offset = IntOffset(-370, -675),*/
+                properties = DialogProperties(
+                    /*focusable = true,*/
                     dismissOnBackPress = true,
                     dismissOnClickOutside = true
                 )
@@ -200,42 +227,54 @@ fun Animal_Adopt_ButtonAndLikeIcon(animal : Animal, context: Context) {
                     modifier = Modifier
                         .size(250.dp, 250.dp)
                         .padding(top = 5.dp)
-                        .background(Color.LightGray, RoundedCornerShape(10.dp))
-                        .border(1.dp, Color.Black, RoundedCornerShape(10.dp))
-                ){
+                        .background(Color(0xFFefe9f4), RoundedCornerShape(8.dp))
+                    /*.border(1.dp, Color.Black, RoundedCornerShape(10.dp))*/
+                ) {
                     Column(
-                        modifier = Modifier.padding(horizontal = 10.dp)
+                        modifier = Modifier
+                            .padding(horizontal = 10.dp)
                     ) {
+                        Spacer(Modifier.height(5.dp))
                         Text(text = "Vas a adoptar a:", color = Color.Black)
                         Text(text = animal.name, color = Color.Black, fontWeight = FontWeight(800))
                         Divider(modifier = Modifier.border(1.dp, Color.Black))
                         Spacer(Modifier.height(20.dp))
                         Text(text = "La fecha de adopción es:", color = Color.Black)
-                        Text(text = currentdate.toString(), color = Color.Black, fontWeight = FontWeight(800))
+                        Text(
+                            text = currentdate.toString(),
+                            color = Color.Black,
+                            fontWeight = FontWeight(800)
+                        )
                         Divider(modifier = Modifier.border(1.dp, Color.Black))
                         Spacer(Modifier.height(30.dp))
-                        Row {
-                            Button(
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                            TextButton(
                                 onClick = {
                                     //Se solicita la adopcion
                                     GlobalScope.launch {
                                         //La peticion a la base de datos de forma asincrona
-                                        room.solicitudAdopcionDAO().setSolicitudCompleta(1.toLong(), animal.id.toLong(), currentdate)
+                                        room.solicitudAdopcionDAO().setSolicitudCompleta(
+                                            1.toLong(),
+                                            animal.id.toLong(),
+                                            currentdate
+                                        )
 
-                                        var solicitud = room.solicitudAdopcionDAO().getSolicitud(1.toLong(),animal.id.toLong())
+                                        var solicitud = room.solicitudAdopcionDAO()
+                                            .getSolicitud(1.toLong(), animal.id.toLong())
                                         Log.i("Solicitud adopcion:", solicitud.id.toString())
                                         openPopUp = false
                                         Log.i("ACEPTAR", "Animal adoptado")
                                     }
                                 },
                                 modifier = Modifier
-                                    .width(100.dp)
-                                    .padding(top = 20.dp)
+                                    .padding(top = 20.dp),
+                                shape = RectangleShape
 
                             ) {
                                 Text(text = "Confirmar")
                             }
-                            Button(
+                            Spacer(Modifier.width(10.dp))
+                            TextButton(
                                 onClick = {
                                     isButtonAdoptar = true
 
@@ -243,8 +282,8 @@ fun Animal_Adopt_ButtonAndLikeIcon(animal : Animal, context: Context) {
                                     Log.i("DENEGAR", "Animal no adoptado")
                                 },
                                 modifier = Modifier
-                                    .width(100.dp)
-                                    .padding(top = 20.dp)
+                                    .padding(top = 20.dp),
+                                shape = RectangleShape
                             ) {
                                 Text(text = "Denegar")
                             }
@@ -253,8 +292,6 @@ fun Animal_Adopt_ButtonAndLikeIcon(animal : Animal, context: Context) {
                     }
                 }
             }
-
-
 
 
             //PopUpAdoptar(animal, room, isButtonAdoptar, openPopUp)
@@ -270,7 +307,7 @@ fun Animal_Adopt_ButtonAndLikeIcon(animal : Animal, context: Context) {
     }
 
     //Logica del LIKE----------------------------------------------------------------------------------------------
-    var islikeClicked by rememberSaveable  { mutableStateOf(false) }
+    var islikeClicked by rememberSaveable { mutableStateOf(false) }
     /* Inicializacion de los likes, si al animal ya se le ha dado like previamente, inicializa
     la variable islikeClicked para que pinte el corazon en consecuencia*/
     var result by remember { mutableStateOf<Favoritos?>(null) }
@@ -279,68 +316,76 @@ fun Animal_Adopt_ButtonAndLikeIcon(animal : Animal, context: Context) {
             //La peticion a la base de datos de forma asincrona
             //Inserta en la base de datos si sabe que no existe el id de dicho animal en la bd
             val query = GlobalScope.async(Dispatchers.IO) {
-                room.favoritosDAO().getFavByIdAnimal(animal.id.toLong(),1.toLong())
+                room.favoritosDAO().getFavByIdAnimal(animal.id.toLong(), 1.toLong())
             }
             result = query.await()
         }
     }
-    if(result != null){
+    if (result != null) {
         islikeClicked = true
     } else islikeClicked = false
 
     //Like
-    IconButton(onClick = {
-        islikeClicked = !islikeClicked
-        if (!islikeClicked) {
-            //ha pulsado sobre no me gusta, luego lo elimina de la
-            GlobalScope.launch {
-                //La peticion a la base de datos de forma asincrona
-                //Elimina de la base de la tabla favoritos, dicho animal
-                room.favoritosDAO().deleteFav(Favoritos(1.toLong(),animal.id.toLong()))
-                var favoritos: List<Favoritos> = room.favoritosDAO().getFavsByIdClient(1.toLong())
+    IconButton(
+        onClick = {
+            islikeClicked = !islikeClicked
+            if (!islikeClicked) {
+                //ha pulsado sobre no me gusta, luego lo elimina de la
+                GlobalScope.launch {
+                    //La peticion a la base de datos de forma asincrona
+                    //Elimina de la base de la tabla favoritos, dicho animal
+                    room.favoritosDAO().deleteFav(Favoritos(1.toLong(), animal.id.toLong()))
+                    var favoritos: List<Favoritos> =
+                        room.favoritosDAO().getFavsByIdClient(1.toLong())
 
-                Log.i("Numero de favs ", favoritos.size.toString())
-            }
-        }else{
-            GlobalScope.launch {
-                //La peticion a la base de datos de forma asincrona
-                //Elimina de la base de la tabla favoritos, dicho animal
-                room.favoritosDAO().setFav(Favoritos(1.toLong(),animal.id.toLong()))
-                var favoritos: List<Favoritos> = room.favoritosDAO().getFavsByIdClient(1.toLong())
+                    Log.i("Numero de favs ", favoritos.size.toString())
+                }
+            } else {
+                GlobalScope.launch {
+                    //La peticion a la base de datos de forma asincrona
+                    //Elimina de la base de la tabla favoritos, dicho animal
+                    room.favoritosDAO().setFav(Favoritos(1.toLong(), animal.id.toLong()))
+                    var favoritos: List<Favoritos> =
+                        room.favoritosDAO().getFavsByIdClient(1.toLong())
 
-                Log.i("Numero de favs ", favoritos.size.toString())
+                    Log.i("Numero de favs ", favoritos.size.toString())
+                }
             }
-        }
-    },
+        },
         modifier = Modifier
-            .padding(top = 10.dp)){
+            .padding(top = 10.dp)
+    ) {
 
         if (!islikeClicked) {
-            Icon(Icons.Default.FavoriteBorder,
+            Icon(
+                Icons.Default.FavoriteBorder,
                 contentDescription = "like button"
             )
 
         } else {
-            Icon(Icons.Default.Favorite,
-                contentDescription = "like button")
+            Icon(
+                Icons.Default.Favorite,
+                contentDescription = "like button"
+            )
         }
     }
 }
 
+/*@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PopUpAdoptar (animal: Animal, room: AplicacionDB, isButtonAdoptar: Boolean, openPopUp: Boolean){
+fun PopUpAdoptar(animal: Animal, room: AplicacionDB, isButtonAdoptar: Boolean, openPopUp: Boolean) {
     val sdf = SimpleDateFormat("dd/MM/yyyy", Locale("es", "ES"))
     val currentdate = sdf.format(Date())
 
     var isButtonAdoptarState by rememberSaveable { mutableStateOf(isButtonAdoptar) }
     var openPopUpState by rememberSaveable { mutableStateOf(openPopUp) }
 
-    Popup(
-        onDismissRequest = {openPopUpState = false},
-        alignment = Alignment.Center,
-        offset = IntOffset(-370, -675),
-        properties = PopupProperties(
-            focusable = true,
+    AlertDialog(
+        onDismissRequest = { openPopUpState = false },
+        *//*alignment = Alignment.Center,
+        offset = IntOffset(-370, -675),*//*
+        properties = DialogProperties(
+            *//*focusable = true,*//*
             dismissOnBackPress = true,
             dismissOnClickOutside = true
         )
@@ -349,9 +394,9 @@ fun PopUpAdoptar (animal: Animal, room: AplicacionDB, isButtonAdoptar: Boolean, 
             modifier = Modifier
                 .size(250.dp, 250.dp)
                 .padding(top = 5.dp)
-                .background(Color.White, RoundedCornerShape(10.dp))
-                .border(1.dp, Color.Black, RoundedCornerShape(10.dp))
-        ){
+                .background(Color(0xFFefe9f4), RoundedCornerShape(8.dp))
+            *//*.border(1.dp, Color.Black, RoundedCornerShape(10.dp))*//*
+        ) {
             Column(
                 modifier = Modifier.padding(horizontal = 10.dp)
             ) {
@@ -360,7 +405,11 @@ fun PopUpAdoptar (animal: Animal, room: AplicacionDB, isButtonAdoptar: Boolean, 
                 Divider(modifier = Modifier.border(1.dp, Color.Black))
                 Spacer(Modifier.height(20.dp))
                 Text(text = "La fecha de adopción es:", color = Color.Black)
-                Text(text = currentdate.toString(), color = Color.Black, fontWeight = FontWeight(800))
+                Text(
+                    text = currentdate.toString(),
+                    color = Color.Black,
+                    fontWeight = FontWeight(800)
+                )
                 Divider(modifier = Modifier.border(1.dp, Color.Black))
                 Spacer(Modifier.height(30.dp))
                 Row {
@@ -369,9 +418,14 @@ fun PopUpAdoptar (animal: Animal, room: AplicacionDB, isButtonAdoptar: Boolean, 
                             //Se solicita la adopcion
                             GlobalScope.launch {
                                 //La peticion a la base de datos de forma asincrona
-                                room.solicitudAdopcionDAO().setSolicitudCompleta(1.toLong(), animal.id.toLong(), currentdate)
+                                room.solicitudAdopcionDAO().setSolicitudCompleta(
+                                    1.toLong(),
+                                    animal.id.toLong(),
+                                    currentdate
+                                )
 
-                                var solicitud = room.solicitudAdopcionDAO().getSolicitud(1.toLong(),animal.id.toLong())
+                                var solicitud = room.solicitudAdopcionDAO()
+                                    .getSolicitud(1.toLong(), animal.id.toLong())
                                 Log.i("Solicitud adopcion:", solicitud.id.toString())
                                 openPopUpState = false
                                 Log.i("ACEPTAR", "Animal adoptado")
@@ -401,26 +455,27 @@ fun PopUpAdoptar (animal: Animal, room: AplicacionDB, isButtonAdoptar: Boolean, 
             }
         }
     }
-}
+}*/
 
 @Composable
 fun Animal_Info(animal: Animal) {
-    Column {
+    Column(Modifier.padding(top = 15.dp, start = 10.dp, end = 10.dp)) {
         Text(
             text = animal.name,
             fontSize = 25.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         )
 
         Text(
-            text = if(animal.description != null)
-                        animal.description
-                    else
-                        "No hay descripción",
+            text = if (animal.description != null)
+                animal.description
+            else
+                "No hay descripción",
             fontSize = 15.sp,
             modifier = Modifier
-                .fillMaxWidth(0.65f)
-        )
+                .fillMaxWidth(0.65f),
+
+            )
 
         val caracteristicas = hashMapOf(
             "Edad" to animal.age,
@@ -438,16 +493,20 @@ fun Animal_Info(animal: Animal) {
             items(caracteristicas.toList()) { (key, value) ->
                 if (value != null)
                     Text(
-                            "$key: $value",
-                        fontSize = 20.sp
+                        "$key: $value",
+                        fontSize = 20.sp,
                     )
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Animal_Photo(photos: List<Photo>) {
+    var openPopUp by remember { mutableStateOf(false) }
+    var photoUrl by remember { mutableStateOf<String?>(null) }
+    Spacer(Modifier.height(10.dp))
     LazyHorizontalGrid(
         rows = GridCells.Fixed(2),
         modifier = Modifier.height(400.dp)
@@ -456,10 +515,31 @@ fun Animal_Photo(photos: List<Photo>) {
             AsyncImage(
                 model = photo.full,
                 placeholder = painterResource(R.drawable.ic_launcher_foreground),
-                modifier = Modifier.size(200.dp),
-                contentDescription = "Animal photo",
+                modifier = Modifier
+                    .size(200.dp)
+                    .clickable {
+                        openPopUp = true
+                        photoUrl = photo.full
+                    },
+                contentDescription = "Animal photo"
             )
         }
     }
+    if (openPopUp) {
+        photoUrl?.let { Log.println(Log.ASSERT, "619", it) }
+        AlertDialog(
+            onDismissRequest = { openPopUp = false },
+            properties = DialogProperties(
+                dismissOnBackPress = true,
+                dismissOnClickOutside = true
+            ),
+        ) {
+            AsyncImage(
+                model = photoUrl,
+                placeholder = painterResource(R.drawable.ic_launcher_foreground),
+                contentDescription = "Animal photo",
+            )
 
+        }
+    }
 }

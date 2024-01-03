@@ -30,4 +30,13 @@ sealed class AppScreens(val route: String){
 
     //Pantalla que muestra los resultados de la busqueda o filtrado
     object SearchResultsScreen: AppScreens("search_results_screen")
+
+    //Pantalla para login
+    object LoginActivity: AppScreens("loginActivity")
+
+    //Pantalla para el registro
+    object RegisterActivity: AppScreens("registerActivity")
+
+    //Pantalla para añadir una nueva organizacion
+    object NewOrgScreen: AppScreens("new_org_screen")
 }

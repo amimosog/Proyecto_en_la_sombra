@@ -8,11 +8,14 @@ import androidx.room.Relation
 
 @Entity
 data class Protectora(
-    @PrimaryKey(autoGenerate = true)
-    val idProtectora: Long,
     val nombre: String,
-    val descripcion: String?
-)
+    val descripcion: String?,
+    val numTlf: String,
+    val email: String
+){
+    @PrimaryKey(autoGenerate = true)
+    var idProtectora: Long = 0
+}
 
 data class ProtectoraAnunciaAnimales(
     @Embedded
@@ -23,25 +26,3 @@ data class ProtectoraAnunciaAnimales(
     )
     val animals : List<Animal>
 )
-/*
-data class ProtectoraEsDonadaPorClientes(
-    @Embedded
-    val protectora: Protectora,
-    @Relation(
-        parentColumn="idProtectora",
-        entityColumn="idCliente",
-        associateBy = Junction(Donacion::class)
-    )
-    val clientes : List<Cliente>
-)
-
-data class ProtectoraEsValoradaPorClientes(
-    @Embedded
-    val protectora: Protectora,
-    @Relation(
-        parentColumn="idProtectora",
-        entityColumn="idCliente",
-        associateBy = Junction(Valoracion::class)
-    )
-    val clientes : List<Cliente>
-)*/

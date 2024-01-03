@@ -106,13 +106,7 @@ fun listadoResultados(navController: NavController, search: String, type : Strin
                         }
                     }
 
-            }   }
+                }
+            }
         }
-}
-
-
-@Preview(showSystemUi = true)
-@Composable
-fun verPantalla(){
-    //listadoResultados()
 }

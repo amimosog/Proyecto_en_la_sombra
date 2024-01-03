@@ -15,14 +15,3 @@ data class Animal (
     val insertado: Long, //id del administrador que lo inserto
     val protectora: Long //id de la protectora del animal
 )
-/*
-data class animalEsApadrinadoPorClientes(
-    @Embedded
-    val anima : Animal,
-    @Relation(
-        parentColumn="idCliente",
-        entityColumn="idCliente",
-        associateBy = Junction(DonacionRegular::class)
-    )
-    val clientes : List<Cliente>
-)*/

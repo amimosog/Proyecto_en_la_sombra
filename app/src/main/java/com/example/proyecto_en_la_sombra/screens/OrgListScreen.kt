@@ -1,10 +1,12 @@
 package com.example.proyecto_en_la_sombra.screens
 
-import androidx.compose.foundation.Image
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,11 +32,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.proyecto_en_la_sombra.Model.Favoritos
+import com.example.proyecto_en_la_sombra.Model.Protectora
 import com.example.proyecto_en_la_sombra.R
+import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
 import com.example.proyecto_en_la_sombra.api.RetrofitService
 import com.example.proyecto_en_la_sombra.api.organizationsModel.Organization
 import com.example.proyecto_en_la_sombra.api.organizationsModel.OrganizationsRemoteModel
@@ -44,35 +51,43 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 
 @Composable
-fun OrganizationList(navController: NavController) {
-    var result by remember { mutableStateOf<OrganizationsRemoteModel?>(null) }
+fun OrganizationList(navController: NavController, context: Context) {
+    val room : AplicacionDB = AplicacionDB.getInstance(context)
+
+    var orgsAPI by remember { mutableStateOf<OrganizationsRemoteModel?>(null) }
     LaunchedEffect(true) {
         val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
-        val query = GlobalScope.async(Dispatchers.IO) { service.getOrganizations(auth) }
-        result = query.await()
+        val query1 = GlobalScope.async(Dispatchers.IO) { service.getOrganizations(auth) }
+        orgsAPI = query1.await()
     }
 
-    if (result != null) {
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.background)
-                .fillMaxWidth()
-        ) {
-            Text(
-                text = "Lista de Organizaciones",
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.titleLarge,
-                textAlign = TextAlign.Center,
-            )
-        }
-        LazyColumn(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .padding(top = 35.dp)
-                .fillMaxWidth()
-        ) {
-            result?.organizations?.let {
+    var orgsBD by remember { mutableStateOf<List<Protectora>?>(null) }
+    LaunchedEffect(true) {
+        val query2 = GlobalScope.async(Dispatchers.IO) { room.protectoraDAO().getOrganizaciones()}
+        orgsBD = query2.await()
+    }
+
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.background)
+            .fillMaxWidth()
+    ) {
+        Text(
+            text = "Lista de Organizaciones",
+            color = MaterialTheme.colorScheme.onBackground,
+            style = MaterialTheme.typography.titleLarge,
+            textAlign = TextAlign.Center,
+        )
+    }
+    LazyColumn(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .padding(top = 33.dp, bottom = 60.dp)
+            .fillMaxWidth()
+    ) {
+        if (orgsAPI != null) {
+            orgsAPI?.organizations?.let {
                 items(it) { org ->
                     mostrarOrg(org, navController)
                     Spacer(modifier = Modifier.height(10.dp))
@@ -80,6 +95,34 @@ fun OrganizationList(navController: NavController) {
             }
         }
 
+        if (orgsBD != null) {
+            orgsBD?.forEachIndexed { index, org ->
+                item {
+                    mostrarOrgBD(org, navController)
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+            }
+        }
+    }
+
+    Box (
+        modifier = Modifier
+            .fillMaxWidth(0.98f)
+            .fillMaxHeight(0.89f)
+    ){
+        Button(
+            onClick = {
+                navController.navigate(route = AppScreens.NewOrgScreen.route)
+            },
+            contentPadding = PaddingValues(0.dp, 5.dp),
+            shape = RoundedCornerShape(10.dp),
+            modifier = Modifier
+                .width(110.dp)
+                .align(Alignment.BottomEnd)
+        ) {
+            Text(text = "Añadir Organizacion",
+                textAlign = TextAlign.Center)
+        }
     }
 }
 
@@ -115,7 +158,7 @@ fun orgLogo(org: Organization) {
         modifier = Modifier
             .size(60.dp)
             .clip(RoundedCornerShape(15.dp))
-            .background(color = Color.Transparent)
+            .background(color = Color.White)
     )
 }
 
@@ -128,14 +171,15 @@ fun orgTexts(org: Organization) {
             else
                 "No tiene un nombre asignado",
             color = Color.White,
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight(800)
         )
         Text(
             text = if (org.phone != null)
                 org.phone
             else
                 "No tiene un telefono asignado",
-            color = Color.Blue,
+            color = Color.Black,
             style = MaterialTheme.typography.bodySmall
         )
         Text(
@@ -143,7 +187,74 @@ fun orgTexts(org: Organization) {
                 org.email
             else
                 "No tiene un email asignado",
-            color = Color.Yellow,
+            color = Color.Black,
+            style = MaterialTheme.typography.bodySmall
+        )
+    }
+}
+
+@Composable
+fun mostrarOrgBD(org: Protectora, navController: NavController) {
+    var expanded by remember { mutableStateOf(false) }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth(0.90f)
+            .clip(RoundedCornerShape(15.dp))
+            .background(Color.Gray)
+            .padding(5.dp)
+            .clickable {
+                expanded = !expanded
+                navController.navigate(route = AppScreens.ProfileOrganizationScreen.route + "/" + org.idProtectora)
+            },
+    ) {
+        orgLogo(org)
+        Spacer(modifier = Modifier.width(10.dp))
+        orgTexts(org)
+    }
+}
+
+@Composable
+fun orgLogo(org: Protectora) {
+    AsyncImage(
+        /*model = if (org.photos.isNotEmpty())
+            org.photos[0].full
+        else*/
+            "https://play-lh.googleusercontent.com/QuYkQAkLt5OpBAIabNdIGmd8HKwK58tfqmKNvw2UF69pb4jkojQG9za9l3nLfhv2N5U",
+        placeholder = painterResource(R.drawable.ic_launcher_foreground),
+        contentDescription = "Organization logo",
+        modifier = Modifier
+            .size(60.dp)
+            .clip(RoundedCornerShape(15.dp))
+            .background(color = Color.White)
+    )
+}
+
+@Composable
+fun orgTexts(org: Protectora) {
+    Column {
+        Text(
+            text = if (org.nombre != null)
+                org.nombre
+            else
+                "No tiene un nombre asignado",
+            color = Color.White,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight(800)
+        )
+        Text(
+            text = if (org.numTlf != null)
+                org.numTlf
+            else
+                "No tiene un telefono asignado",
+            color = Color.Black,
+            style = MaterialTheme.typography.bodySmall
+        )
+        Text(
+            text = if (org.email != null)
+                org.email
+            else
+                "No tiene un email asignado",
+            color = Color.Black,
             style = MaterialTheme.typography.bodySmall
         )
     }
