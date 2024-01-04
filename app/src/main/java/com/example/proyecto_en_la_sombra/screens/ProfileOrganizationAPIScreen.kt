@@ -2,6 +2,7 @@ package com.example.proyecto_en_la_sombra.screens
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -56,6 +57,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.proyecto_en_la_sombra.Model.Cliente
@@ -269,6 +271,20 @@ fun DetailInfoAPI(org: OrgRemoteModel, context: Context) {
                                  }
                              }
                             openPopUp = false
+
+                            //
+                            // Se puede poner un boton de compartir
+                            //
+                            val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                                putExtra(
+                                    Intent.EXTRA_TEXT,
+                                    "He donado a esta organización " + texto + "€ para ayudarla con los animales.\n" +
+                                            "¿Te unes a ayudar?\n" + org.organization.url
+                                )
+                                type = "text/plain"
+                            }
+                            val shareIntent = Intent.createChooser(sendIntent, null)
+                            startActivity(context, shareIntent, null)
                         }
                     ) {
                         Text("Confirmar")

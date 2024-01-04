@@ -269,11 +269,14 @@ fun Animal_Adopt_ButtonAndLikeIcon(animal: Animal, context: Context) {
                                         openPopUp = false
                                         Log.i("ACEPTAR", "Animal adoptado")
 
+                                        //
+                                        // Se puede poner un boton de compartir
+                                        //
                                         val sendIntent = Intent(Intent.ACTION_SEND).apply {
                                             putExtra(
                                                 Intent.EXTRA_TEXT,
-                                                "Acabo de adoptar a este bicho y le he dado una segunda oportunidad, estabilada y toma ejemplo. " +
-                                                        "A que es bonito? " + animal.url
+                                                "Acabo de adoptar a este bicho y le he dado una segunda oportunidad, estabilada y toma ejemplo.\n" +
+                                                        "A que es bonito?\n" + animal.url
                                             )
                                             type = "text/plain"
                                         }
