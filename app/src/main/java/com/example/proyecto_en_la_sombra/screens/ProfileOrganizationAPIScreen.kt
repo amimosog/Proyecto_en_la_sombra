@@ -16,8 +16,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -58,6 +60,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.proyecto_en_la_sombra.Model.Cliente
 import com.example.proyecto_en_la_sombra.Model.Donacion
+import com.example.proyecto_en_la_sombra.Model.Valoracion
 import com.example.proyecto_en_la_sombra.R
 import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
 import com.example.proyecto_en_la_sombra.api.RetrofitService
@@ -79,6 +82,9 @@ import kotlinx.coroutines.runBlocking
 @Composable
 fun profileOrganizationAPI(navController: NavController, id : String, context: Context) {
     var result by remember { mutableStateOf<OrgRemoteModel?>(null) }
+    var reviews by remember { mutableStateOf<List<Valoracion>?>(null) }
+    val room : AplicacionDB = AplicacionDB.getInstance(context)
+
     LaunchedEffect(true) {
         val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
         val query =
@@ -109,9 +115,13 @@ fun profileOrganizationAPI(navController: NavController, id : String, context: C
             OrgGalleryAPI(id,navController)
             result?.let { ReviewsFieldAPI(it, context, id) }
         }
-        Column(modifier = Modifier.padding(0.dp)) {
-            ReviewsAPI(1)
+
+        //Se llama a pintar los comentarios
+        LaunchedEffect(true) {
+            reviews = room.valoracionDAO().getValoracionByIdProtectora(id);
         }
+        ReviewsBD(reviews,context)
+
     }
 }
 
@@ -367,19 +377,7 @@ fun ReviewsFieldAPI(org: OrgRemoteModel, context: Context, id : String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 7.dp)
-            .background(color = Color(165, 165, 165))
-            .drawBehind {
-                val strokeWidth = 1.dp.toPx()
-                val y = size.height - strokeWidth / 2
-
-                drawLine(
-                    Color.LightGray,
-                    Offset(0f, y),
-                    Offset(size.width, y),
-                    strokeWidth
-                )
-            },
+            .background(color = Color(165, 165, 165)),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -427,23 +425,39 @@ fun ReviewsFieldAPI(org: OrgRemoteModel, context: Context, id : String) {
                         else -> false
                     }
                 },
-            shape = RoundedCornerShape(10.dp),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.LightGray,
-                unfocusedContainerColor = Color.LightGray,
-                disabledContainerColor = Color.LightGray,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
-            )
+            shape = RoundedCornerShape(10.dp)
         )
     }
 }
 
 @Composable
-fun ReviewsAPI(id: Int) {
+fun Reviews(reviews: List<Valoracion>?, context: Context) {
+    LazyColumn(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .padding(top = 33.dp, bottom = 60.dp)
+            .fillMaxWidth()
+    ) {
+        reviews?.let {
+            items(it) { valor ->
+                review(valor, context)
+            }
+        }
+
+    }
+}
+
+@Composable
+fun review(valoracion: Valoracion, context: Context) {
+    val room : AplicacionDB = AplicacionDB.getInstance(context)
+    var cliente by remember { mutableStateOf<Cliente?>(null) }
+
+    LaunchedEffect(true) {
+        cliente = room.clienteDAO().getClientById(valoracion.idCliente)
+    }
     Column(
         modifier = Modifier
-            .border(BorderStroke(1.dp, Color.DarkGray), shape = RoundedCornerShape(10.dp)),
+            .border(BorderStroke(1.dp, Color.DarkGray), shape = RoundedCornerShape(10.dp))
     ) {
         Box(
             modifier = Modifier
@@ -459,18 +473,20 @@ fun ReviewsAPI(id: Int) {
                             .size(60.dp)
                             .padding(top = 7.dp, start = 7.dp)
                     )
-                    Text(
-                        text = "Nombre de usuario",
-                        fontSize = 12.sp,
-                        modifier = Modifier.padding(start = 5.dp, top = 3.dp, bottom = 4.dp),
-                        textAlign = TextAlign.Center,
-                    )
+                    cliente?.let {
+                        Text(
+                            text = it.nickname,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(start = 5.dp, top = 3.dp, bottom = 4.dp),
+                            textAlign = TextAlign.Center,
+                        )
+                    }
                 }
                 Column(
                     verticalArrangement = Arrangement.Center,
                 ) {
                     Text(
-                        text = "Esto es una review",
+                        text = valoracion.valoracion,
                         modifier = Modifier.padding(5.dp),
                         textAlign = TextAlign.Center,
                         softWrap = true,

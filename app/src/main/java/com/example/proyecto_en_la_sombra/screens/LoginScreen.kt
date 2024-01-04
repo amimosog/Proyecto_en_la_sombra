@@ -65,8 +65,8 @@ fun LoginComponents(navController : NavController, context: Context) {
     val room : AplicacionDB = AplicacionDB.getInstance(context)
 
 
-    var email: String by remember { mutableStateOf("angel@perico.com") }
-    var pass: String by remember { mutableStateOf("1234567") }
+    var email: String by remember { mutableStateOf("") }
+    var pass: String by remember { mutableStateOf("") }
     var passCheck: String by remember { mutableStateOf("") } //En este contexto almacenara la contrasena almacenada en la base de datos
     var passwordVisible: Boolean by remember { mutableStateOf(false) }
 
