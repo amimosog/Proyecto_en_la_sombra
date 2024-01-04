@@ -107,7 +107,7 @@ fun profileOrganizationBD(navController: NavController, id : Long, context: Cont
     Reviews(reviews,context)
 
 }
-}
+
 
 @Composable
 fun OrgImageBD(url: String) {
