@@ -2,6 +2,7 @@ package com.example.proyecto_en_la_sombra.screens
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,9 +21,12 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -44,9 +48,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.proyecto_en_la_sombra.Model.Cliente
@@ -88,7 +95,7 @@ fun profileOrganizationBD(navController: NavController, id : Long, context: Cont
             }
         }
         Column {
-            DetailInfoBD(org)
+            DetailInfoBD(org, context)
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             //
@@ -105,22 +112,23 @@ fun profileOrganizationBD(navController: NavController, id : Long, context: Cont
 }
 
 @SuppressLint("SuspiciousIndentation")
-fun getDonacionOrgBD(org : OrgRemoteModel, Donaciones : List<Donacion>): Float {
+fun getDonacionOrgBD(org : Protectora, Donaciones : List<Donacion>): Float {
     var donacion : Float = 0F
     for (i in Donaciones){
-        if(i.idProtectora.toString() == org.organization.id)
+        if(i.idProtectora == org.idProtectora.toString())
             donacion += i.cantidad
     }
     return donacion
 }
 
-fun ExisteUserDonacionBD(cliente : Cliente, Donaciones : List<Donacion>, donacion: Donacion) : Boolean {
-    var donacionTotal : Float = 0F
+@OptIn(DelicateCoroutinesApi::class)
+fun ExisteUserDonacionBD(cliente : Cliente, Donaciones : List<Donacion>, donacion: Donacion, room : AplicacionDB, org: Protectora) : Boolean {
     var existeUsuario : Boolean = false
     for (i in Donaciones) {
-        if(i.idCliente == cliente.idCliente)
+        if(i.idCliente == cliente.idCliente && i.idProtectora == org.idProtectora.toString()) {
             existeUsuario = true
-        i.cantidad += donacion.cantidad
+            i.cantidad += donacion.cantidad
+            GlobalScope.launch { room.donacionDAO().updateDonacion(i.cantidad, cliente.idCliente, org.idProtectora.toString()) } }
     }
     return existeUsuario
 }
@@ -165,7 +173,7 @@ fun OrgInfoBD(org: Protectora) {
 }
 
 @Composable
-fun DetailInfoBD(org: Protectora) {
+fun DetailInfoBD(org: Protectora, context: Context) {
     if (org.email != null) {
         Text(
             "Email: " + org.email,
@@ -186,6 +194,89 @@ fun DetailInfoBD(org: Protectora) {
     //
     //Pagina web de la organizacion
     //
+
+
+    //DONACIONES
+    val room = AplicacionDB.getInstance(context)
+    val cliente : Cliente
+    runBlocking{
+        cliente = room.clienteDAO().getClienteByEmail(emailActual)
+    }
+    var openPopUp by remember { mutableStateOf<Boolean>(false) }
+    var result by remember { mutableStateOf<List<Donacion>?>(null) }
+    LaunchedEffect(true) {
+        val query =
+            GlobalScope.async(Dispatchers.IO) { room.donacionDAO().getDonaciones() }
+        result = query.await()
+    }
+    if (result != null) {
+        var donacionOrg by remember { mutableStateOf(getDonacionOrgBD(org,result!!)) }
+        Text(
+            "Donaciones: $donacionOrg €",
+            modifier = Modifier.padding(top = 7.dp, start = 7.dp),
+            fontSize = 14.sp)
+        Button(onClick = { openPopUp = true }) {
+            Text("Donar")
+        }
+    }
+    if(openPopUp){
+        var texto by remember { mutableStateOf("") }
+        Dialog(onDismissRequest = { openPopUp = false }) {
+            AlertDialog(
+                onDismissRequest = { openPopUp = false },
+                title = { Text("Donar") },
+                text = {
+                    Column {
+                        TextField(
+                            value = texto,
+                            onValueChange = { texto = it },
+                            label = { Text("Cantidad") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            val newDonation = Donacion(cliente.idCliente, org.idProtectora.toString(), texto.toFloat())
+                            if(!ExisteUserDonacionBD(cliente, result!!, newDonation, room, org)) {
+                                var listaDonacion : List<Donacion> = newDonation?.let { listOf(it) }!!
+                                GlobalScope.launch {
+                                    room.donacionDAO().setDonaciones(listaDonacion)
+                                }
+                            }
+                            openPopUp = false
+
+                            //
+                            // Se puede poner un boton de compartir
+                            //
+                            val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                                putExtra(
+                                    Intent.EXTRA_TEXT,
+                                    "He donado a ${org.nombre} $texto € para ayudarla con los animales.\n" +
+                                            "¿Te unes a ayudar?\n"
+                                )
+                                type = "text/plain"
+                            }
+                            val shareIntent = Intent.createChooser(sendIntent, null)
+                            ContextCompat.startActivity(context, shareIntent, null)
+                        }
+                    ) {
+                        Text("Confirmar")
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = { openPopUp = false }
+                    ) {
+                        Text("Cancelar")
+                    }
+                }
+            )
+        }
+    }
+
+
 }
 
 //

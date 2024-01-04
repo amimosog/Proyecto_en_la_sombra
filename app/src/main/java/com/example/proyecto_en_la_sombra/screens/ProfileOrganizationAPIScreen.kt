@@ -141,7 +141,7 @@ fun getDonacionOrg(org : OrgRemoteModel, Donaciones : List<Donacion>): Float {
 fun ExisteUserDonacion(cliente : Cliente, Donaciones : List<Donacion>, donacion: Donacion, room : AplicacionDB, org: OrgRemoteModel) : Boolean {
     var existeUsuario : Boolean = false
     for (i in Donaciones) {
-        if(i.idCliente == cliente.idCliente) {
+        if(i.idCliente == cliente.idCliente && i.idProtectora == org.organization.id) {
             existeUsuario = true
             i.cantidad += donacion.cantidad
             GlobalScope.launch { room.donacionDAO().updateDonacion(i.cantidad, cliente.idCliente, org.organization.id) } }
