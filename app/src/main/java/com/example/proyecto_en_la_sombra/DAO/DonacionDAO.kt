@@ -15,4 +15,7 @@ interface DonacionDAO {
     //Inserta una lista de donaciones
     @Insert
     suspend fun setDonaciones(donaciones : List<Donacion>)
+
+    @Query("UPDATE Donacion SET cantidad = :cantidad WHERE idCliente = :idCliente AND idProtectora = :idProtectora")
+    suspend fun updateDonacion(cantidad: Float, idCliente: Long, idProtectora: String)
 }

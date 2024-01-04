@@ -131,19 +131,20 @@ fun profileOrganizationAPI(navController: NavController, id : String, context: C
 fun getDonacionOrg(org : OrgRemoteModel, Donaciones : List<Donacion>): Float {
     var donacion : Float = 0F
     for (i in Donaciones){
-        if(i.idProtectora.toString() == org.organization.id)
+        if(i.idProtectora == org.organization.id)
         donacion += i.cantidad
     }
     return donacion
 }
 
-fun ExisteUserDonacion(cliente : Cliente, Donaciones : List<Donacion>, donacion: Donacion) : Boolean {
-    var donacionTotal : Float = 0F
+@OptIn(DelicateCoroutinesApi::class)
+fun ExisteUserDonacion(cliente : Cliente, Donaciones : List<Donacion>, donacion: Donacion, room : AplicacionDB, org: OrgRemoteModel) : Boolean {
     var existeUsuario : Boolean = false
     for (i in Donaciones) {
-        if(i.idCliente == cliente.idCliente)
+        if(i.idCliente == cliente.idCliente) {
             existeUsuario = true
             i.cantidad += donacion.cantidad
+            GlobalScope.launch { room.donacionDAO().updateDonacion(i.cantidad, cliente.idCliente, org.organization.id) } }
     }
     return existeUsuario
 }
@@ -236,8 +237,9 @@ fun DetailInfoAPI(org: OrgRemoteModel, context: Context) {
         result = query.await()
     }
     if (result != null) {
+        var donacionOrg by remember { mutableStateOf(getDonacionOrg(org,result!!)) }
         Text(
-            "Donaciones: " + getDonacionOrg(org, result!!).toString() + " €",
+            "Donaciones: $donacionOrg €",
             modifier = Modifier.padding(top = 7.dp, start = 7.dp),
             fontSize = 14.sp)
         Button(onClick = { openPopUp = true }) {
@@ -264,10 +266,10 @@ fun DetailInfoAPI(org: OrgRemoteModel, context: Context) {
                     Button(
                         onClick = {
                              val newDonation = Donacion(cliente.idCliente, org.organization.id, texto.toFloat())
-                             if(!ExisteUserDonacion(cliente, result!!, newDonation)) {
-                                 result = result?.plus(newDonation)
+                             if(!ExisteUserDonacion(cliente, result!!, newDonation, room, org)) {
+                                 var listaDonacion : List<Donacion> = newDonation?.let { listOf(it) }!!
                                  GlobalScope.launch {
-                                     room.donacionDAO().setDonaciones(result!!)
+                                     room.donacionDAO().setDonaciones(listaDonacion)
                                  }
                              }
                             openPopUp = false
