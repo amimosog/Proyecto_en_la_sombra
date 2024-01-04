@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Business
+import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
@@ -29,12 +31,12 @@ fun MyNavigationBar(navController: NavController){
         NavigationButton(
             navController = navController,
             route = AppScreens.OrgListScreen.route,
-            imageVector = Icons.Default.Lock
+            imageVector = Icons.Filled.Business
         )
         NavigationButton(
             navController = navController,
             route = AppScreens.AnimalListScreen.route,
-            imageVector = Icons.Default.Home
+            imageVector = Icons.Filled.Explore
         )
         NavigationButton(
             navController = navController,

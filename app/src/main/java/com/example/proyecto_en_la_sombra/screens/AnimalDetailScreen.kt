@@ -2,6 +2,7 @@ package com.example.proyecto_en_la_sombra.screens
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.icu.text.SimpleDateFormat
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -56,6 +57,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
@@ -64,6 +66,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
+import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.proyecto_en_la_sombra.Model.Favoritos
@@ -264,6 +268,17 @@ fun Animal_Adopt_ButtonAndLikeIcon(animal: Animal, context: Context) {
                                         Log.i("Solicitud adopcion:", solicitud.id.toString())
                                         openPopUp = false
                                         Log.i("ACEPTAR", "Animal adoptado")
+
+                                        val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                                            putExtra(
+                                                Intent.EXTRA_TEXT,
+                                                "Acabo de adoptar a este bicho y le he dado una segunda oportunidad, estabilada y toma ejemplo. " +
+                                                        "A que es bonito? " + animal.url
+                                            )
+                                            type = "text/plain"
+                                        }
+                                        val shareIntent = Intent.createChooser(sendIntent, null)
+                                        startActivity(context, shareIntent, null)
                                     }
                                 },
                                 modifier = Modifier
@@ -273,6 +288,7 @@ fun Animal_Adopt_ButtonAndLikeIcon(animal: Animal, context: Context) {
                             ) {
                                 Text(text = "Confirmar")
                             }
+
                             Spacer(Modifier.width(10.dp))
                             TextButton(
                                 onClick = {
