@@ -1,5 +1,6 @@
 package com.example.proyecto_en_la_sombra.screens
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -49,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.proyecto_en_la_sombra.Model.Cliente
+import com.example.proyecto_en_la_sombra.Model.Donacion
 import com.example.proyecto_en_la_sombra.Model.Protectora
 import com.example.proyecto_en_la_sombra.Model.Valoracion
 import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
@@ -85,12 +87,6 @@ fun profileOrganizationBD(navController: NavController, id : Long, context: Cont
                 OrgInfoBD(org)
             }
         }
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = "SocialMediaBD(org)")
-        }
         Column {
             DetailInfoBD(org)
         }
@@ -108,6 +104,26 @@ fun profileOrganizationBD(navController: NavController, id : Long, context: Cont
 
 }
 
+@SuppressLint("SuspiciousIndentation")
+fun getDonacionOrgBD(org : OrgRemoteModel, Donaciones : List<Donacion>): Float {
+    var donacion : Float = 0F
+    for (i in Donaciones){
+        if(i.idProtectora.toString() == org.organization.id)
+            donacion += i.cantidad
+    }
+    return donacion
+}
+
+fun ExisteUserDonacionBD(cliente : Cliente, Donaciones : List<Donacion>, donacion: Donacion) : Boolean {
+    var donacionTotal : Float = 0F
+    var existeUsuario : Boolean = false
+    for (i in Donaciones) {
+        if(i.idCliente == cliente.idCliente)
+            existeUsuario = true
+        i.cantidad += donacion.cantidad
+    }
+    return existeUsuario
+}
 
 @Composable
 fun OrgImageBD(url: String) {
@@ -133,19 +149,17 @@ fun OrgInfoBD(org: Protectora) {
         //Ciudad de la organizacion
         //
         Text(
-            "Ciudad",
+            org.ciudad,
             modifier = Modifier.padding(start = 5.dp),
             fontSize = 14.sp,
-            color = Color.Red
         )
         //
         //Pais de la organizacion
         //
         Text(
-            "Pais",
+            org.pais,
             modifier = Modifier.padding(top = 1.dp, start = 5.dp),
             fontSize = 12.sp,
-            color = Color.Red
         )
     }
 }

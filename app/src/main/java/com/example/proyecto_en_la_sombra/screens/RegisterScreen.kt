@@ -118,7 +118,7 @@ fun RegisterComponents(navController: NavController, context:Context) {
 
         ) {
             item {
-                Spacer(Modifier.height(30.dp))
+                Spacer(Modifier.height(20.dp))
                 Text(
                     text = "Crear cuenta",
                     fontWeight = FontWeight.Bold,
@@ -126,7 +126,7 @@ fun RegisterComponents(navController: NavController, context:Context) {
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(0.71F)
                 )
-                Spacer(Modifier.height(60.dp))
+                Spacer(Modifier.height(40.dp))
                 TextField(
                     shape = RoundedCornerShape(8.dp),
                     value = name,
@@ -293,11 +293,13 @@ fun RegisterComponents(navController: NavController, context:Context) {
                 }) {
                     Text(text = "Registrar")
                 }
+                Spacer(Modifier.height(5.dp))
                 Button(onClick = {
                     navController.navigate(route = AppScreens.LoginActivity.route)
                 }) {
                     Text(text = "Ya tengo cuenta")
                 }
+                Spacer(Modifier.height(20.dp))
             }
         }
     }

@@ -85,19 +85,19 @@ fun OrganizationList(navController: NavController, context: Context) {
             .padding(top = 33.dp, bottom = 60.dp)
             .fillMaxWidth()
     ) {
-        if (orgsAPI != null) {
-            orgsAPI?.organizations?.let {
-                items(it) { org ->
-                    mostrarOrgAPI(org, navController)
+        if (orgsBD != null) {
+            orgsBD?.forEachIndexed { index, org ->
+                item {
+                    mostrarOrgBD(org, navController)
                     Spacer(modifier = Modifier.height(10.dp))
                 }
             }
         }
 
-        if (orgsBD != null) {
-            orgsBD?.forEachIndexed { index, org ->
-                item {
-                    mostrarOrgBD(org, navController)
+        if (orgsAPI != null) {
+            orgsAPI?.organizations?.let {
+                items(it) { org ->
+                    mostrarOrgAPI(org, navController)
                     Spacer(modifier = Modifier.height(10.dp))
                 }
             }

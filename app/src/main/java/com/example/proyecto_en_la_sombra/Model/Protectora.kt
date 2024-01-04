@@ -9,9 +9,10 @@ import androidx.room.Relation
 @Entity
 data class Protectora(
     val nombre: String,
-    val descripcion: String?,
     val numTlf: String,
-    val email: String
+    val email: String,
+    val ciudad: String,
+    val pais: String
 ){
     @PrimaryKey(autoGenerate = true)
     var idProtectora: Long = 0
