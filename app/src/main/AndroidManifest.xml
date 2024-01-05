@@ -14,31 +14,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Proyecto_en_la_sombra"
         tools:targetApi="31">
-        <activity
-            android:name=".screens.PreviewScreens"
-            android:exported="false"
-            android:label="@string/title_activity_preview_screens"
-            android:theme="@style/Theme.Proyecto_en_la_sombra" />
-        <activity
-            android:name=".screens.RegisterActivity"
-            android:exported="false"
-            android:label="@string/title_activity_register"
-            android:theme="@style/Theme.Proyecto_en_la_sombra" />
-        <activity
-            android:name=".screens.ProfileOrganizationScreen"
-            android:exported="false"
-            android:label="@string/title_activity_profile_organization_screen"
-            android:theme="@style/Theme.Proyecto_en_la_sombra" />
-        <activity
-            android:name=".screens.AnimalView"
-            android:exported="true"
-            android:label="@string/title_activity_main2"
-            android:theme="@style/Theme.Proyecto_en_la_sombra" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.Proyecto_en_la_sombra">
+            android:theme="@style/Theme.Proyecto_en_la_sombra"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
