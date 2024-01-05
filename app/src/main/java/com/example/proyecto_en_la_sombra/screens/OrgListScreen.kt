@@ -40,6 +40,7 @@ import coil.compose.AsyncImage
 import com.example.proyecto_en_la_sombra.Model.Protectora
 import com.example.proyecto_en_la_sombra.R
 import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
+import com.example.proyecto_en_la_sombra.Repository.protectoraRepository
 import com.example.proyecto_en_la_sombra.api.RetrofitService
 import com.example.proyecto_en_la_sombra.api.organizationsModel.Organization
 import com.example.proyecto_en_la_sombra.api.organizationsModel.OrganizationsRemoteModel
@@ -50,19 +51,17 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 
 @Composable
-fun OrganizationList(navController: NavController, context: Context) {
-    val room : AplicacionDB = AplicacionDB.getInstance(context)
+fun OrganizationList(navController: NavController, protectoraRepository: protectoraRepository) {
 
     var orgsAPI by remember { mutableStateOf<OrganizationsRemoteModel?>(null) }
     LaunchedEffect(true) {
-        val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
-        val query1 = GlobalScope.async(Dispatchers.IO) { service.getOrganizations(auth) }
+        val query1 = GlobalScope.async(Dispatchers.IO) { protectoraRepository.getOrganizations() }
         orgsAPI = query1.await()
     }
 
     var orgsBD by remember { mutableStateOf<List<Protectora>?>(null) }
     LaunchedEffect(true) {
-        val query2 = GlobalScope.async(Dispatchers.IO) { room.protectoraDAO().getOrganizaciones()}
+        val query2 = GlobalScope.async(Dispatchers.IO) { protectoraRepository.getOrganizaciones()}
         orgsBD = query2.await()
     }
 
@@ -215,9 +214,6 @@ fun mostrarOrgBD(org: Protectora, navController: NavController) {
 @Composable
 fun orgLogo(org: Protectora) {
     AsyncImage(
-        /*model = if (org.photos.isNotEmpty())
-            org.photos[0].full
-        else*/
             "https://play-lh.googleusercontent.com/QuYkQAkLt5OpBAIabNdIGmd8HKwK58tfqmKNvw2UF69pb4jkojQG9za9l3nLfhv2N5U",
         placeholder = painterResource(R.drawable.ic_launcher_foreground),
         contentDescription = "Organization logo",

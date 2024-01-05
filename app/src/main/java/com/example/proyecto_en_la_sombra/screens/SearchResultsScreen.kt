@@ -2,8 +2,6 @@ package com.example.proyecto_en_la_sombra.screens
 
 
 
-import android.content.Context.INPUT_METHOD_SERVICE
-import android.view.inputmethod.InputMethodManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,15 +23,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.proyecto_en_la_sombra.R
+import com.example.proyecto_en_la_sombra.Repository.animalRepository
 import com.example.proyecto_en_la_sombra.api.RetrofitService
-import com.example.proyecto_en_la_sombra.api.model.Animal
 import com.example.proyecto_en_la_sombra.api.model.RemoteModelPage
 import com.example.proyecto_en_la_sombra.auth
 import com.example.proyecto_en_la_sombra.navigation.AppScreens
@@ -46,14 +40,21 @@ import kotlinx.coroutines.async
 
 
 @Composable
-fun listadoResultados(navController: NavController, search: String, type : String, size : String, gender : String, age : String) {
+fun listadoResultados(
+    navController: NavController,
+    search: String,
+    type: String,
+    size: String,
+    gender: String,
+    age: String,
+    animals: animalRepository
+) {
     var result by remember { mutableStateOf<RemoteModelPage?>(null) }
     //var result2 by remember { mutableStateOf<RemoteModelPage?>(null) }
     LaunchedEffect(true) {
-        val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
         var query1 : Deferred<RemoteModelPage>
-        query1 = if(search != "") GlobalScope.async(Dispatchers.IO) { service.getAnimalsName(auth, "random", search) }
-        else GlobalScope.async(Dispatchers.IO) { service.getAnimalsFilters(auth, "random", type, size, gender, age) }
+        query1 = if(search != "") GlobalScope.async(Dispatchers.IO) { animals.getAnimalsName("random", search) }
+        else GlobalScope.async(Dispatchers.IO) { animals.getAnimalsFilters("random", type, size, gender, age) }
         //val query2 = GlobalScope.async(Dispatchers.IO) { service.getAnimalsLocation(auth, "random", search) }
         result = query1.await()!!
         //result2 = query2.await()!!

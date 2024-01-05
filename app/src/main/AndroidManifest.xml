@@ -15,6 +15,11 @@
         android:theme="@style/Theme.Proyecto_en_la_sombra"
         tools:targetApi="31">
         <activity
+            android:name=".screens.PreviewScreens"
+            android:exported="false"
+            android:label="@string/title_activity_preview_screens"
+            android:theme="@style/Theme.Proyecto_en_la_sombra" />
+        <activity
             android:name=".screens.RegisterActivity"
             android:exported="false"
             android:label="@string/title_activity_register"

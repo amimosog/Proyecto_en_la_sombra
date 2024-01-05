@@ -49,39 +49,19 @@ import androidx.navigation.NavController
 import com.example.proyecto_en_la_sombra.Model.Cliente
 import com.example.proyecto_en_la_sombra.R
 import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
+import com.example.proyecto_en_la_sombra.Repository.clientRepository
 import com.example.proyecto_en_la_sombra.navigation.AppScreens
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-/*import com.example.proyecto_en_la_sombra.screens.ui.theme.Proyecto_en_la_sombraTheme
-
-class RegisterActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            Proyecto_en_la_sombraTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-
-                }
-            }
-        }
-    }
-}*/
-
 @Composable
-fun RegisterActivity(navController: NavController, context: Context){
-    RegisterComponents(navController, context)
+fun RegisterActivity(navController: NavController, users: clientRepository){
+    RegisterComponents(navController, users)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterComponents(navController: NavController, context:Context) {
-
-    val room : AplicacionDB = AplicacionDB.getInstance(context)
+fun RegisterComponents(navController: NavController, users: clientRepository) {
 
     var name: String by remember { mutableStateOf("") }
     var apellidos: String by remember { mutableStateOf("") }
@@ -278,11 +258,10 @@ fun RegisterComponents(navController: NavController, context:Context) {
                                     email,
                                     pass,
                                     phoneNumber,
-                                    null,
                                     null
                                 )
                                 //La peticion a la base de datos de forma asincrona
-                                room.clienteDAO().insertCliente(cliente)
+                                users.insertCliente(cliente)
 
                                 Log.i("Insercion usuario", "usuario insertado")
                             }

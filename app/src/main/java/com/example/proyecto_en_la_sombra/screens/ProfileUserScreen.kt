@@ -1,11 +1,6 @@
 package com.example.proyecto_en_la_sombra.screens
 
-import android.app.Activity
 import android.content.Context
-import android.os.Bundle
-import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -29,33 +24,28 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
-import androidx.room.Room
 import coil.compose.AsyncImage
 import com.example.proyecto_en_la_sombra.Model.Cliente
-import com.example.proyecto_en_la_sombra.Model.Donacion
 import com.example.proyecto_en_la_sombra.Model.Favoritos
 import com.example.proyecto_en_la_sombra.Model.SolicitudAdopcion
 import com.example.proyecto_en_la_sombra.R
 import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
+import com.example.proyecto_en_la_sombra.Repository.animalRepository
+import com.example.proyecto_en_la_sombra.Repository.clientRepository
+import com.example.proyecto_en_la_sombra.Repository.favoritosRepository
+import com.example.proyecto_en_la_sombra.Repository.solicitudAdopciónRepository
 import com.example.proyecto_en_la_sombra.api.RetrofitService
 import com.example.proyecto_en_la_sombra.api.model.RemoteResult
 import com.example.proyecto_en_la_sombra.auth
 import com.example.proyecto_en_la_sombra.emailActual
 import com.example.proyecto_en_la_sombra.navigation.AppScreens
-import com.example.proyecto_en_la_sombra.navigation.MyNavigationBar
-import com.example.proyecto_en_la_sombra.ui.theme.Proyecto_en_la_sombraTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
@@ -63,36 +53,45 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 
-
 data class Photo(val image: Int)
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ProfileComponents(navController: NavController, context: Context) {
-    val room : AplicacionDB = AplicacionDB.getInstance(context)
+fun ProfileComponents(
+    navController: NavController,
+    users: clientRepository,
+    solicitudAdopcionRepository: solicitudAdopciónRepository,
+    favoritosRepository: favoritosRepository,
+    animalRepository: animalRepository
+) {
     var cliente: Cliente
     //Llamar a la base de datos para que cargue el nombre
-    runBlocking{
-        cliente = room.clienteDAO().getClienteByEmail(emailActual)
+    runBlocking {
+        cliente = users.getClienteByEmail(emailActual)
     }
 
     //Obtenemos la lista de favoritos del usuario
     var resultFavs by remember { mutableStateOf<List<Favoritos>?>(null) }
     LaunchedEffect(true) {
-        val query1 = GlobalScope.async(Dispatchers.IO) { room.favoritosDAO().getFavsByIdClient(1.toLong()) }
+        val query1 =
+            GlobalScope.async(Dispatchers.IO) { favoritosRepository.getFavsByIdClient(1.toLong()) }
         resultFavs = query1.await()
     }
 
     var resultAdop by remember { mutableStateOf<List<SolicitudAdopcion>?>(null) }
     LaunchedEffect(true) {
-        val query2 = GlobalScope.async(Dispatchers.IO) { room.solicitudAdopcionDAO().getAdopByIdClient(1.toLong()) }
+        val query2 = GlobalScope.async(Dispatchers.IO) {
+            solicitudAdopcionRepository.getAdopByIdClient(1.toLong())
+        }
         resultAdop = query2.await()
     }
 
-    Column(modifier = Modifier
-        .background(MaterialTheme.colorScheme.background)
-        .padding(8.dp)) {
-        Row{
+    Column(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.background)
+            .padding(8.dp)
+    ) {
+        Row {
             ImagenUser()
             BloqueNombre(cliente)
         }
@@ -101,13 +100,13 @@ fun ProfileComponents(navController: NavController, context: Context) {
 
         //-------------------------TABS-------------------------------------------------
         val pagerState = rememberPagerState(
-            pageCount = {3}
+            pageCount = { 3 }
         )
         val coroutineScope = rememberCoroutineScope()
         TabRow(selectedTabIndex = pagerState.currentPage,
             containerColor = MaterialTheme.colorScheme.background,
             contentColor = MaterialTheme.colorScheme.onBackground,
-            divider = {  },
+            divider = { },
             indicator = { tabPositions ->
                 TabRowDefaults.Indicator(
                     modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
@@ -116,7 +115,7 @@ fun ProfileComponents(navController: NavController, context: Context) {
                 )
 
             }
-        ){
+        ) {
             Tab(
                 selected = pagerState.currentPage == 0,
                 text = { Text("Favoritos") },
@@ -152,27 +151,27 @@ fun ProfileComponents(navController: NavController, context: Context) {
         ) { page ->
             if (page == 0) {
                 LazyVerticalGrid(
-                        columns = GridCells.Adaptive(100.dp),
-                        content = {
-                            resultFavs?.forEachIndexed { index, fav ->
-                                item {
-                                    ImagenFav(fav,navController)
-                                }
+                    columns = GridCells.Adaptive(100.dp),
+                    content = {
+                        resultFavs?.forEachIndexed { index, fav ->
+                            item {
+                                ImagenFav(fav, navController, animalRepository)
                             }
                         }
-                    )
-            }else if(page == 1){
+                    }
+                )
+            } else if (page == 1) {
                 LazyVerticalGrid(
                     columns = GridCells.Adaptive(100.dp),
                     content = {
                         resultAdop?.forEachIndexed { index, adop ->
                             item {
-                                ImagenAdop(adop,navController)
+                                ImagenAdop(adop, navController, animalRepository)
                             }
                         }
                     }
                 )
-            }else{
+            } else {
                 Column(
                     verticalArrangement = Arrangement.Center,
                 ) {
@@ -187,7 +186,7 @@ fun ProfileComponents(navController: NavController, context: Context) {
 fun ImagenUser() {
     Image(
         painterResource(R.drawable.ic_launcher_foreground),
-            "Imagen del usuario",
+        "Imagen del usuario",
         modifier = Modifier
             .size(80.dp)
             .clip(CircleShape)
@@ -196,46 +195,59 @@ fun ImagenUser() {
 }
 
 @Composable
-fun ImagenFav(favorito: Favoritos, navController: NavController) {
+fun ImagenFav(
+    favorito: Favoritos,
+    navController: NavController,
+    animalRepository: animalRepository
+) {
 
     var result by remember { mutableStateOf<RemoteResult?>(null) }
     LaunchedEffect(true) {
-        val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
-        val query = GlobalScope.async(Dispatchers.IO) { service.getAnimals(auth,favorito.idAnimal.toString()) }
+        val query = GlobalScope.async(Dispatchers.IO) {
+            animalRepository.getAnimalById(favorito.idAnimal.toString())
+        }
         result = query.await()
     }
-    if (result?.animal?.photos?.isNotEmpty() == true){
+    if (result?.animal?.photos?.isNotEmpty() == true) {
         AsyncImage(model = result!!.animal.photos[0].small,
             contentDescription = "",
             placeholder = painterResource(R.drawable.ic_launcher_foreground),
-            modifier = Modifier.size(60.dp).clickable {
-                navController.navigate(route = AppScreens.AnimalDetailScreen.route + "/" + result?.animal!!.id)
-            })
+            modifier = Modifier
+                .size(60.dp)
+                .clickable {
+                    navController.navigate(route = AppScreens.AnimalDetailScreen.route + "/" + result?.animal!!.id)
+                })
     }
 }
 
 @Composable
-fun ImagenAdop(solicitudAdopcion: SolicitudAdopcion, navController: NavController) {
+fun ImagenAdop(
+    solicitudAdopcion: SolicitudAdopcion,
+    navController: NavController,
+    animalRepository: animalRepository
+) {
     var result by remember { mutableStateOf<RemoteResult?>(null) }
     LaunchedEffect(true) {
-        val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
-        val query = GlobalScope.async(Dispatchers.IO) { service.getAnimals(auth,solicitudAdopcion.idAnimal.toString()) }
+        val query = GlobalScope.async(Dispatchers.IO) {
+            animalRepository.getAnimalById(solicitudAdopcion.idAnimal.toString())
+        }
         result = query.await()
     }
-    if (result?.animal?.photos?.isNotEmpty() == true){
+    if (result?.animal?.photos?.isNotEmpty() == true) {
         AsyncImage(model = result!!.animal.photos[0].small,
             contentDescription = "",
             placeholder = painterResource(R.drawable.ic_launcher_foreground),
-            modifier = Modifier.size(60.dp).clickable {
-                navController.navigate(route = AppScreens.AnimalDetailScreen.route + "/" + result?.animal!!.id)
-            })
+            modifier = Modifier
+                .size(60.dp)
+                .clickable {
+                    navController.navigate(route = AppScreens.AnimalDetailScreen.route + "/" + result?.animal!!.id)
+                })
     }
 }
 
 @Composable
 fun BloqueNombre(cliente: Cliente) {
-    var expanded by remember { mutableStateOf(false)}
-
+    var expanded by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier
         .padding(start = 8.dp)
@@ -269,41 +281,52 @@ fun BloqueNombre(cliente: Cliente) {
 fun BloqueDatos(cliente: Cliente) {
     Column(modifier = Modifier.padding(start = 8.dp)) {
         Row {
-            Text("Nickname:",
+            Text(
+                "Nickname:",
                 color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.titleLarge)
-            Text(cliente.nickname,
+                style = MaterialTheme.typography.titleLarge
+            )
+            Text(
+                cliente.nickname,
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(4.dp))
+                modifier = Modifier.padding(4.dp)
+            )
         }
 
         Row {
-            Text("Email:",
+            Text(
+                "Email:",
                 color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.titleLarge)
-            Text(cliente.email,
+                style = MaterialTheme.typography.titleLarge
+            )
+            Text(
+                cliente.email,
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(4.dp))
+                modifier = Modifier.padding(4.dp)
+            )
         }
 
         Row {
-            Text("Num. tlf.:",
+            Text(
+                "Num. tlf.:",
                 color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.titleLarge)
+                style = MaterialTheme.typography.titleLarge
+            )
             cliente.numTelefono?.let { //Bloque necesario ya que si es nulo el campo, no crea el Text
                 Text(
                     it,
                     color = MaterialTheme.colorScheme.onBackground,
                     style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(4.dp))
+                    modifier = Modifier.padding(4.dp)
+                )
             }
         }
     }
 }
 
 @Composable
-fun TextoNombre(text: String, color: Color, style: TextStyle, lines: Int = Int.MAX_VALUE){
+fun TextoNombre(text: String, color: Color, style: TextStyle, lines: Int = Int.MAX_VALUE) {
     Text(text, color = color, style = style, maxLines = lines)
 }

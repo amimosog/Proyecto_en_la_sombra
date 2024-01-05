@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.proyecto_en_la_sombra.R
 import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
+import com.example.proyecto_en_la_sombra.Repository.clientRepository
 import com.example.proyecto_en_la_sombra.emailActual
 import com.example.proyecto_en_la_sombra.navigation.AppScreens
 import kotlinx.coroutines.GlobalScope
@@ -54,16 +55,13 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun LoginActivity(navController : NavController, context: Context){
-    LoginComponents(navController, context)
+fun LoginActivity(navController: NavController, users: clientRepository) {
+    LoginComponents(navController, users)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginComponents(navController : NavController, context: Context) {
-
-    val room : AplicacionDB = AplicacionDB.getInstance(context)
-
+fun LoginComponents(navController: NavController, users: clientRepository) {
 
     var email: String by remember { mutableStateOf("") }
     var pass: String by remember { mutableStateOf("") }
@@ -151,7 +149,8 @@ fun LoginComponents(navController : NavController, context: Context) {
                     //Comprobar que la contrasena es la correcta para ese usuario
                     if (email.isNotEmpty() && pass.isNotEmpty()) {
                         GlobalScope.launch {
-                            var cliente = room.clienteDAO().getClienteByEmail(email)
+
+                            var cliente = users.getClienteByEmail(email)
 
                             passCheck = cliente.password
                             Log.i("obtencion usuario por email", cliente.nombre)

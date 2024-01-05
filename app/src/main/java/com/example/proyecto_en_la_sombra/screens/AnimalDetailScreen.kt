@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.icu.text.SimpleDateFormat
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Icon
@@ -13,8 +12,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,7 +39,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,23 +46,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupProperties
-import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -74,6 +62,9 @@ import com.example.proyecto_en_la_sombra.Model.Favoritos
 import com.example.proyecto_en_la_sombra.Model.SolicitudAdopcion
 import com.example.proyecto_en_la_sombra.R
 import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
+import com.example.proyecto_en_la_sombra.Repository.animalRepository
+import com.example.proyecto_en_la_sombra.Repository.favoritosRepository
+import com.example.proyecto_en_la_sombra.Repository.solicitudAdopciónRepository
 import com.example.proyecto_en_la_sombra.api.RetrofitService
 import com.example.proyecto_en_la_sombra.api.model.Animal
 import com.example.proyecto_en_la_sombra.api.model.Photo
@@ -87,55 +78,16 @@ import kotlinx.coroutines.launch
 import java.util.Date
 import java.util.Locale
 
-
-/*class AnimalView : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val sharedPreferences = getSharedPreferences("myPreferences", Context.MODE_PRIVATE)
-        val timeSeconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
-        lifecycleScope.launch {
-            auth = sharedPreferences.getString("token", "")!!
-            val time = sharedPreferences.getLong("time", 0)
-            //Check if an hour has passed since the last token was generated, if so, generate a new one.
-            if (timeSeconds > (time + 3600)) {
-                val authResponse = service.login(grant_type, client_id, client_secret)
-                auth = "Bearer ${authResponse.access_token}"
-                Log.i("Generated token: ", auth)
-                sharedPreferences.edit().putString("token", auth).apply()
-                sharedPreferences.edit().putLong("time", timeSeconds).apply()
-            }
-            //Get the data from the API of the animals and organizations
-            val animal = service.getAnimals(auth, "69771579")
-
-
-            val listanimals = service.getAnimalsRandom(auth, "random")
-
-
-            val listOrganizations = service.getOrganizations(auth)
-
-
-            val Organization = service.getUniqueOrganization(auth, "WI535")
-
-        }
-        setContent {
-            Proyecto_en_la_sombraTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    val animal
-                    AnimalComponents(rememberNavController(), animal)
-                }
-            }
-        }
-    }
-}*/
-
 @OptIn(DelicateCoroutinesApi::class)
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun AnimalComponents(navController: NavController, id: String, context: Context) {
+fun AnimalComponents(
+    navController: NavController,
+    id: String,
+    context: Context,
+    solicitudesAdopt: solicitudAdopciónRepository,
+    favoritosRepository: favoritosRepository
+) {
     var result by remember { mutableStateOf<RemoteResult?>(null) }
     LaunchedEffect(true) {
         val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
@@ -166,7 +118,7 @@ fun AnimalComponents(navController: NavController, id: String, context: Context)
             ) {
                 result?.animal?.let {
                     Animal_Info(it)
-                    Animal_Adopt_ButtonAndLikeIcon(it, context)
+                    Animal_Adopt_ButtonAndLikeIcon(it, context, solicitudesAdopt, favoritosRepository)
                 }
             }
         }
@@ -176,9 +128,13 @@ fun AnimalComponents(navController: NavController, id: String, context: Context)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Animal_Adopt_ButtonAndLikeIcon(animal: Animal, context: Context) {
+fun Animal_Adopt_ButtonAndLikeIcon(
+    animal: Animal,
+    context: Context,
+    solicitudAdopt: solicitudAdopciónRepository,
+    favoritosRepository: favoritosRepository
+) {
     //Logica del boton de ADOPCION----------------------------------------------------------------------------------------------
-    val room: AplicacionDB = AplicacionDB.getInstance(context)
     var isButtonAdoptar by rememberSaveable { mutableStateOf(false) }
     //Variable para gestionar cuando mostrar o no el popup
     var openPopUp by remember { mutableStateOf(false) }
@@ -190,7 +146,7 @@ fun Animal_Adopt_ButtonAndLikeIcon(animal: Animal, context: Context) {
             //La peticion a la base de datos de forma asincrona
             //Inserta en la base de datos si sabe que no existe el id de dicho animal en la bd
             val query = GlobalScope.async(Dispatchers.IO) {
-                room.solicitudAdopcionDAO().getAnimalAdop(animal.id.toLong())
+                solicitudAdopt.getAnimalAdop(animal.id.toLong())
             }
             resultSolicitud = query.await()
         }
@@ -257,14 +213,16 @@ fun Animal_Adopt_ButtonAndLikeIcon(animal: Animal, context: Context) {
                                     //Se solicita la adopcion
                                     GlobalScope.launch {
                                         //La peticion a la base de datos de forma asincrona
-                                        room.solicitudAdopcionDAO().setSolicitudCompleta(
+                                        solicitudAdopt.setSolicitudCompleta(
                                             1.toLong(),
                                             animal.id.toLong(),
                                             currentdate
                                         )
 
-                                        var solicitud = room.solicitudAdopcionDAO()
-                                            .getSolicitud(1.toLong(), animal.id.toLong())
+                                        var solicitud = solicitudAdopt.getSolicitud(
+                                            1.toLong(),
+                                            animal.id.toLong()
+                                        )
                                         Log.i("Solicitud adopcion:", solicitud.id.toString())
                                         openPopUp = false
                                         Log.i("ACEPTAR", "Animal adoptado")
@@ -335,7 +293,7 @@ fun Animal_Adopt_ButtonAndLikeIcon(animal: Animal, context: Context) {
             //La peticion a la base de datos de forma asincrona
             //Inserta en la base de datos si sabe que no existe el id de dicho animal en la bd
             val query = GlobalScope.async(Dispatchers.IO) {
-                room.favoritosDAO().getFavByIdAnimal(animal.id.toLong(), 1.toLong())
+                favoritosRepository.getFavByIdAnimal(animal.id.toLong(), 1.toLong())
             }
             result = query.await()
         }
@@ -353,9 +311,9 @@ fun Animal_Adopt_ButtonAndLikeIcon(animal: Animal, context: Context) {
                 GlobalScope.launch {
                     //La peticion a la base de datos de forma asincrona
                     //Elimina de la base de la tabla favoritos, dicho animal
-                    room.favoritosDAO().deleteFav(Favoritos(1.toLong(), animal.id.toLong()))
+                    favoritosRepository.deleteFav(Favoritos(1.toLong(), animal.id.toLong()))
                     var favoritos: List<Favoritos> =
-                        room.favoritosDAO().getFavsByIdClient(1.toLong())
+                        favoritosRepository.getFavsByIdClient(1.toLong())
 
                     Log.i("Numero de favs ", favoritos.size.toString())
                 }
@@ -363,9 +321,9 @@ fun Animal_Adopt_ButtonAndLikeIcon(animal: Animal, context: Context) {
                 GlobalScope.launch {
                     //La peticion a la base de datos de forma asincrona
                     //Elimina de la base de la tabla favoritos, dicho animal
-                    room.favoritosDAO().setFav(Favoritos(1.toLong(), animal.id.toLong()))
+                    favoritosRepository.setFav(Favoritos(1.toLong(), animal.id.toLong()))
                     var favoritos: List<Favoritos> =
-                        room.favoritosDAO().getFavsByIdClient(1.toLong())
+                        favoritosRepository.getFavsByIdClient(1.toLong())
 
                     Log.i("Numero de favs ", favoritos.size.toString())
                 }
@@ -389,92 +347,6 @@ fun Animal_Adopt_ButtonAndLikeIcon(animal: Animal, context: Context) {
         }
     }
 }
-
-/*@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PopUpAdoptar(animal: Animal, room: AplicacionDB, isButtonAdoptar: Boolean, openPopUp: Boolean) {
-    val sdf = SimpleDateFormat("dd/MM/yyyy", Locale("es", "ES"))
-    val currentdate = sdf.format(Date())
-
-    var isButtonAdoptarState by rememberSaveable { mutableStateOf(isButtonAdoptar) }
-    var openPopUpState by rememberSaveable { mutableStateOf(openPopUp) }
-
-    AlertDialog(
-        onDismissRequest = { openPopUpState = false },
-        *//*alignment = Alignment.Center,
-        offset = IntOffset(-370, -675),*//*
-        properties = DialogProperties(
-            *//*focusable = true,*//*
-            dismissOnBackPress = true,
-            dismissOnClickOutside = true
-        )
-    ) {
-        Box(
-            modifier = Modifier
-                .size(250.dp, 250.dp)
-                .padding(top = 5.dp)
-                .background(Color(0xFFefe9f4), RoundedCornerShape(8.dp))
-            *//*.border(1.dp, Color.Black, RoundedCornerShape(10.dp))*//*
-        ) {
-            Column(
-                modifier = Modifier.padding(horizontal = 10.dp)
-            ) {
-                Text(text = "Vas a adoptar a:", color = Color.Black)
-                Text(text = animal.name, color = Color.Black, fontWeight = FontWeight(800))
-                Divider(modifier = Modifier.border(1.dp, Color.Black))
-                Spacer(Modifier.height(20.dp))
-                Text(text = "La fecha de adopción es:", color = Color.Black)
-                Text(
-                    text = currentdate.toString(),
-                    color = Color.Black,
-                    fontWeight = FontWeight(800)
-                )
-                Divider(modifier = Modifier.border(1.dp, Color.Black))
-                Spacer(Modifier.height(30.dp))
-                Row {
-                    Button(
-                        onClick = {
-                            //Se solicita la adopcion
-                            GlobalScope.launch {
-                                //La peticion a la base de datos de forma asincrona
-                                room.solicitudAdopcionDAO().setSolicitudCompleta(
-                                    1.toLong(),
-                                    animal.id.toLong(),
-                                    currentdate
-                                )
-
-                                var solicitud = room.solicitudAdopcionDAO()
-                                    .getSolicitud(1.toLong(), animal.id.toLong())
-                                Log.i("Solicitud adopcion:", solicitud.id.toString())
-                                openPopUpState = false
-                                Log.i("ACEPTAR", "Animal adoptado")
-                            }
-                        },
-                        modifier = Modifier
-                            .width(100.dp)
-                            .padding(top = 20.dp)
-
-                    ) {
-                        Text(text = "Confirmar")
-                    }
-                    Button(
-                        onClick = {
-                            isButtonAdoptarState = false
-                            openPopUpState = false
-                            Log.i("DENEGAR", "Animal no adoptado")
-                        },
-                        modifier = Modifier
-                            .width(100.dp)
-                            .padding(top = 20.dp)
-                    ) {
-                        Text(text = "Denegar")
-                    }
-                }
-
-            }
-        }
-    }
-}*/
 
 @Composable
 fun Animal_Info(animal: Animal) {

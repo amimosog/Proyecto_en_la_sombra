@@ -14,8 +14,7 @@ data class Cliente (
     val email: String,
     val password : String,
     val numTelefono: String?,
-    val descripcion: String?,
-    val bloqueador: Long? //id del administrador que lo bloqueo si se ha dado el caso
+    val descripcion: String?
 ){
     @PrimaryKey(autoGenerate = true)
     var idCliente: Long = 0

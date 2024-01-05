@@ -31,7 +31,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,8 +41,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
@@ -61,9 +58,12 @@ import com.example.proyecto_en_la_sombra.Model.Donacion
 import com.example.proyecto_en_la_sombra.Model.Protectora
 import com.example.proyecto_en_la_sombra.Model.Valoracion
 import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
-import com.example.proyecto_en_la_sombra.api.RetrofitService
+import com.example.proyecto_en_la_sombra.Repository.animalRepository
+import com.example.proyecto_en_la_sombra.Repository.clientRepository
+import com.example.proyecto_en_la_sombra.Repository.donacionRepository
+import com.example.proyecto_en_la_sombra.Repository.protectoraRepository
+import com.example.proyecto_en_la_sombra.Repository.valoracionRepository
 import com.example.proyecto_en_la_sombra.api.model.RemoteModelPage
-import com.example.proyecto_en_la_sombra.api.organizationsModel.OrgRemoteModel
 import com.example.proyecto_en_la_sombra.auth
 import com.example.proyecto_en_la_sombra.emailActual
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -75,13 +75,21 @@ import kotlinx.coroutines.runBlocking
 
 @OptIn(DelicateCoroutinesApi::class)
 @Composable
-fun profileOrganizationBD(navController: NavController, id : Long, context: Context) {
+fun profileOrganizationBD(
+    navController: NavController,
+    id: Long,
+    context: Context,
+    users: clientRepository,
+    protectoraRepository: protectoraRepository,
+    valoracionRepository: valoracionRepository,
+    donacionRepository: donacionRepository,
+    animals: animalRepository
+) {
     var reviews by remember { mutableStateOf<List<Valoracion>?>(null) }
-    val room : AplicacionDB = AplicacionDB.getInstance(context)
 
     var org: Protectora
-    runBlocking{
-        org = room.protectoraDAO().getOrganizacionId(id)
+    runBlocking {
+        org = protectoraRepository.getOrganizacionId(id)
     }
 
     Column(Modifier.padding(8.dp)) {
@@ -95,40 +103,54 @@ fun profileOrganizationBD(navController: NavController, id : Long, context: Cont
             }
         }
         Column {
-            DetailInfoBD(org, context)
+            DetailInfoBD(org, context,users, donacionRepository)
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             //
             //No hay imagenes TODO
             //OrgGalleryBD(idOrg,navController)
-            ReviewsFieldBD(org, context, id.toString()) }
+            ReviewsFieldBD(org, context, id.toString())
+        }
     }
     //Se llama a pintar los comentarios
     LaunchedEffect(true) {
-        reviews = room.valoracionDAO().getValoracionByIdProtectora(id.toString());
+        reviews = valoracionRepository.getValoracionByIdProtectora(id.toString());
     }
-    Reviews(reviews,context)
+    Reviews(reviews, users)
 
 }
 
 @SuppressLint("SuspiciousIndentation")
-fun getDonacionOrgBD(org : Protectora, Donaciones : List<Donacion>): Float {
-    var donacion : Float = 0F
-    for (i in Donaciones){
-        if(i.idProtectora == org.idProtectora.toString())
+fun getDonacionOrgBD(org: Protectora, Donaciones: List<Donacion>): Float {
+    var donacion: Float = 0F
+    for (i in Donaciones) {
+        if (i.idProtectora == org.idProtectora.toString())
             donacion += i.cantidad
     }
     return donacion
 }
 
 @OptIn(DelicateCoroutinesApi::class)
-fun ExisteUserDonacionBD(cliente : Cliente, Donaciones : List<Donacion>, donacion: Donacion, room : AplicacionDB, org: Protectora) : Boolean {
-    var existeUsuario : Boolean = false
+fun ExisteUserDonacionBD(
+    cliente: Cliente,
+    Donaciones: List<Donacion>,
+    donacion: Donacion,
+    donacionRepository: donacionRepository,
+    org: Protectora
+): Boolean {
+    var existeUsuario: Boolean = false
     for (i in Donaciones) {
-        if(i.idCliente == cliente.idCliente && i.idProtectora == org.idProtectora.toString()) {
+        if (i.idCliente == cliente.idCliente && i.idProtectora == org.idProtectora.toString()) {
             existeUsuario = true
             i.cantidad += donacion.cantidad
-            GlobalScope.launch { room.donacionDAO().updateDonacion(i.cantidad, cliente.idCliente, org.idProtectora.toString()) } }
+            GlobalScope.launch {
+                donacionRepository.updateDonaciones(
+                    i.cantidad,
+                    cliente.idCliente,
+                    org.idProtectora.toString()
+                )
+            }
+        }
     }
     return existeUsuario
 }
@@ -173,7 +195,12 @@ fun OrgInfoBD(org: Protectora) {
 }
 
 @Composable
-fun DetailInfoBD(org: Protectora, context: Context) {
+fun DetailInfoBD(
+    org: Protectora,
+    context: Context,
+    users: clientRepository,
+    donacionRepository: donacionRepository
+) {
     if (org.email != null) {
         Text(
             "Email: " + org.email,
@@ -197,29 +224,29 @@ fun DetailInfoBD(org: Protectora, context: Context) {
 
 
     //DONACIONES
-    val room = AplicacionDB.getInstance(context)
-    val cliente : Cliente
-    runBlocking{
-        cliente = room.clienteDAO().getClienteByEmail(emailActual)
+    val cliente: Cliente
+    runBlocking {
+        cliente = users.getClienteByEmail(emailActual)
     }
     var openPopUp by remember { mutableStateOf<Boolean>(false) }
     var result by remember { mutableStateOf<List<Donacion>?>(null) }
     LaunchedEffect(true) {
         val query =
-            GlobalScope.async(Dispatchers.IO) { room.donacionDAO().getDonaciones() }
+            GlobalScope.async(Dispatchers.IO) { donacionRepository.getDonaciones() }
         result = query.await()
     }
     if (result != null) {
-        var donacionOrg by remember { mutableStateOf(getDonacionOrgBD(org,result!!)) }
+        var donacionOrg by remember { mutableStateOf(getDonacionOrgBD(org, result!!)) }
         Text(
             "Donaciones: $donacionOrg €",
             modifier = Modifier.padding(top = 7.dp, start = 7.dp),
-            fontSize = 14.sp)
+            fontSize = 14.sp
+        )
         Button(onClick = { openPopUp = true }) {
             Text("Donar")
         }
     }
-    if(openPopUp){
+    if (openPopUp) {
         var texto by remember { mutableStateOf("") }
         Dialog(onDismissRequest = { openPopUp = false }) {
             AlertDialog(
@@ -238,11 +265,23 @@ fun DetailInfoBD(org: Protectora, context: Context) {
                 confirmButton = {
                     Button(
                         onClick = {
-                            val newDonation = Donacion(cliente.idCliente, org.idProtectora.toString(), texto.toFloat())
-                            if(!ExisteUserDonacionBD(cliente, result!!, newDonation, room, org)) {
-                                var listaDonacion : List<Donacion> = newDonation?.let { listOf(it) }!!
+                            val newDonation = Donacion(
+                                cliente.idCliente,
+                                org.idProtectora.toString(),
+                                texto.toFloat()
+                            )
+                            if (!ExisteUserDonacionBD(
+                                    cliente,
+                                    result!!,
+                                    newDonation,
+                                    donacionRepository,
+                                    org
+                                )
+                            ) {
+                                var listaDonacion: List<Donacion> =
+                                    newDonation?.let { listOf(it) }!!
                                 GlobalScope.launch {
-                                    room.donacionDAO().setDonaciones(listaDonacion)
+                                    donacionRepository.setDonaciones(listaDonacion)
                                 }
                             }
                             openPopUp = false
@@ -283,12 +322,13 @@ fun DetailInfoBD(org: Protectora, context: Context) {
 //No hay imagenes en la org, no se usa de momento TODO
 //
 @Composable
-fun OrgGalleryBD(id: Long, navController: NavController) {
+fun OrgGalleryBD(id: Long, navController: NavController, animals: animalRepository) {
     var result by remember { mutableStateOf<RemoteModelPage?>(null) }
     LaunchedEffect(true) {
-        val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
         val query = //Poner el id de la organizacion
-            GlobalScope.async(Dispatchers.IO) { service.getAnimalsByOrganization(auth,id.toString()) }
+            GlobalScope.async(Dispatchers.IO) {
+                animals.getAnimalsByOrganization(id.toString())
+            }
         result = query.await()
     }
     LazyVerticalGrid(
@@ -305,10 +345,10 @@ fun OrgGalleryBD(id: Long, navController: NavController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReviewsFieldBD(org: Protectora, context: Context, id : String) {
+fun ReviewsFieldBD(org: Protectora, context: Context, id: String) {
     var review by remember { mutableStateOf("") }
 
-    val room : AplicacionDB = AplicacionDB.getInstance(context)
+    val room: AplicacionDB = AplicacionDB.getInstance(context)
 
     Column(
         modifier = Modifier
@@ -323,7 +363,7 @@ fun ReviewsFieldBD(org: Protectora, context: Context, id : String) {
 
         TextField(
             value = review,
-            onValueChange = {review = it },
+            onValueChange = { review = it },
             placeholder = {
                 Text(
                     text = "¿Algo que decir?",
@@ -367,7 +407,7 @@ fun ReviewsFieldBD(org: Protectora, context: Context, id : String) {
 }
 
 @Composable
-fun ReviewsBD(reviews: List<Valoracion>?, context: Context) {
+fun ReviewsBD(reviews: List<Valoracion>?, users: clientRepository) {
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -376,7 +416,7 @@ fun ReviewsBD(reviews: List<Valoracion>?, context: Context) {
     ) {
         reviews?.let {
             items(it) { valor ->
-                reviewBD(valor, context)
+                reviewBD(valor, users)
             }
         }
 
@@ -384,12 +424,11 @@ fun ReviewsBD(reviews: List<Valoracion>?, context: Context) {
 }
 
 @Composable
-fun reviewBD(valoracion: Valoracion, context: Context) {
-    val room : AplicacionDB = AplicacionDB.getInstance(context)
+fun reviewBD(valoracion: Valoracion, users: clientRepository) {
     var cliente by remember { mutableStateOf<Cliente?>(null) }
 
     LaunchedEffect(true) {
-        cliente = room.clienteDAO().getClientById(valoracion.idCliente)
+        cliente = users.getClientById(valoracion.idCliente)
     }
     Column(
         modifier = Modifier
