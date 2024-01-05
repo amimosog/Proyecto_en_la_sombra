@@ -8,16 +8,16 @@ import com.example.proyecto_en_la_sombra.DAO.*
 import com.example.proyecto_en_la_sombra.Model.*
 
 @Database(
-    entities = [Administrador::class, Animal::class, Cliente::class, Donacion::class, DonacionRegular::class, Favoritos::class, Protectora::class, SolicitudAdopcion::class, Valoracion::class],
-    version = 15,
+    entities = [ Animal::class, Cliente::class, Donacion::class, Favoritos::class, Protectora::class, SolicitudAdopcion::class, Valoracion::class],
+    version = 17,
     exportSchema = false
 )
 abstract class AplicacionDB : RoomDatabase() {
-    abstract fun administradoDAO() : AdministradoDAO
+
     abstract fun animalDAO() : AnimalDAO
     abstract fun clienteDAO() : ClienteDAO
     abstract fun donacionDAO() : DonacionDAO
-    abstract fun donacionRegularDAO() : DonacionRegularDAO
+
     abstract fun favoritosDAO() : FavoritosDAO
     abstract fun protectoraDAO() : ProtectoraDAO
     abstract fun solicitudAdopcionDAO() : SolicitudAdopcionDAO

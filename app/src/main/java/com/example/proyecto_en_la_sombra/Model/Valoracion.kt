@@ -7,5 +7,4 @@ data class Valoracion(
     val idCliente: Long, //identificador del cliente que realiza la valoracion
     val idProtectora: String, //identificador de la protectora a la que realizan la valoracion
     val valoracion: String,
-    val puntuacion: Int?
 )
