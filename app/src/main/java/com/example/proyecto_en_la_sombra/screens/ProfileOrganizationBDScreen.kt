@@ -7,6 +7,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -29,6 +31,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -44,6 +47,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
@@ -95,31 +100,28 @@ fun profileOrganizationBD(
     runBlocking {
         org = protectoraRepository.getOrganizacionId(id)
     }
+    Column {
 
-    Column(Modifier.padding(8.dp)) {
-        Column {
-            Row {
-                if(org.logo != null)
-                    OrgImageBD(org.logo!!)
-                else
-                    OrgImageBD("https://play-lh.googleusercontent.com/QuYkQAkLt5OpBAIabNdIGmd8HKwK58tfqmKNvw2UF69pb4jkojQG9za9l3nLfhv2N5U")
+        Row {
+            if (org.logo != null)
+                OrgImageBD(org.logo!!)
+            else
+                OrgImageBD("https://play-lh.googleusercontent.com/QuYkQAkLt5OpBAIabNdIGmd8HKwK58tfqmKNvw2UF69pb4jkojQG9za9l3nLfhv2N5U")
 
-                OrgInfoBD(org)
-            }
+            OrgInfoBD(org)
         }
-        Column {
-            DetailInfoBD(navController, org, context, users, donacionRepository)
+
+        DetailInfoBD(navController, org, context, users, donacionRepository)
+
+        OrgGalleryBD(org.idProtectora, navController, animals)
+        ReviewsFieldBD(org, context, id.toString())
+
+        //Se llama a pintar los comentarios
+        LaunchedEffect(true) {
+            reviews = valoracionRepository.getValoracionByIdProtectora(id.toString());
         }
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            OrgGalleryBD(org.idProtectora, navController, animals)
-            ReviewsFieldBD(org, context, id.toString())
-        }
+        reviews?.let { Reviews(it, users) }
     }
-    //Se llama a pintar los comentarios
-    LaunchedEffect(true) {
-        reviews = valoracionRepository.getValoracionByIdProtectora(id.toString());
-    }
-    Reviews(reviews, users)
 
 }
 
@@ -343,7 +345,7 @@ fun OrgGalleryBD(idOrg: Long, navController: NavController, animalRepository: an
     }
     LazyVerticalGrid(
         columns = GridCells.Adaptive(100.dp),
-        modifier = Modifier.height(400.dp)
+        modifier =Modifier.wrapContentHeight(Alignment.CenterVertically)
     ) {
         animals?.forEachIndexed { index, animal ->
             item {
@@ -429,15 +431,13 @@ fun ReviewsFieldBD(org: Protectora, context: Context, id: String) {
             shape = RoundedCornerShape(10.dp)
         )
     }
+
 }
 
 @Composable
-fun ReviewsBD(reviews: List<Valoracion>?, users: clientRepository) {
+fun ReviewsBD(reviews: List<Valoracion>, users: clientRepository) {
     LazyColumn(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .padding(top = 33.dp, bottom = 60.dp)
-            .fillMaxWidth()
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         reviews?.let {
             items(it) { valor ->
@@ -450,49 +450,40 @@ fun ReviewsBD(reviews: List<Valoracion>?, users: clientRepository) {
 
 @Composable
 fun reviewBD(valoracion: Valoracion, users: clientRepository) {
+
     var cliente by remember { mutableStateOf<Cliente?>(null) }
 
     LaunchedEffect(true) {
         cliente = users.getClientById(valoracion.idCliente)
     }
-    Column(
-        modifier = Modifier
-            .border(BorderStroke(1.dp, Color.DarkGray), shape = RoundedCornerShape(10.dp))
-    ) {
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(10.dp))
-                .background(color = Color(212, 212, 212))
-        ) {
-            Row {
-                Column {
-                    Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(60.dp)
-                            .padding(top = 7.dp, start = 7.dp)
-                    )
-                    cliente?.let {
-                        Text(
-                            text = it.nickname,
-                            fontSize = 12.sp,
-                            modifier = Modifier.padding(start = 5.dp, top = 3.dp, bottom = 4.dp),
-                            textAlign = TextAlign.Center,
-                        )
-                    }
-                }
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                ) {
+        Row {
+            Column {
+                Icon(
+                    imageVector = Icons.Default.AccountCircle,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(60.dp)
+                        .padding(top = 7.dp, start = 7.dp)
+                )
+                cliente?.let {
                     Text(
-                        text = valoracion.valoracion,
-                        modifier = Modifier.padding(5.dp),
+                        text = it.nickname,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(start = 5.dp, top = 3.dp, bottom = 4.dp),
                         textAlign = TextAlign.Center,
-                        softWrap = true,
                     )
                 }
             }
+            Column(
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    text = valoracion.valoracion,
+                    modifier = Modifier.padding(5.dp),
+                    textAlign = TextAlign.Center,
+                    softWrap = true,
+                )
+            }
         }
-    }
+
 }

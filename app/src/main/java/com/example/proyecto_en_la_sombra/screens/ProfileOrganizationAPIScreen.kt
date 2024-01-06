@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -107,35 +109,30 @@ fun profileOrganizationAPI(
         result = query.await()
     }
     Column(Modifier.padding(8.dp)) {
-        Column {
-            Row {
-                result?.organization?.let {
-                    if (it.photos.isNotEmpty())
-                        OrgImageAPI(it.photos[0].small)
-                    else OrgImageAPI("https://play-lh.googleusercontent.com/QuYkQAkLt5OpBAIabNdIGmd8HKwK58tfqmKNvw2UF69pb4jkojQG9za9l3nLfhv2N5U")
-                }
-                result?.let { OrgInfoAPI(it) }
+
+        Row {
+            result?.organization?.let {
+                if (it.photos.isNotEmpty())
+                    OrgImageAPI(it.photos[0].small)
+                else OrgImageAPI("https://play-lh.googleusercontent.com/QuYkQAkLt5OpBAIabNdIGmd8HKwK58tfqmKNvw2UF69pb4jkojQG9za9l3nLfhv2N5U")
             }
+            result?.let { OrgInfoAPI(it) }
         }
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            result?.let { SocialMediaAPI(it) }
-        }
-        Column {
-            result?.let { DetailInfoAPI(navController, it, context, donacionRepository, users) }
-        }
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            OrgGalleryAPI(id, navController, animals)
-            result?.let { ReviewsFieldAPI(it, context, id) }
-        }
+
+
+        result?.let { SocialMediaAPI(it) }
+
+        result?.let { DetailInfoAPI(navController, it, context, donacionRepository, users) }
+
+        OrgGalleryAPI(id, navController, animals)
+        result?.let { ReviewsFieldAPI(it, context, id) }
+
 
         //Se llama a pintar los comentarios
         LaunchedEffect(true) {
             reviews = valoracionRepository.getValoracionByIdProtectora(id);
         }
-        ReviewsBD(reviews, users)
+        reviews?.let { ReviewsBD(it, users) }
 
     }
 }
@@ -208,7 +205,6 @@ fun OrgInfoAPI(org: OrgRemoteModel) {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DetailInfoAPI(
     navController: NavController,
@@ -371,7 +367,7 @@ fun OrgGalleryAPI(id: String, navController: NavController, animals: animalRepos
     }
     LazyVerticalGrid(
         columns = GridCells.Adaptive(100.dp),
-        modifier = Modifier.height(400.dp)
+        modifier = Modifier.wrapContentHeight(Alignment.CenterVertically)
     ) {
         result?.animals?.forEachIndexed { index, animal ->
             item {
@@ -440,7 +436,6 @@ fun SocialMediaAPI(org: OrgRemoteModel) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReviewsFieldAPI(org: OrgRemoteModel, context: Context, id: String) {
     var review by remember { mutableStateOf("") }
@@ -504,12 +499,9 @@ fun ReviewsFieldAPI(org: OrgRemoteModel, context: Context, id: String) {
 }
 
 @Composable
-fun Reviews(reviews: List<Valoracion>?, users: clientRepository) {
+fun Reviews(reviews: List<Valoracion>, users: clientRepository) {
     LazyColumn(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .padding(top = 33.dp, bottom = 60.dp)
-            .fillMaxWidth()
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         reviews?.let {
             items(it) { valor ->
@@ -528,44 +520,34 @@ fun review(valoracion: Valoracion, users: clientRepository) {
     LaunchedEffect(true) {
         cliente = users.getClientById(valoracion.idCliente)
     }
-    Column(
-        modifier = Modifier
-            .border(BorderStroke(1.dp, Color.DarkGray), shape = RoundedCornerShape(10.dp))
-    ) {
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(10.dp))
-                .background(color = Color(212, 212, 212))
-        ) {
-            Row {
-                Column {
-                    Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(60.dp)
-                            .padding(top = 7.dp, start = 7.dp)
-                    )
-                    cliente?.let {
-                        Text(
-                            text = it.nickname,
-                            fontSize = 12.sp,
-                            modifier = Modifier.padding(start = 5.dp, top = 3.dp, bottom = 4.dp),
-                            textAlign = TextAlign.Center,
-                        )
-                    }
-                }
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    Text(
-                        text = valoracion.valoracion,
-                        modifier = Modifier.padding(5.dp),
-                        textAlign = TextAlign.Center,
-                        softWrap = true,
-                    )
-                }
+    Row {
+        Column {
+            Icon(
+                imageVector = Icons.Default.AccountCircle,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(60.dp)
+                    .padding(top = 7.dp, start = 7.dp)
+            )
+            cliente?.let {
+                Text(
+                    text = it.nickname,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(start = 5.dp, top = 3.dp, bottom = 4.dp),
+                    textAlign = TextAlign.Center,
+                )
             }
         }
+        Column(
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text(
+                text = valoracion.valoracion,
+                modifier = Modifier.padding(5.dp),
+                textAlign = TextAlign.Center,
+                softWrap = true,
+            )
+        }
     }
+
 }
