@@ -91,6 +91,7 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.5")
     implementation ("androidx.room:room-ktx:2.2.5")
     implementation("androidx.room:room-runtime:$room_version")
+    implementation ("androidx.activity:activity-compose:1.8.2")
     annotationProcessor("androidx.room:room-compiler:$room_version")
     // To use Kotlin Symbol Processing (KSP)
     ksp("androidx.room:room-compiler:$room_version")

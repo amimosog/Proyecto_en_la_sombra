@@ -3,14 +3,10 @@ package com.example.proyecto_en_la_sombra.screens
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,23 +16,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,15 +40,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -65,17 +61,14 @@ import com.example.proyecto_en_la_sombra.Model.Cliente
 import com.example.proyecto_en_la_sombra.Model.Donacion
 import com.example.proyecto_en_la_sombra.Model.Valoracion
 import com.example.proyecto_en_la_sombra.R
-import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
 import com.example.proyecto_en_la_sombra.Repository.animalRepository
 import com.example.proyecto_en_la_sombra.Repository.clientRepository
 import com.example.proyecto_en_la_sombra.Repository.donacionRepository
 import com.example.proyecto_en_la_sombra.Repository.protectoraRepository
 import com.example.proyecto_en_la_sombra.Repository.valoracionRepository
-import com.example.proyecto_en_la_sombra.api.RetrofitService
 import com.example.proyecto_en_la_sombra.api.model.Animal
-import com.example.proyecto_en_la_sombra.api.organizationsModel.OrgRemoteModel
 import com.example.proyecto_en_la_sombra.api.model.RemoteModelPage
-import com.example.proyecto_en_la_sombra.auth
+import com.example.proyecto_en_la_sombra.api.organizationsModel.OrgRemoteModel
 import com.example.proyecto_en_la_sombra.emailActual
 import com.example.proyecto_en_la_sombra.navigation.AppScreens
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -125,7 +118,7 @@ fun profileOrganizationAPI(
         result?.let { DetailInfoAPI(navController, it, context, donacionRepository, users) }
 
         OrgGalleryAPI(id, navController, animals)
-        result?.let { ReviewsFieldAPI(it, context, id) }
+        result?.let { ReviewsFieldAPI(id, users, valoracionRepository) }
 
 
         //Se llama a pintar los comentarios
@@ -436,12 +429,15 @@ fun SocialMediaAPI(org: OrgRemoteModel) {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun ReviewsFieldAPI(org: OrgRemoteModel, context: Context, id: String) {
+fun ReviewsFieldAPI(
+    id: String,
+    users: clientRepository,
+    valoracionRepository: valoracionRepository
+) {
     var review by remember { mutableStateOf("") }
-
-    val room: AplicacionDB = AplicacionDB.getInstance(context)
-
+    val keyboardController = LocalSoftwareKeyboardController.current
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -472,28 +468,25 @@ fun ReviewsFieldAPI(org: OrgRemoteModel, context: Context, id: String) {
             },
             modifier = Modifier
                 .padding(bottom = 5.dp)
-                .height(47.dp)
-                // Add this Modifier
-                .onKeyEvent { event ->
-                    when (event.key) {
-                        Key.Enter -> {
-                            // Handle the enter key here
-                            GlobalScope.launch {
-                                var cliente = room
-                                    .clienteDAO()
-                                    .getClienteByEmail(emailActual)
-                                room
-                                    .valoracionDAO()
-                                    .setValoracion(cliente.idCliente, id, review)
-                                review = ""
-                            }
-                            true
-                        }
-
-                        else -> false
+                .height(47.dp),
+            shape = RoundedCornerShape(10.dp),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.LightGray,
+                unfocusedContainerColor = Color.LightGray,
+                disabledContainerColor = Color.LightGray,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+            ),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    GlobalScope.launch {
+                        val cliente = users.getClienteByEmail(emailActual)
+                        valoracionRepository.setValoracion(cliente.idCliente, id, review)
+                        review = ""
+                        keyboardController?.hide()
                     }
-                },
-            shape = RoundedCornerShape(10.dp)
+                })
         )
     }
 }

@@ -6,9 +6,9 @@ import com.example.proyecto_en_la_sombra.api.organizationsModel.OrgRemoteModel
 import com.example.proyecto_en_la_sombra.api.organizationsModel.OrganizationsRemoteModel
 import com.example.proyecto_en_la_sombra.auth
 
-class protectoraRepository(instance: AplicacionDB) {
+class protectoraRepository(instance: AplicacionDB, service: RetrofitService) {
     var store = instance
-    var source = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
+    var source = service
 
     suspend fun getOrganizaciones(): List<Protectora> = store.protectoraDAO().getOrganizaciones()
 

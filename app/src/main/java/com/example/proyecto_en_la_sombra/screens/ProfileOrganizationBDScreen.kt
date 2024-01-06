@@ -25,6 +25,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -36,6 +37,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,6 +45,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -52,7 +55,9 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -114,7 +119,7 @@ fun profileOrganizationBD(
         DetailInfoBD(navController, org, context, users, donacionRepository)
 
         OrgGalleryBD(org.idProtectora, navController, animals)
-        ReviewsFieldBD(org, context, id.toString())
+        ReviewsFieldBD(id.toString(), users, valoracionRepository)
 
         //Se llama a pintar los comentarios
         LaunchedEffect(true) {
@@ -370,13 +375,13 @@ fun showImageBD(animal: Animal, navController: NavController) {
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun ReviewsFieldBD(org: Protectora, context: Context, id: String) {
+fun ReviewsFieldBD(id: String,
+                   users: clientRepository,
+                   valoracionRepository: valoracionRepository) {
     var review by remember { mutableStateOf("") }
-
-    val room: AplicacionDB = AplicacionDB.getInstance(context)
-
+    val keyboardController = LocalSoftwareKeyboardController.current
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -407,28 +412,25 @@ fun ReviewsFieldBD(org: Protectora, context: Context, id: String) {
             },
             modifier = Modifier
                 .padding(bottom = 5.dp)
-                .height(47.dp)
-                // Add this Modifier
-                .onKeyEvent { event ->
-                    when (event.key) {
-                        Key.Enter -> {
-                            // Handle the enter key here
-                            GlobalScope.launch {
-                                var cliente = room
-                                    .clienteDAO()
-                                    .getClienteByEmail(emailActual)
-                                room
-                                    .valoracionDAO()
-                                    .setValoracion(cliente.idCliente, id, review)
-                                review = ""
-                            }
-                            true
-                        }
-
-                        else -> false
+                .height(47.dp),
+            shape = RoundedCornerShape(10.dp),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.LightGray,
+                unfocusedContainerColor = Color.LightGray,
+                disabledContainerColor = Color.LightGray,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+            ),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    GlobalScope.launch {
+                        val cliente = users.getClienteByEmail(emailActual)
+                        valoracionRepository.setValoracion(cliente.idCliente, id, review)
+                        review = ""
+                        keyboardController?.hide()
                     }
-                },
-            shape = RoundedCornerShape(10.dp)
+                })
         )
     }
 

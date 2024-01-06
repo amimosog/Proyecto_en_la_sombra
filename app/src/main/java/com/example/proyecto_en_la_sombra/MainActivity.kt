@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
         val animals = animalRepository(room, service)
         val donaciones = donacionRepository(room)
         val favoritos = favoritosRepository(room)
-        val organizations = protectoraRepository(room)
+        val organizations = protectoraRepository(room, service)
         val solicitudesAdopt = solicitudAdopciónRepository(room)
         val valoraciones = valoracionRepository(room)
 
