@@ -11,10 +11,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -45,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -53,19 +56,20 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.proyecto_en_la_sombra.Model.Animal
 import com.example.proyecto_en_la_sombra.Model.Cliente
 import com.example.proyecto_en_la_sombra.Model.Donacion
 import com.example.proyecto_en_la_sombra.Model.Protectora
 import com.example.proyecto_en_la_sombra.Model.Valoracion
+import com.example.proyecto_en_la_sombra.R
 import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
 import com.example.proyecto_en_la_sombra.Repository.animalRepository
 import com.example.proyecto_en_la_sombra.Repository.clientRepository
 import com.example.proyecto_en_la_sombra.Repository.donacionRepository
 import com.example.proyecto_en_la_sombra.Repository.protectoraRepository
 import com.example.proyecto_en_la_sombra.Repository.valoracionRepository
-import com.example.proyecto_en_la_sombra.api.model.RemoteModelPage
-import com.example.proyecto_en_la_sombra.auth
 import com.example.proyecto_en_la_sombra.emailActual
+import com.example.proyecto_en_la_sombra.navigation.AppScreens
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -95,20 +99,19 @@ fun profileOrganizationBD(
     Column(Modifier.padding(8.dp)) {
         Column {
             Row {
-                /*if(org.photos.isNotEmpty())TODO
-                    OrgImageBD(org.photos[0])
-                else*/ OrgImageBD("https://play-lh.googleusercontent.com/QuYkQAkLt5OpBAIabNdIGmd8HKwK58tfqmKNvw2UF69pb4jkojQG9za9l3nLfhv2N5U")
+                if(org.logo != null)
+                    OrgImageBD(org.logo!!)
+                else
+                    OrgImageBD("https://play-lh.googleusercontent.com/QuYkQAkLt5OpBAIabNdIGmd8HKwK58tfqmKNvw2UF69pb4jkojQG9za9l3nLfhv2N5U")
 
                 OrgInfoBD(org)
             }
         }
         Column {
-            DetailInfoBD(org, context,users, donacionRepository)
+            DetailInfoBD(navController, org, context, users, donacionRepository)
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            //
-            //No hay imagenes TODO
-            //OrgGalleryBD(idOrg,navController)
+            OrgGalleryBD(org.idProtectora, navController, animals)
             ReviewsFieldBD(org, context, id.toString())
         }
     }
@@ -175,17 +178,11 @@ fun OrgInfoBD(org: Protectora) {
             modifier = Modifier.padding(top = 7.dp, start = 5.dp),
             fontSize = 20.sp
         )
-        //
-        //Ciudad de la organizacion
-        //
         Text(
             org.ciudad,
             modifier = Modifier.padding(start = 5.dp),
             fontSize = 14.sp,
         )
-        //
-        //Pais de la organizacion
-        //
         Text(
             org.pais,
             modifier = Modifier.padding(top = 1.dp, start = 5.dp),
@@ -196,6 +193,7 @@ fun OrgInfoBD(org: Protectora) {
 
 @Composable
 fun DetailInfoBD(
+    navController: NavController,
     org: Protectora,
     context: Context,
     users: clientRepository,
@@ -242,10 +240,23 @@ fun DetailInfoBD(
             modifier = Modifier.padding(top = 7.dp, start = 7.dp),
             fontSize = 14.sp
         )
+    }
+
+    Row {
+        Spacer(Modifier.width(10.dp))
         Button(onClick = { openPopUp = true }) {
             Text("Donar")
         }
+        Spacer(Modifier.width(10.dp))
+        Button(
+            onClick = {
+                navController.navigate(route = AppScreens.NewAnimalScreen.route+ "/" + org.idProtectora)
+            }
+        ) {
+            Text("Añadir Animal")
+        }
     }
+
     if (openPopUp) {
         var texto by remember { mutableStateOf("") }
         Dialog(onDismissRequest = { openPopUp = false }) {
@@ -322,25 +333,39 @@ fun DetailInfoBD(
 //No hay imagenes en la org, no se usa de momento TODO
 //
 @Composable
-fun OrgGalleryBD(id: Long, navController: NavController, animals: animalRepository) {
-    var result by remember { mutableStateOf<RemoteModelPage?>(null) }
+fun OrgGalleryBD(idOrg: Long, navController: NavController, animalRepository: animalRepository) {
+    var animals by remember { mutableStateOf<List<Animal>?>(null) }
     LaunchedEffect(true) {
-        val query = //Poner el id de la organizacion
-            GlobalScope.async(Dispatchers.IO) {
-                animals.getAnimalsByOrganization(id.toString())
+        val query = GlobalScope.async(Dispatchers.IO) {
+                animalRepository.getAnimalByOrgId(idOrg)
             }
-        result = query.await()
+        animals = query.await()
     }
     LazyVerticalGrid(
         columns = GridCells.Adaptive(100.dp),
         modifier = Modifier.height(400.dp)
     ) {
-        result?.animals?.forEachIndexed { index, animal ->
+        animals?.forEachIndexed { index, animal ->
             item {
-                showImageAPI(animal, navController)
+                showImageBD(animal, navController)
             }
         }
     }
+}
+
+@Composable
+fun showImageBD(animal: Animal, navController: NavController) {
+
+    AsyncImage(
+        model = animal.fotos,
+        placeholder = painterResource(R.drawable.ic_launcher_foreground),
+        contentDescription = "Animal photo",
+        modifier = Modifier
+            .size(200.dp)
+            /*.clickable { TODO detalles del animal
+                navController.navigate(route = AppScreens.AnimalDetailScreen.route + "/" + animal.idAnimal)
+            }*/
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

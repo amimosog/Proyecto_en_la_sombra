@@ -12,7 +12,8 @@ data class Protectora(
     val numTlf: String,
     val email: String,
     val ciudad: String,
-    val pais: String
+    val pais: String,
+    val logo: String?
 ){
     @PrimaryKey(autoGenerate = true)
     var idProtectora: Long = 0

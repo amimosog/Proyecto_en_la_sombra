@@ -9,7 +9,7 @@ import com.example.proyecto_en_la_sombra.Model.*
 
 @Database(
     entities = [ Animal::class, Cliente::class, Donacion::class, Favoritos::class, Protectora::class, SolicitudAdopcion::class, Valoracion::class],
-    version = 18,
+    version = 20,
     exportSchema = false
 )
 abstract class AplicacionDB : RoomDatabase() {

@@ -42,4 +42,7 @@ sealed class AppScreens(val route: String){
 
     //Pantalla para añadir una nueva organizacion
     object NewOrgScreen: AppScreens("new_org_screen")
+
+    //Pantalla para añadir un nuevo animal
+    object NewAnimalScreen: AppScreens("new_animal_screen")
 }

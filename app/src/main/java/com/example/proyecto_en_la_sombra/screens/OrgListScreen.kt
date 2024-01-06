@@ -138,14 +138,14 @@ fun mostrarOrgAPI(org: Organization, navController: NavController) {
                 navController.navigate(route = AppScreens.ProfileOrganizationScreenAPI.route + "/" + org.id)
             },
     ) {
-        orgLogo(org)
+        orgLogoAPI(org)
         Spacer(modifier = Modifier.width(10.dp))
         orgTexts(org)
     }
 }
 
 @Composable
-fun orgLogo(org: Organization) {
+fun orgLogoAPI(org: Organization) {
     AsyncImage(
         model = if (org.photos.isNotEmpty())
             org.photos[0].full
@@ -205,15 +205,18 @@ fun mostrarOrgBD(org: Protectora, navController: NavController) {
                 navController.navigate(route = AppScreens.ProfileOrganizationScreenBD.route + "/" + org.idProtectora)
             },
     ) {
-        orgLogo(org)
+        orgLogoBD(org)
         Spacer(modifier = Modifier.width(10.dp))
         orgTexts(org)
     }
 }
 
 @Composable
-fun orgLogo(org: Protectora) {
+fun orgLogoBD(org: Protectora) {
     AsyncImage(
+        model = if (org.logo != null)
+            org.logo
+        else
             "https://play-lh.googleusercontent.com/QuYkQAkLt5OpBAIabNdIGmd8HKwK58tfqmKNvw2UF69pb4jkojQG9za9l3nLfhv2N5U",
         placeholder = painterResource(R.drawable.ic_launcher_foreground),
         contentDescription = "Organization logo",

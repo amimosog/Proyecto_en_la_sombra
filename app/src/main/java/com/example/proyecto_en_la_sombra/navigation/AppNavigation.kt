@@ -25,6 +25,7 @@ import com.example.proyecto_en_la_sombra.screens.profileOrganizationAPI
 import com.example.proyecto_en_la_sombra.screens.profileOrganizationBD
 import com.example.proyecto_en_la_sombra.screens.RegisterActivity
 import com.example.proyecto_en_la_sombra.screens.newOrgComponents
+import com.example.proyecto_en_la_sombra.screens.newAnimalComponents
 
 /*Elemento composable que se va a encargar de orquestar la navegacion, va a conocer
 las pantallas de nuestra app y se va a encargar de gestionar el paso entre ellas*/
@@ -176,6 +177,18 @@ fun AppNavigation(
 
         composable(route = AppScreens.NewOrgScreen.route) {
             newOrgComponents(navController, protectoraRepository)
+        }
+
+        composable(route = AppScreens.NewAnimalScreen.route+ "/{idOrg}",
+            arguments = listOf(
+                navArgument("idOrg") {
+                    type = NavType.LongType
+                }
+            )
+        ) {it.arguments?.getLong("idOrg")
+            ?.let { it1 ->
+                newAnimalComponents(navController, animals, it1)
+            }
         }
     }
 }

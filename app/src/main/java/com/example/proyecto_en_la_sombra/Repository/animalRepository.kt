@@ -1,5 +1,6 @@
 package com.example.proyecto_en_la_sombra.Repository
 
+import com.example.proyecto_en_la_sombra.Model.Animal
 import com.example.proyecto_en_la_sombra.api.RetrofitService
 import com.example.proyecto_en_la_sombra.api.TypeModel.TypeRemoteModel
 import com.example.proyecto_en_la_sombra.api.model.RemoteModelPage
@@ -15,6 +16,8 @@ class animalRepository(instance: AplicacionDB, service: RetrofitService) {
 
     suspend fun insertAnimal(animal: com.example.proyecto_en_la_sombra.Model.Animal) =
         store.animalDAO().insertAnimal(animal)
+
+    suspend fun getAnimalByOrgId(idOrg: Long): List<Animal> = store.animalDAO().getAnimalsByOrgId(idOrg)
 
     suspend fun getAnimalById(idAnimal: String): RemoteResult =
         source.getAnimals(auth, idAnimal)

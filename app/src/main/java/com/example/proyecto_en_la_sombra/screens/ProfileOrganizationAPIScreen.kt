@@ -13,10 +13,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -122,7 +124,7 @@ fun profileOrganizationAPI(
             result?.let { SocialMediaAPI(it) }
         }
         Column {
-            result?.let { DetailInfoAPI(it, context, donacionRepository, users) }
+            result?.let { DetailInfoAPI(navController, it, context, donacionRepository, users) }
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             OrgGalleryAPI(id, navController, animals)
@@ -209,6 +211,7 @@ fun OrgInfoAPI(org: OrgRemoteModel) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DetailInfoAPI(
+    navController: NavController,
     org: OrgRemoteModel,
     context: Context,
     donacionRepository: donacionRepository,
@@ -273,10 +276,23 @@ fun DetailInfoAPI(
             modifier = Modifier.padding(top = 7.dp, start = 7.dp),
             fontSize = 14.sp
         )
+    }
+
+    Row {
+        Spacer(Modifier.width(10.dp))
         Button(onClick = { openPopUp = true }) {
             Text("Donar")
         }
+        Spacer(Modifier.width(10.dp))
+        Button(
+            onClick = {
+                navController.navigate(route = AppScreens.NewAnimalScreen.route)
+            }
+        ) {
+            Text("Añadir Animal")
+        }
     }
+
     if (openPopUp) {
         var texto by remember { mutableStateOf("") }
         Dialog(onDismissRequest = { openPopUp = false }) {

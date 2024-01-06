@@ -12,14 +12,6 @@ import com.example.proyecto_en_la_sombra.Model.ProtectoraAnunciaAnimales
 
 @Dao
 interface ProtectoraDAO {
-    //Devuelve una lista de las protectoras que han sido donadas por clientes junto a dicho clientes
-    //@Query("SELECT * FROM Protectora")
-    //suspend fun getProtectorasDonadasPorClientes() : List<ProtectoraEsDonadaPorClientes>
-
-    //Devuelve una lista de las protectoras que han sido valoradas por clientes junto a dichos clientes
-    //@Query("SELECT * FROM Protectora")
-    //suspend fun getProtectorasValoradasPorClientes() : List<ProtectoraEsValoradaPorClientes>
-
     //Devuelve una lista de las organizaciones que hay en la base de datos local
     @Transaction
     @Query("SELECT * FROM Protectora")
