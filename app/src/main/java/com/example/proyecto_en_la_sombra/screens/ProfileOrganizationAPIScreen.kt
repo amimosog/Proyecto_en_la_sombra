@@ -25,10 +25,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 
 import androidx.compose.material.icons.filled.Clear
@@ -124,7 +126,7 @@ fun profileOrganizationAPI(
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth(0.90F)
-                .wrapContentHeight()
+                .fillMaxHeight(0.95F)
                 .offset(y = 12.dp)
                 .background(Color.White, RoundedCornerShape(8.dp))
         ) {
@@ -138,11 +140,20 @@ fun profileOrganizationAPI(
                     }
                     result?.let { OrgInfoAPI(it) }
                 }
+
                 Divider(modifier = Modifier.border(0.5.dp, Color.LightGray))
 
                 result?.let { SocialMediaAPI(it) }
 
-                result?.let { DetailInfoAPI(navController, it, context, donacionRepository, users) }
+                result?.let {
+                    DetailInfoAPI(
+                        navController,
+                        it,
+                        context,
+                        donacionRepository,
+                        users
+                    )
+                }
 
                 OrgGalleryAPI(id, navController, animals)
                 result?.let { ReviewsFieldAPI(id, users, valoracionRepository) }
@@ -393,7 +404,7 @@ fun OrgGalleryAPI(id: String, navController: NavController, animals: animalRepos
     }
     LazyVerticalGrid(
         columns = GridCells.Adaptive(100.dp),
-        modifier = Modifier.wrapContentHeight(Alignment.CenterVertically)
+        modifier = Modifier.height(500.dp)
     ) {
         animalOrgAPI?.animals?.forEachIndexed { index, animal ->
             item {
@@ -480,16 +491,14 @@ fun ReviewsFieldAPI(
     val keyboardController = LocalSoftwareKeyboardController.current
     Column(
         modifier = Modifier
-            .fillMaxWidth(0.99F)
-            .background(color = Color(199, 199, 199), RoundedCornerShape(8.dp))
-            .padding(start = 12.dp, end = 12.dp),
+            .fillMaxWidth(0.98F)
+            .background(color = Color(145, 145, 145), RoundedCornerShape(8.dp)),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             "¿Quieres dejar una opinión sobre esta organización?",
             fontSize = 14.sp
         )
-
         TextField(
             value = review,
             onValueChange = { review = it },
@@ -508,11 +517,10 @@ fun ReviewsFieldAPI(
                 )
             },
             modifier = Modifier
-                .padding(bottom = 5.dp)
-                .height(47.dp),
+                .padding(bottom = 5.dp),
             shape = RoundedCornerShape(10.dp),
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.LightGray,
+                focusedContainerColor = Color.White,
                 unfocusedContainerColor = Color.LightGray,
                 disabledContainerColor = Color.LightGray,
                 focusedIndicatorColor = Color.Transparent,
@@ -536,7 +544,7 @@ fun ReviewsFieldAPI(
 fun Reviews(reviews: List<Valoracion>, users: clientRepository) {
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.wrapContentHeight()
+        modifier = Modifier.height(100.dp)
     ) {
         reviews?.let {
             items(it) { valor ->
