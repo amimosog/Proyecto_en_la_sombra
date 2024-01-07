@@ -118,7 +118,7 @@ fun profileOrganizationBD(
 
         DetailInfoBD(navController, org, context, users, donacionRepository)
 
-        OrgGalleryBD(org.idProtectora, navController, animals)
+        OrgGalleryBD(org.idProtectora.toString(), navController, animals)
         ReviewsFieldBD(id.toString(), users, valoracionRepository)
 
         //Se llama a pintar los comentarios
@@ -337,7 +337,7 @@ fun DetailInfoBD(
 //No hay imagenes en la org, no se usa de momento TODO
 //
 @Composable
-fun OrgGalleryBD(idOrg: Long, navController: NavController, animalRepository: animalRepository) {
+fun OrgGalleryBD(idOrg: String, navController: NavController, animalRepository: animalRepository) {
     var animals by remember { mutableStateOf<List<Animal>?>(null) }
     LaunchedEffect(true) {
         val query = GlobalScope.async(Dispatchers.IO) {

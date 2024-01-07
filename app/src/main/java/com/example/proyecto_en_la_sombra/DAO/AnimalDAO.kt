@@ -19,5 +19,5 @@ interface AnimalDAO {
 
     //Get animals by a given org id
     @Query("SELECT * FROM Animal WHERE protectora = :idOrg")
-    suspend fun getAnimalsByOrgId(idOrg: Long): List<Animal>
+    suspend fun getAnimalsByOrgId(idOrg: String): List<Animal>
 }

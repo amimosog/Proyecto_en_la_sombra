@@ -57,6 +57,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.proyecto_en_la_sombra.Model.Animal as AnimalBD
 import com.example.proyecto_en_la_sombra.Model.Cliente
 import com.example.proyecto_en_la_sombra.Model.Donacion
 import com.example.proyecto_en_la_sombra.Model.Valoracion
@@ -107,7 +108,8 @@ fun profileOrganizationAPI(
             result?.organization?.let {
                 if (it.photos.isNotEmpty())
                     OrgImageAPI(it.photos[0].small)
-                else OrgImageAPI("https://play-lh.googleusercontent.com/QuYkQAkLt5OpBAIabNdIGmd8HKwK58tfqmKNvw2UF69pb4jkojQG9za9l3nLfhv2N5U")
+                else
+                    OrgImageAPI("https://play-lh.googleusercontent.com/QuYkQAkLt5OpBAIabNdIGmd8HKwK58tfqmKNvw2UF69pb4jkojQG9za9l3nLfhv2N5U")
             }
             result?.let { OrgInfoAPI(it) }
         }
@@ -352,19 +354,29 @@ fun DetailInfoAPI(
 
 @Composable
 fun OrgGalleryAPI(id: String, navController: NavController, animals: animalRepository) {
-    var result by remember { mutableStateOf<RemoteModelPage?>(null) }
+    var animalOrgAPI by remember { mutableStateOf<RemoteModelPage?>(null) }
+    var animalOrgBD by remember { mutableStateOf<List<AnimalBD>?>(null) }
+
     LaunchedEffect(true) {
-        val query = //Poner el id de la organizacion
-            GlobalScope.async(Dispatchers.IO) { animals.getAnimalsByOrganization(id) }
-        result = query.await()
+        val queryAPI = GlobalScope.async(Dispatchers.IO) { animals.getAnimalsByOrganization(id) }
+        animalOrgAPI = queryAPI.await()
+
+        val queryBD = GlobalScope.async(Dispatchers.IO) { animals.getAnimalByOrgId(id)}
+        animalOrgBD = queryBD.await()
     }
     LazyVerticalGrid(
         columns = GridCells.Adaptive(100.dp),
         modifier = Modifier.wrapContentHeight(Alignment.CenterVertically)
     ) {
-        result?.animals?.forEachIndexed { index, animal ->
+        animalOrgAPI?.animals?.forEachIndexed { index, animal ->
             item {
                 showImageAPI(animal, navController)
+            }
+        }
+
+        animalOrgBD?.forEachIndexed { index, animalBD ->
+            item {
+                showImageBD(animalBD, navController)
             }
         }
     }
