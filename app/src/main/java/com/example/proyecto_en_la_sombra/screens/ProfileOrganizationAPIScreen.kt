@@ -275,7 +275,7 @@ fun DetailInfoAPI(
         Spacer(Modifier.width(10.dp))
         Button(
             onClick = {
-                navController.navigate(route = AppScreens.NewAnimalScreen.route)
+                navController.navigate(route = AppScreens.NewAnimalScreen.route + "/" + org.organization.id)
             }
         ) {
             Text("Añadir Animal")

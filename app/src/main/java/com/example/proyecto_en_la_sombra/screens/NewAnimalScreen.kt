@@ -47,7 +47,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun newAnimalComponents(navController: NavController, animalRepository: animalRepository, idOrg: Long) {
+fun newAnimalComponents(navController: NavController, animalRepository: animalRepository, idOrg: String) {
     var nombre: String by remember { mutableStateOf("") }
     var desc: String by remember { mutableStateOf("") }
     var fotos: String by remember { mutableStateOf("") }

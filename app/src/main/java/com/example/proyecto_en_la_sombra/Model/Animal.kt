@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 data class Animal (
     val nombre: String,
     val descripcion: String?,
-    val protectora: Long, //id de la protectora del animal
+    val protectora: String, //id de la protectora del animal
     val fotos: String? //url con las imagenes del animal TODO:Hacer que sea una lista o algo asi
 ){
     @PrimaryKey(autoGenerate = true)

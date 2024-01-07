@@ -182,10 +182,10 @@ fun AppNavigation(
         composable(route = AppScreens.NewAnimalScreen.route+ "/{idOrg}",
             arguments = listOf(
                 navArgument("idOrg") {
-                    type = NavType.LongType
+                    type = NavType.StringType
                 }
             )
-        ) {it.arguments?.getLong("idOrg")
+        ) {it.arguments?.getString("idOrg")
             ?.let { it1 ->
                 newAnimalComponents(navController, animals, it1)
             }

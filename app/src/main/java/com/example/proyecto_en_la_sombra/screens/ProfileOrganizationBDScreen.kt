@@ -257,7 +257,7 @@ fun DetailInfoBD(
         Spacer(Modifier.width(10.dp))
         Button(
             onClick = {
-                navController.navigate(route = AppScreens.NewAnimalScreen.route+ "/" + org.idProtectora)
+                navController.navigate(route = AppScreens.NewAnimalScreen.route+ "/" + org.idProtectora.toString())
             }
         ) {
             Text("Añadir Animal")
@@ -283,11 +283,8 @@ fun DetailInfoBD(
                 confirmButton = {
                     Button(
                         onClick = {
-                            val newDonation = Donacion(
-                                cliente.idCliente,
-                                org.idProtectora.toString(),
-                                texto.toFloat()
-                            )
+                            val newDonation =
+                                Donacion(cliente.idCliente, org.idProtectora.toString(), texto.toFloat())
                             if (!ExisteUserDonacionBD(
                                     cliente,
                                     result!!,
