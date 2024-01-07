@@ -45,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.proyecto_en_la_sombra.Model.Cliente
 import com.example.proyecto_en_la_sombra.R
 import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
 import com.example.proyecto_en_la_sombra.Repository.clientRepository
@@ -106,7 +107,7 @@ fun LoginComponents(navController: NavController, users: clientRepository) {
                     onValueChange = { email = it },
                     placeholder = { Text(text = "Email", modifier = Modifier.alpha(0.5F)) },
                     trailingIcon = {
-                        Icon(Icons.Outlined.Email, contentDescription = "email_icon")
+                        Icon(Outlined.Email, contentDescription = "email_icon")
                     },
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.LightGray,
@@ -147,13 +148,17 @@ fun LoginComponents(navController: NavController, users: clientRepository) {
                 Spacer(Modifier.height(35.dp))
                 Button(onClick = {
                     //Comprobar que la contrasena es la correcta para ese usuario
+                    var cliente : Cliente
+                    var clienteExistente : Boolean = false
                     if (email.isNotEmpty() && pass.isNotEmpty()) {
                         GlobalScope.launch {
-
-                            var cliente = users.getClienteByEmail(email)
-
-                            passCheck = cliente.password
-                            Log.i("obtencion usuario por email", cliente.nombre)
+                            try {
+                                cliente = users.getClienteByEmail(email)
+                                clienteExistente = true
+                                passCheck = cliente.password
+                            } catch (e: Exception) {
+                                Log.i("obtencion usuario por email", "no existe")
+                            }
                         }
                         if (passCheck.equals(pass)) {
                             emailActual = email
