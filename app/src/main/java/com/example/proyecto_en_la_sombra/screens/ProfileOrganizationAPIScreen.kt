@@ -5,13 +5,18 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,10 +30,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
+
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -45,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
@@ -93,42 +101,60 @@ fun profileOrganizationAPI(
     animals: animalRepository
 ) {
     var result by remember { mutableStateOf<OrgRemoteModel?>(null) }
-    var reviews by remember { mutableStateOf<List<Valoracion>?>(null) }
+    var reviews by remember { mutableStateOf<List<Valoracion>?>(null) }                         //Martín Calvo Peña
     LaunchedEffect(true) {
-
         val query =
             GlobalScope.async(Dispatchers.IO) {
                 protectoraRepository.getUniqueOrganization(id)
             }
         result = query.await()
     }
-    Column(Modifier.padding(8.dp)) {
+    Box(
+        Modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.background_register),
+            contentDescription = "background",
+            modifier = Modifier
+                .fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth(0.90F)
+                .wrapContentHeight()
+                .offset(y = 12.dp)
+                .background(Color.White, RoundedCornerShape(8.dp))
+        ) {
+            item {
+                Row {
+                    result?.organization?.let {
+                        if (it.photos.isNotEmpty())
+                            OrgImageAPI(it.photos[0].small)
+                        else
+                            OrgImageAPI("https://play-lh.googleusercontent.com/QuYkQAkLt5OpBAIabNdIGmd8HKwK58tfqmKNvw2UF69pb4jkojQG9za9l3nLfhv2N5U")
+                    }
+                    result?.let { OrgInfoAPI(it) }
+                }
+                Divider(modifier = Modifier.border(0.5.dp, Color.LightGray))
 
-        Row {
-            result?.organization?.let {
-                if (it.photos.isNotEmpty())
-                    OrgImageAPI(it.photos[0].small)
-                else
-                    OrgImageAPI("https://play-lh.googleusercontent.com/QuYkQAkLt5OpBAIabNdIGmd8HKwK58tfqmKNvw2UF69pb4jkojQG9za9l3nLfhv2N5U")
+                result?.let { SocialMediaAPI(it) }
+
+                result?.let { DetailInfoAPI(navController, it, context, donacionRepository, users) }
+
+                OrgGalleryAPI(id, navController, animals)
+                result?.let { ReviewsFieldAPI(id, users, valoracionRepository) }
+
+
+                //Se llama a pintar los comentarios
+                LaunchedEffect(true) {
+                    reviews = valoracionRepository.getValoracionByIdProtectora(id);
+                }
+                reviews?.let { Reviews(it, users) }
             }
-            result?.let { OrgInfoAPI(it) }
         }
-
-
-        result?.let { SocialMediaAPI(it) }
-
-        result?.let { DetailInfoAPI(navController, it, context, donacionRepository, users) }
-
-        OrgGalleryAPI(id, navController, animals)
-        result?.let { ReviewsFieldAPI(id, users, valoracionRepository) }
-
-
-        //Se llama a pintar los comentarios
-        LaunchedEffect(true) {
-            reviews = valoracionRepository.getValoracionByIdProtectora(id);
-        }
-        reviews?.let { ReviewsBD(it, users) }
-
     }
 }
 
@@ -175,13 +201,13 @@ fun OrgImageAPI(url: String) {
         modifier = Modifier
             .clip(CircleShape)
             .size(100.dp)
-            .background(color = Color.DarkGray)
+            .background(color = Color.White)
     )
 }
 
 @Composable
 fun OrgInfoAPI(org: OrgRemoteModel) {
-    Column() {
+    Column {
         Text(
             org.organization.name,
             modifier = Modifier.padding(top = 7.dp, start = 5.dp),
@@ -354,6 +380,7 @@ fun DetailInfoAPI(
 
 @Composable
 fun OrgGalleryAPI(id: String, navController: NavController, animals: animalRepository) {
+
     var animalOrgAPI by remember { mutableStateOf<RemoteModelPage?>(null) }
     var animalOrgBD by remember { mutableStateOf<List<AnimalBD>?>(null) }
 
@@ -361,7 +388,7 @@ fun OrgGalleryAPI(id: String, navController: NavController, animals: animalRepos
         val queryAPI = GlobalScope.async(Dispatchers.IO) { animals.getAnimalsByOrganization(id) }
         animalOrgAPI = queryAPI.await()
 
-        val queryBD = GlobalScope.async(Dispatchers.IO) { animals.getAnimalByOrgId(id)}
+        val queryBD = GlobalScope.async(Dispatchers.IO) { animals.getAnimalByOrgId(id) }
         animalOrgBD = queryBD.await()
     }
     LazyVerticalGrid(
@@ -401,7 +428,8 @@ fun showImageAPI(animal: Animal, navController: NavController) {
 fun SocialMediaAPI(org: OrgRemoteModel) {
     val localUriHandler = LocalUriHandler.current
     val logoModifier = Modifier
-        .padding(top = 5.dp, start = 10.dp)
+        .offset(y = 5.dp)
+        .padding(start = 10.dp)
         .size(60.dp)
         .clip(CircleShape)
 
@@ -452,8 +480,9 @@ fun ReviewsFieldAPI(
     val keyboardController = LocalSoftwareKeyboardController.current
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .background(color = Color(165, 165, 165)),
+            .fillMaxWidth(0.99F)
+            .background(color = Color(199, 199, 199), RoundedCornerShape(8.dp))
+            .padding(start = 12.dp, end = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -506,7 +535,8 @@ fun ReviewsFieldAPI(
 @Composable
 fun Reviews(reviews: List<Valoracion>, users: clientRepository) {
     LazyColumn(
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.wrapContentHeight()
     ) {
         reviews?.let {
             items(it) { valor ->
@@ -525,10 +555,10 @@ fun review(valoracion: Valoracion, users: clientRepository) {
     LaunchedEffect(true) {
         cliente = users.getClientById(valoracion.idCliente)
     }
-    Row {
+    Row(modifier = Modifier.background(Color(209, 209, 209), RoundedCornerShape(8.dp))) {
         Column {
             Icon(
-                imageVector = Icons.Default.AccountCircle,
+                imageVector = Icons.Outlined.AccountCircle,
                 contentDescription = null,
                 modifier = Modifier
                     .size(60.dp)
@@ -538,7 +568,7 @@ fun review(valoracion: Valoracion, users: clientRepository) {
                 Text(
                     text = it.nickname,
                     fontSize = 12.sp,
-                    modifier = Modifier.padding(start = 5.dp, top = 3.dp, bottom = 4.dp),
+                    modifier = Modifier.padding(start = 7.dp, top = 3.dp, bottom = 4.dp),
                     textAlign = TextAlign.Center,
                 )
             }
