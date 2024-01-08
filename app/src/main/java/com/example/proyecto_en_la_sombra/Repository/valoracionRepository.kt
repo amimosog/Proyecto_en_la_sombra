@@ -12,4 +12,6 @@ class valoracionRepository(instance: AplicacionDB) {
     suspend fun getValoracionByIdProtectora(idProtectora: String): List<Valoracion> =
         store.valoracionDAO().getValoracionByIdProtectora(idProtectora)
 
+    suspend fun getValoracionByIdProtectoraCliente(idProtectora: String, idCliente: Long): Valoracion =
+        store.valoracionDAO().getValoracionByIdProtectoraCliente(idProtectora, idCliente)
 }

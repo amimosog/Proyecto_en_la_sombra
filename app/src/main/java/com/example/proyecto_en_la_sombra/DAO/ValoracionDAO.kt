@@ -11,4 +11,7 @@ interface ValoracionDAO{
 
     @Query("SELECT * FROM Valoracion WHERE idProtectora = :idProtectora")
     suspend fun getValoracionByIdProtectora(idProtectora: String) : List<Valoracion>
+
+    @Query("SELECT * FROM Valoracion WHERE idProtectora = :idProtectora AND idCliente = :idCliente")
+    suspend fun getValoracionByIdProtectoraCliente(idProtectora: String, idCliente: Long) : Valoracion
 }

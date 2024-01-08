@@ -5,10 +5,9 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,8 +35,6 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -77,7 +74,6 @@ import com.example.proyecto_en_la_sombra.Model.Donacion
 import com.example.proyecto_en_la_sombra.Model.Protectora
 import com.example.proyecto_en_la_sombra.Model.Valoracion
 import com.example.proyecto_en_la_sombra.R
-import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
 import com.example.proyecto_en_la_sombra.Repository.animalRepository
 import com.example.proyecto_en_la_sombra.Repository.clientRepository
 import com.example.proyecto_en_la_sombra.Repository.donacionRepository
@@ -143,7 +139,15 @@ fun profileOrganizationBD(
                 DetailInfoBD(navController, org, context, users, donacionRepository)
 
                 OrgGalleryBD(org.idProtectora.toString(), navController, animals)
-                ReviewsFieldBD(id.toString(), users, valoracionRepository)
+
+
+                var existeReview: Valoracion? by remember { mutableStateOf(null) }
+                LaunchedEffect(true) {
+                    existeReview = valoracionRepository.getValoracionByIdProtectoraCliente(id.toString(), users.getClienteByEmail(emailActual).idCliente);
+                }
+                if (existeReview == null) {
+                    ReviewsFieldBD(id.toString(), users, valoracionRepository)
+                }
 
                 //Se llama a pintar los comentarios
                 LaunchedEffect(true) {
@@ -153,6 +157,7 @@ fun profileOrganizationBD(
             }
         }
     }
+
 }
 
 @SuppressLint("SuspiciousIndentation")
@@ -309,11 +314,7 @@ fun DetailInfoBD(
                     Button(
                         onClick = {
                             val newDonation =
-                                Donacion(
-                                    cliente.idCliente,
-                                    org.idProtectora.toString(),
-                                    texto.toFloat()
-                                )
+                                Donacion(cliente.idCliente, org.idProtectora.toString(), texto.toFloat())
                             if (!ExisteUserDonacionBD(
                                     cliente,
                                     result!!,
@@ -362,9 +363,6 @@ fun DetailInfoBD(
 
 }
 
-//
-//No hay imagenes en la org, no se usa de momento TODO
-//
 @Composable
 fun OrgGalleryBD(idOrg: String, navController: NavController, animalRepository: animalRepository) {
     var animals by remember { mutableStateOf<List<Animal>?>(null) }
@@ -396,9 +394,9 @@ fun showImageBD(animal: Animal, navController: NavController) {
         contentDescription = "Animal photo",
         modifier = Modifier
             .size(200.dp)
-        /*.clickable { TODO detalles del animal
-            navController.navigate(route = AppScreens.AnimalDetailScreen.route + "/" + animal.idAnimal)
-        }*/
+            /*.clickable { TODO detalles del animal (No se va a hacer detalles de los animales añadidos)
+                navController.navigate(route = AppScreens.AnimalDetailScreen.route + "/" + animal.idAnimal)
+            }*/
     )
 }
 
@@ -411,6 +409,7 @@ fun ReviewsFieldBD(
 ) {
     var review by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
