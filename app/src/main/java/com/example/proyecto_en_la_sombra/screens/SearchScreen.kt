@@ -109,7 +109,7 @@ fun SearchBarCustom(navController: NavController) {
                 )
             )
 
-            getType(onUpdate = { caracteristicas = it })
+            //getType(onUpdate = { caracteristicas = it })
             Column {
                 dropdown(name = "age", list = caracteristicas.getValue("age")) {
                     ageDropdown = it

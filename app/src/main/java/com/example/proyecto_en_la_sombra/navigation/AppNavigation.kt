@@ -73,7 +73,8 @@ fun AppNavigation(
                         it1,
                         context,
                         solicitudAdoptRepository,
-                        favoritosRepository
+                        favoritosRepository,
+                        users
                     )
                 }
         }

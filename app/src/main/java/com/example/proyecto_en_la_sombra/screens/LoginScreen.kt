@@ -156,6 +156,7 @@ fun LoginComponents(navController: NavController, users: clientRepository) {
                                 cliente = users.getClienteByEmail(email)
                                 clienteExistente = true
                                 passCheck = cliente.password
+                                Log.i("Id usuario inicia", cliente.idCliente.toString())
                             } catch (e: Exception) {
                                 Log.i("obtencion usuario por email", "no existe")
                             }

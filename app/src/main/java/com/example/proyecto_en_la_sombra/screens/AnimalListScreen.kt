@@ -141,14 +141,6 @@ fun iconElements(animal: Animal, context: Context) {
             islikeClicked = true
         } else islikeClicked = false
 
-        Icon(
-            Icons.Default.Add,
-            contentDescription = "Follow button",
-            modifier = Modifier
-                .padding(start = 350.dp, top = 630.dp)
-                .size(30.dp)
-        )
-
         IconButton(
             onClick = {
                 islikeClicked = !islikeClicked
@@ -176,7 +168,7 @@ fun iconElements(animal: Animal, context: Context) {
                 }
             },
             modifier = Modifier
-                .padding(start = 350.dp, top = 10.dp)
+                .padding(start = 350.dp, top = 630.dp)
                 .size(30.dp)
         ) {
 

@@ -9,7 +9,7 @@ class favoritosRepository(instance: AplicacionDB) {
         store.favoritosDAO().getFavsByIdClient(id)
 
     suspend fun getFavByIdAnimal(idAnimal: Long, idCliente: Long): Favoritos =
-        store.favoritosDAO().getFavByIdAnimal(idAnimal, idAnimal)
+        store.favoritosDAO().getFavByIdAnimal(idAnimal, idCliente)
 
     suspend fun setFav(fav: Favoritos) = store.favoritosDAO().setFav(fav)
 

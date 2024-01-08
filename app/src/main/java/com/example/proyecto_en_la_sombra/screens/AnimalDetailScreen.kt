@@ -63,6 +63,7 @@ import com.example.proyecto_en_la_sombra.Model.SolicitudAdopcion
 import com.example.proyecto_en_la_sombra.R
 import com.example.proyecto_en_la_sombra.Repository.AplicacionDB
 import com.example.proyecto_en_la_sombra.Repository.animalRepository
+import com.example.proyecto_en_la_sombra.Repository.clientRepository
 import com.example.proyecto_en_la_sombra.Repository.favoritosRepository
 import com.example.proyecto_en_la_sombra.Repository.solicitudAdopciónRepository
 import com.example.proyecto_en_la_sombra.api.RetrofitService
@@ -70,6 +71,7 @@ import com.example.proyecto_en_la_sombra.api.model.Animal
 import com.example.proyecto_en_la_sombra.api.model.Photo
 import com.example.proyecto_en_la_sombra.api.model.RemoteResult
 import com.example.proyecto_en_la_sombra.auth
+import com.example.proyecto_en_la_sombra.emailActual
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -86,7 +88,8 @@ fun AnimalComponents(
     id: String,
     context: Context,
     solicitudesAdopt: solicitudAdopciónRepository,
-    favoritosRepository: favoritosRepository
+    favoritosRepository: favoritosRepository,
+    users: clientRepository
 ) {
     var result by remember { mutableStateOf<RemoteResult?>(null) }
     LaunchedEffect(true) {
@@ -118,7 +121,7 @@ fun AnimalComponents(
             ) {
                 result?.animal?.let {
                     Animal_Info(it)
-                    Animal_Adopt_ButtonAndLikeIcon(it, context, solicitudesAdopt, favoritosRepository)
+                    Animal_Adopt_ButtonAndLikeIcon(it, context, solicitudesAdopt, favoritosRepository, users)
                 }
             }
         }
@@ -132,7 +135,8 @@ fun Animal_Adopt_ButtonAndLikeIcon(
     animal: Animal,
     context: Context,
     solicitudAdopt: solicitudAdopciónRepository,
-    favoritosRepository: favoritosRepository
+    favoritosRepository: favoritosRepository,
+    users: clientRepository
 ) {
     //Logica del boton de ADOPCION----------------------------------------------------------------------------------------------
     var isButtonAdoptar by rememberSaveable { mutableStateOf(false) }
@@ -214,13 +218,13 @@ fun Animal_Adopt_ButtonAndLikeIcon(
                                     GlobalScope.launch {
                                         //La peticion a la base de datos de forma asincrona
                                         solicitudAdopt.setSolicitudCompleta(
-                                            1.toLong(),
+                                            users.getClienteByEmail(emailActual).idCliente,
                                             animal.id.toLong(),
                                             currentdate
                                         )
 
                                         var solicitud = solicitudAdopt.getSolicitud(
-                                            1.toLong(),
+                                            users.getClienteByEmail(emailActual).idCliente,
                                             animal.id.toLong()
                                         )
                                         Log.i("Solicitud adopcion:", solicitud.id.toString())
@@ -274,9 +278,6 @@ fun Animal_Adopt_ButtonAndLikeIcon(
             //PopUpAdoptar(animal, room, isButtonAdoptar, openPopUp)
         }
 
-        Log.i("Valor isButtonAdoptar", isButtonAdoptar.toString())
-        Log.i("Valor openPopUp", openPopUp.toString())
-
         if (isButtonAdoptar)
             Text(text = "Adoptar")
         else
@@ -293,14 +294,20 @@ fun Animal_Adopt_ButtonAndLikeIcon(
             //La peticion a la base de datos de forma asincrona
             //Inserta en la base de datos si sabe que no existe el id de dicho animal en la bd
             val query = GlobalScope.async(Dispatchers.IO) {
-                favoritosRepository.getFavByIdAnimal(animal.id.toLong(), 1.toLong())
+                favoritosRepository.getFavByIdAnimal(animal.id.toLong(), users.getClienteByEmail(emailActual).idCliente)
             }
             result = query.await()
+
+            Log.i("Like Result", result.toString())
         }
     }
     if (result != null) {
         islikeClicked = true
-    } else islikeClicked = false
+    } else {
+        islikeClicked = false
+    }
+
+    Log.i("Logica like",islikeClicked.toString())
 
     //Like
     IconButton(
@@ -311,9 +318,9 @@ fun Animal_Adopt_ButtonAndLikeIcon(
                 GlobalScope.launch {
                     //La peticion a la base de datos de forma asincrona
                     //Elimina de la base de la tabla favoritos, dicho animal
-                    favoritosRepository.deleteFav(Favoritos(1.toLong(), animal.id.toLong()))
+                    favoritosRepository.deleteFav(Favoritos(users.getClienteByEmail(emailActual).idCliente, animal.id.toLong()))
                     var favoritos: List<Favoritos> =
-                        favoritosRepository.getFavsByIdClient(1.toLong())
+                        favoritosRepository.getFavsByIdClient(users.getClienteByEmail(emailActual).idCliente)
 
                     Log.i("Numero de favs ", favoritos.size.toString())
                 }
@@ -321,9 +328,9 @@ fun Animal_Adopt_ButtonAndLikeIcon(
                 GlobalScope.launch {
                     //La peticion a la base de datos de forma asincrona
                     //Elimina de la base de la tabla favoritos, dicho animal
-                    favoritosRepository.setFav(Favoritos(1.toLong(), animal.id.toLong()))
+                    favoritosRepository.setFav(Favoritos(users.getClienteByEmail(emailActual).idCliente, animal.id.toLong()))
                     var favoritos: List<Favoritos> =
-                        favoritosRepository.getFavsByIdClient(1.toLong())
+                        favoritosRepository.getFavsByIdClient(users.getClienteByEmail(emailActual).idCliente)
 
                     Log.i("Numero de favs ", favoritos.size.toString())
                 }
@@ -336,13 +343,13 @@ fun Animal_Adopt_ButtonAndLikeIcon(
         if (!islikeClicked) {
             Icon(
                 Icons.Default.FavoriteBorder,
-                contentDescription = "like button"
+                contentDescription = "like button no"
             )
 
         } else {
             Icon(
                 Icons.Default.Favorite,
-                contentDescription = "like button"
+                contentDescription = "like button si"
             )
         }
     }

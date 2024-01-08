@@ -103,7 +103,7 @@ fun profileOrganizationAPI(
     animals: animalRepository
 ) {
     var result by remember { mutableStateOf<OrgRemoteModel?>(null) }
-    var reviews by remember { mutableStateOf<List<Valoracion>?>(null) }                         //Martín Calvo Peña
+    var reviews by remember { mutableStateOf<List<Valoracion>?>(null) }
     LaunchedEffect(true) {
         val query =
             GlobalScope.async(Dispatchers.IO) {
@@ -157,8 +157,15 @@ fun profileOrganizationAPI(
                 }
 
                 OrgGalleryAPI(id, navController, animals)
-                result?.let { ReviewsFieldAPI(id, users, valoracionRepository) }
 
+                var existeReview: Valoracion? by remember { mutableStateOf(null) }
+                LaunchedEffect(true) {
+                    existeReview = valoracionRepository.getValoracionByIdProtectoraCliente(id, users.getClienteByEmail(emailActual).idCliente);
+                }
+
+                if (existeReview == null) {
+                    ReviewsFieldAPI(id, users, valoracionRepository)
+                }
 
                 //Se llama a pintar los comentarios
                 LaunchedEffect(true) {

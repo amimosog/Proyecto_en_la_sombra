@@ -74,14 +74,14 @@ fun ProfileComponents(
     var resultFavs by remember { mutableStateOf<List<Favoritos>?>(null) }
     LaunchedEffect(true) {
         val query1 =
-            GlobalScope.async(Dispatchers.IO) { favoritosRepository.getFavsByIdClient(1.toLong()) }
+            GlobalScope.async(Dispatchers.IO) { favoritosRepository.getFavsByIdClient(users.getClienteByEmail(emailActual).idCliente) }
         resultFavs = query1.await()
     }
 
     var resultAdop by remember { mutableStateOf<List<SolicitudAdopcion>?>(null) }
     LaunchedEffect(true) {
         val query2 = GlobalScope.async(Dispatchers.IO) {
-            solicitudAdopcionRepository.getAdopByIdClient(1.toLong())
+            solicitudAdopcionRepository.getAdopByIdClient(users.getClienteByEmail(emailActual).idCliente)
         }
         resultAdop = query2.await()
     }
@@ -100,7 +100,7 @@ fun ProfileComponents(
 
         //-------------------------TABS-------------------------------------------------
         val pagerState = rememberPagerState(
-            pageCount = { 3 }
+            pageCount = { 2 }
         )
         val coroutineScope = rememberCoroutineScope()
         TabRow(selectedTabIndex = pagerState.currentPage,
@@ -134,16 +134,6 @@ fun ProfileComponents(
                     }
                 }
             )
-            Tab(
-                selected = pagerState.currentPage == 2,
-                text = { Text("Preferencias") },
-                onClick = {
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(2)
-                    }
-                }
-            )
-
         }
         HorizontalPager(
             state = pagerState,
@@ -160,7 +150,7 @@ fun ProfileComponents(
                         }
                     }
                 )
-            } else if (page == 1) {
+            } else{
                 LazyVerticalGrid(
                     columns = GridCells.Adaptive(100.dp),
                     content = {
@@ -171,12 +161,6 @@ fun ProfileComponents(
                         }
                     }
                 )
-            } else {
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    BloqueDatos(cliente)
-                }
             }
         }
     }
