@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,8 +14,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -55,6 +59,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
@@ -105,29 +110,49 @@ fun profileOrganizationBD(
     runBlocking {
         org = protectoraRepository.getOrganizacionId(id)
     }
-    Column {
+    Box(
+        Modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.background_register),
+            contentDescription = "background",
+            modifier = Modifier
+                .fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth(0.90F)
+                .fillMaxHeight(0.95F)
+                .offset(y = 12.dp)
+                .background(Color.White, RoundedCornerShape(8.dp)),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            item {
+                Row {
+                    if (org.logo != null)
+                        OrgImageBD(org.logo!!)
+                    else
+                        OrgImageBD("https://play-lh.googleusercontent.com/QuYkQAkLt5OpBAIabNdIGmd8HKwK58tfqmKNvw2UF69pb4jkojQG9za9l3nLfhv2N5U")
 
-        Row {
-            if (org.logo != null)
-                OrgImageBD(org.logo!!)
-            else
-                OrgImageBD("https://play-lh.googleusercontent.com/QuYkQAkLt5OpBAIabNdIGmd8HKwK58tfqmKNvw2UF69pb4jkojQG9za9l3nLfhv2N5U")
+                    OrgInfoBD(org)
+                }
 
-            OrgInfoBD(org)
+                DetailInfoBD(navController, org, context, users, donacionRepository)
+
+                OrgGalleryBD(org.idProtectora.toString(), navController, animals)
+                ReviewsFieldBD(id.toString(), users, valoracionRepository)
+
+                //Se llama a pintar los comentarios
+                LaunchedEffect(true) {
+                    reviews = valoracionRepository.getValoracionByIdProtectora(id.toString());
+                }
+                reviews?.let { Reviews(it, users) }
+            }
         }
-
-        DetailInfoBD(navController, org, context, users, donacionRepository)
-
-        OrgGalleryBD(org.idProtectora.toString(), navController, animals)
-        ReviewsFieldBD(id.toString(), users, valoracionRepository)
-
-        //Se llama a pintar los comentarios
-        LaunchedEffect(true) {
-            reviews = valoracionRepository.getValoracionByIdProtectora(id.toString());
-        }
-        reviews?.let { Reviews(it, users) }
     }
-
 }
 
 @SuppressLint("SuspiciousIndentation")
@@ -257,7 +282,7 @@ fun DetailInfoBD(
         Spacer(Modifier.width(10.dp))
         Button(
             onClick = {
-                navController.navigate(route = AppScreens.NewAnimalScreen.route+ "/" + org.idProtectora.toString())
+                navController.navigate(route = AppScreens.NewAnimalScreen.route + "/" + org.idProtectora.toString())
             }
         ) {
             Text("Añadir Animal")
@@ -284,7 +309,11 @@ fun DetailInfoBD(
                     Button(
                         onClick = {
                             val newDonation =
-                                Donacion(cliente.idCliente, org.idProtectora.toString(), texto.toFloat())
+                                Donacion(
+                                    cliente.idCliente,
+                                    org.idProtectora.toString(),
+                                    texto.toFloat()
+                                )
                             if (!ExisteUserDonacionBD(
                                     cliente,
                                     result!!,
@@ -341,13 +370,14 @@ fun OrgGalleryBD(idOrg: String, navController: NavController, animalRepository: 
     var animals by remember { mutableStateOf<List<Animal>?>(null) }
     LaunchedEffect(true) {
         val query = GlobalScope.async(Dispatchers.IO) {
-                animalRepository.getAnimalByOrgId(idOrg)
-            }
+            animalRepository.getAnimalByOrgId(idOrg)
+        }
         animals = query.await()
     }
     LazyVerticalGrid(
         columns = GridCells.Adaptive(100.dp),
-        modifier =Modifier.wrapContentHeight(Alignment.CenterVertically)
+        modifier = Modifier.height(500.dp),
+        verticalArrangement = Arrangement.Center
     ) {
         animals?.forEachIndexed { index, animal ->
             item {
@@ -366,23 +396,25 @@ fun showImageBD(animal: Animal, navController: NavController) {
         contentDescription = "Animal photo",
         modifier = Modifier
             .size(200.dp)
-            /*.clickable { TODO detalles del animal
-                navController.navigate(route = AppScreens.AnimalDetailScreen.route + "/" + animal.idAnimal)
-            }*/
+        /*.clickable { TODO detalles del animal
+            navController.navigate(route = AppScreens.AnimalDetailScreen.route + "/" + animal.idAnimal)
+        }*/
     )
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun ReviewsFieldBD(id: String,
-                   users: clientRepository,
-                   valoracionRepository: valoracionRepository) {
+fun ReviewsFieldBD(
+    id: String,
+    users: clientRepository,
+    valoracionRepository: valoracionRepository
+) {
     var review by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = Color(165, 165, 165)),
+            .background(color = Color(165, 165, 165), RoundedCornerShape(8.dp)),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -436,14 +468,14 @@ fun ReviewsFieldBD(id: String,
 @Composable
 fun ReviewsBD(reviews: List<Valoracion>, users: clientRepository) {
     LazyColumn(
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.height(150.dp)
     ) {
         reviews?.let {
             items(it) { valor ->
                 reviewBD(valor, users)
             }
         }
-
     }
 }
 
@@ -455,34 +487,35 @@ fun reviewBD(valoracion: Valoracion, users: clientRepository) {
     LaunchedEffect(true) {
         cliente = users.getClientById(valoracion.idCliente)
     }
-        Row {
-            Column {
-                Icon(
-                    imageVector = Icons.Default.AccountCircle,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(60.dp)
-                        .padding(top = 7.dp, start = 7.dp)
-                )
-                cliente?.let {
-                    Text(
-                        text = it.nickname,
-                        fontSize = 12.sp,
-                        modifier = Modifier.padding(start = 5.dp, top = 3.dp, bottom = 4.dp),
-                        textAlign = TextAlign.Center,
-                    )
-                }
-            }
-            Column(
-                verticalArrangement = Arrangement.Center,
-            ) {
+    Spacer(modifier = Modifier.height(15.dp))
+    Row(modifier = Modifier.background(Color(209, 209, 209), RoundedCornerShape(8.dp))) {
+        Column {
+            Icon(
+                imageVector = Icons.Default.AccountCircle,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(60.dp)
+                    .padding(top = 7.dp, start = 7.dp)
+            )
+            cliente?.let {
                 Text(
-                    text = valoracion.valoracion,
-                    modifier = Modifier.padding(5.dp),
+                    text = it.nickname,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(start = 5.dp, top = 3.dp, bottom = 4.dp),
                     textAlign = TextAlign.Center,
-                    softWrap = true,
                 )
             }
         }
+        Column(
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text(
+                text = valoracion.valoracion,
+                modifier = Modifier.padding(5.dp),
+                textAlign = TextAlign.Center,
+                softWrap = true,
+            )
+        }
+    }
 
 }

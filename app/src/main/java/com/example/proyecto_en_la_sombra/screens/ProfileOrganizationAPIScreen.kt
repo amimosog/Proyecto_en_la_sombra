@@ -128,7 +128,8 @@ fun profileOrganizationAPI(
                 .fillMaxWidth(0.90F)
                 .fillMaxHeight(0.95F)
                 .offset(y = 12.dp)
-                .background(Color.White, RoundedCornerShape(8.dp))
+                .background(Color.White, RoundedCornerShape(8.dp)),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
                 Row {
@@ -492,7 +493,7 @@ fun ReviewsFieldAPI(
     Column(
         modifier = Modifier
             .fillMaxWidth(0.98F)
-            .background(color = Color(145, 145, 145), RoundedCornerShape(8.dp)),
+            .background(color = Color(165, 165, 165), RoundedCornerShape(8.dp)),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -544,14 +545,13 @@ fun ReviewsFieldAPI(
 fun Reviews(reviews: List<Valoracion>, users: clientRepository) {
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.height(100.dp)
+        modifier = Modifier.height(150.dp)
     ) {
         reviews?.let {
             items(it) { valor ->
                 review(valor, users)
             }
         }
-
     }
 }
 
@@ -563,6 +563,7 @@ fun review(valoracion: Valoracion, users: clientRepository) {
     LaunchedEffect(true) {
         cliente = users.getClientById(valoracion.idCliente)
     }
+    Spacer(modifier = Modifier.height(15.dp))
     Row(modifier = Modifier.background(Color(209, 209, 209), RoundedCornerShape(8.dp))) {
         Column {
             Icon(
