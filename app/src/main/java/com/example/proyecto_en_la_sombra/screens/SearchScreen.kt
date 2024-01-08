@@ -57,7 +57,7 @@ import java.util.Collections
 val size = listOf<String>("", "Small", "Medium", "Large", "Xlarge")
 val gender = listOf<String>("", "Male", "Female")
 val age = listOf<String>("", "Baby", "Young", "Adult")
-val type = listOf<String>("", "Dog", "Cat", "Rabbit", "Small & Furry", "Horse", "Bird", "Scales, Fins & Other", "Barnyard")
+val type = listOf<String>("", "Dog", "Cat", "Rabbit", "Horse", "Bird", "Barnyard")
 
 var caracteristicas = hashMapOf(
     "size" to size,
@@ -123,7 +123,6 @@ fun SearchBarCustom(navController: NavController) {
                 dropdown(name = "size", list = caracteristicas.getValue("size")) {
                     sizeDropdown = it
                 }
-                //dropdown(name = name, list = list, onTextChange = { sizeDropdown = it })
             }
         }
     }
