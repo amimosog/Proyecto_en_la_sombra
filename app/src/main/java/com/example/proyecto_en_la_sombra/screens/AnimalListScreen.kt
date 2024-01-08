@@ -51,13 +51,16 @@ import androidx.compose.material3.Button
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat.startActivity
+import com.example.proyecto_en_la_sombra.Repository.clientRepository
+import com.example.proyecto_en_la_sombra.Repository.favoritosRepository
+import com.example.proyecto_en_la_sombra.emailActual
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 /*Funcion que pinta cada elemento de la lista de forma optima*/
 @Composable
-fun listOfElements(navController: NavController, context: Context) {
+fun listOfElements(navController: NavController, users: clientRepository, favoritosRepository: favoritosRepository) {
     var result by remember { mutableStateOf<RemoteModelPage?>(null) }
     LaunchedEffect(true) {
         val service = RetrofitService.RetrofitServiceFactory.makeRetrofitService()
@@ -74,7 +77,7 @@ fun listOfElements(navController: NavController, context: Context) {
             * una vez por cada elemento de la lista*/
             result?.animals?.let {
                 items(it) { animal ->
-                    listElement(animal, navController, context)
+                    listElement(animal, navController, users, favoritosRepository)
                 }
             }
 
@@ -86,7 +89,7 @@ fun listOfElements(navController: NavController, context: Context) {
 
 /*Funcion que pinta los textos y las imagenes en conjunto*/
 @Composable
-fun listElement(animal: Animal, navController: NavController, context: Context) {
+fun listElement(animal: Animal, navController: NavController, users: clientRepository, favoritosRepository: favoritosRepository) {
     Box(modifier = Modifier
         .fillMaxSize()
         .clickable {
@@ -100,7 +103,7 @@ fun listElement(animal: Animal, navController: NavController, context: Context) 
             else
                 "https://play-lh.googleusercontent.com/QuYkQAkLt5OpBAIabNdIGmd8HKwK58tfqmKNvw2UF69pb4jkojQG9za9l3nLfhv2N5U"
         )
-        iconElements(animal, context)
+        iconElements(animal, users, favoritosRepository)
         textElements(animal)
     }
 }
@@ -120,9 +123,8 @@ fun imageElements(image: String) {
 
 /*Funcion que pinta los elementos de tipo texto*/
 @Composable
-fun iconElements(animal: Animal, context: Context) {
+fun iconElements(animal: Animal, users: clientRepository, favoritosRepository: favoritosRepository) {
     Column {
-        val room: AplicacionDB = AplicacionDB.getInstance(context)
         var islikeClicked by rememberSaveable { mutableStateOf(false) }
         /* Inicializacion de los likes, si al animal ya se le ha dado like previamente, inicializa
         la variable islikeClicked para que pinte el corazon en consecuencia*/
@@ -132,14 +134,16 @@ fun iconElements(animal: Animal, context: Context) {
                 //La peticion a la base de datos de forma asincrona
                 //Inserta en la base de datos si sabe que no existe el id de dicho animal en la bd
                 val query = GlobalScope.async(Dispatchers.IO) {
-                    room.favoritosDAO().getFavByIdAnimal(animal.id.toLong(), 1.toLong())
+                    favoritosRepository.getFavByIdAnimal(animal.id.toLong(), users.getClienteByEmail(emailActual).idCliente)
                 }
                 result = query.await()
             }
         }
         if (result != null) {
             islikeClicked = true
-        } else islikeClicked = false
+        } else {
+            islikeClicked = false
+        }
 
         IconButton(
             onClick = {
@@ -149,9 +153,8 @@ fun iconElements(animal: Animal, context: Context) {
                     GlobalScope.launch {
                         //La peticion a la base de datos de forma asincrona
                         //Elimina de la base de la tabla favoritos, dicho animal
-                        room.favoritosDAO().deleteFav(Favoritos(1.toLong(), animal.id.toLong()))
-                        var favoritos: List<Favoritos> =
-                            room.favoritosDAO().getFavsByIdClient(1.toLong())
+                        favoritosRepository.deleteFav(Favoritos(users.getClienteByEmail(emailActual).idCliente, animal.id.toLong()))
+                        var favoritos: List<Favoritos> = favoritosRepository.getFavsByIdClient(users.getClienteByEmail(emailActual).idCliente)
 
                         Log.i("Numero de favs ", favoritos.size.toString())
                     }
@@ -159,9 +162,8 @@ fun iconElements(animal: Animal, context: Context) {
                     GlobalScope.launch {
                         //La peticion a la base de datos de forma asincrona
                         //Elimina de la base de la tabla favoritos, dicho animal
-                        room.favoritosDAO().setFav(Favoritos(1.toLong(), animal.id.toLong()))
-                        var favoritos: List<Favoritos> =
-                            room.favoritosDAO().getFavsByIdClient(1.toLong())
+                        favoritosRepository.setFav(Favoritos(users.getClienteByEmail(emailActual).idCliente, animal.id.toLong()))
+                        var favoritos: List<Favoritos> = favoritosRepository.getFavsByIdClient(users.getClienteByEmail(emailActual).idCliente)
 
                         Log.i("Numero de favs ", favoritos.size.toString())
                     }
@@ -175,13 +177,13 @@ fun iconElements(animal: Animal, context: Context) {
             if (!islikeClicked) {
                 Icon(
                     Icons.Default.FavoriteBorder,
-                    contentDescription = "like button"
+                    contentDescription = "like button no"
                 )
 
             } else {
                 Icon(
                     Icons.Default.Favorite,
-                    contentDescription = "like button"
+                    contentDescription = "like button si"
                 )
             }
         }

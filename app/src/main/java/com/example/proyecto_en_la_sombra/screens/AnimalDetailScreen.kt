@@ -307,8 +307,6 @@ fun Animal_Adopt_ButtonAndLikeIcon(
         islikeClicked = false
     }
 
-    Log.i("Logica like",islikeClicked.toString())
-
     //Like
     IconButton(
         onClick = {
@@ -319,8 +317,7 @@ fun Animal_Adopt_ButtonAndLikeIcon(
                     //La peticion a la base de datos de forma asincrona
                     //Elimina de la base de la tabla favoritos, dicho animal
                     favoritosRepository.deleteFav(Favoritos(users.getClienteByEmail(emailActual).idCliente, animal.id.toLong()))
-                    var favoritos: List<Favoritos> =
-                        favoritosRepository.getFavsByIdClient(users.getClienteByEmail(emailActual).idCliente)
+                    var favoritos: List<Favoritos> = favoritosRepository.getFavsByIdClient(users.getClienteByEmail(emailActual).idCliente)
 
                     Log.i("Numero de favs ", favoritos.size.toString())
                 }
@@ -329,8 +326,7 @@ fun Animal_Adopt_ButtonAndLikeIcon(
                     //La peticion a la base de datos de forma asincrona
                     //Elimina de la base de la tabla favoritos, dicho animal
                     favoritosRepository.setFav(Favoritos(users.getClienteByEmail(emailActual).idCliente, animal.id.toLong()))
-                    var favoritos: List<Favoritos> =
-                        favoritosRepository.getFavsByIdClient(users.getClienteByEmail(emailActual).idCliente)
+                    var favoritos: List<Favoritos> = favoritosRepository.getFavsByIdClient(users.getClienteByEmail(emailActual).idCliente)
 
                     Log.i("Numero de favs ", favoritos.size.toString())
                 }

@@ -55,7 +55,7 @@ fun AppNavigation(
         }
 
         composable(route = AppScreens.AnimalListScreen.route) {
-            listOfElements(navController, context)
+            listOfElements(navController, users, favoritosRepository)
             MyNavigationBar(navController)
         }
 
